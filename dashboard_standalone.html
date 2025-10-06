@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Southwest Airlines Tech Ops SPC Dashboard</title>
+    <title>Southwest Airlines® Tech Ops SPC Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Southwest Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0A2463;
-            color: #f0f0f0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #F7F8FA;
+            color: #111B40;
         }
         .header {
-            background: linear-gradient(135deg, #304CB2 0%, #0A2463 100%);
-            padding: 1rem 2rem;
-            border-bottom: 3px solid #FFBF3F;
+            background: #111B40;
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
         .header h1 {
-            color: #FFBF3F;
-            font-size: 1.75rem;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .header h1::before {
-            content: '♥ ';
+            content: '♥';
             color: #C4122F;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
         }
         .controls {
             display: flex;
@@ -40,48 +42,46 @@
             align-items: center;
         }
         button {
-            padding: 0.5rem 1rem;
+            padding: 0.625rem 1.25rem;
             border: none;
-            border-radius: 0.5rem;
-            font-weight: 700;
+            border-radius: 0.375rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
+            transition: all 0.2s ease;
             font-size: 0.875rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.025em;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #C4122F 0%, #8B0000 100%);
+            background: #304CB2;
             color: white;
-            box-shadow: 0 2px 4px rgba(196, 18, 47, 0.4);
+            box-shadow: 0 1px 3px rgba(48, 76, 178, 0.2);
         }
         .btn-primary:hover { 
-            background: linear-gradient(135deg, #8B0000 0%, #C4122F 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(196, 18, 47, 0.6);
+            background: #2844A8;
+            box-shadow: 0 4px 12px rgba(48, 76, 178, 0.3);
+            transform: translateY(-1px);
         }
         .btn-secondary {
-            background: #304CB2;
-            color: #FFBF3F;
-            border: 2px solid #FFBF3F;
+            background: white;
+            color: #304CB2;
+            border: 1.5px solid #304CB2;
         }
         .btn-secondary:hover { 
-            background: #FFBF3F;
-            color: #304CB2;
-            transform: translateY(-2px);
+            background: #F0F4FF;
+            border-color: #2844A8;
         }
         input[type="text"], select {
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            border: 2px solid #FFBF3F;
-            background: #1B3A6B;
-            color: #FFBF3F;
-            font-weight: 600;
+            padding: 0.625rem;
+            border-radius: 0.375rem;
+            border: 1.5px solid #D1D5DB;
+            background: white;
+            color: #111B40;
+            font-weight: 500;
         }
         input[type="text"]:focus, select:focus {
             outline: none;
-            border-color: #C4122F;
-            box-shadow: 0 0 0 3px rgba(196, 18, 47, 0.2);
+            border-color: #304CB2;
+            box-shadow: 0 0 0 3px rgba(48, 76, 178, 0.1);
         }
         .main {
             padding: 2rem;
@@ -90,14 +90,13 @@
             margin-bottom: 3rem;
         }
         .station-title {
-            color: #FFBF3F;
-            font-size: 2rem;
+            color: #111B40;
+            font-size: 1.75rem;
             margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 3px solid #C4122F;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #304CB2;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
         .charts-grid {
             display: grid;
@@ -105,62 +104,61 @@
             gap: 2rem;
         }
         .chart-container {
-            background: #1B3A6B;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-            border: 2px solid #304CB2;
+            background: white;
+            padding: 0;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            border: 1px solid #E5E7EB;
         }
         .chart-header {
-            background: linear-gradient(135deg, #304CB2 0%, #1B3A6B 100%);
-            margin: -1rem -1rem 0.75rem -1rem;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem 0.75rem 0 0;
+            background: #FAFBFC;
+            margin: 0;
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem 0.5rem 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #FFBF3F;
+            border-bottom: 1px solid #E5E7EB;
         }
         .chart-title {
-            font-size: 1.125rem;
-            font-weight: 800;
-            color: #FFBF3F;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111B40;
+            letter-spacing: -0.025em;
         }
         .chart-subtitle {
-            font-size: 0.875rem;
-            color: #ffffff;
-            margin-top: 0.25rem;
-            font-weight: 600;
+            font-size: 0.8125rem;
+            color: #6B7280;
+            margin-top: 0.125rem;
+            font-weight: 500;
         }
         .chart-stats {
             display: flex;
             gap: 1.5rem;
-            font-size: 0.875rem;
-            color: #ffffff;
+            font-size: 0.8125rem;
+            color: #111B40;
         }
         .chart-stat {
             display: flex;
             flex-direction: column;
         }
         .chart-stat-label {
-            color: #FFBF3F;
-            font-size: 0.75rem;
-            font-weight: 700;
+            color: #6B7280;
+            font-size: 0.6875rem;
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         .chart-stat-value {
-            font-weight: 800;
+            font-weight: 700;
             font-size: 1rem;
-            color: #ffffff;
+            color: #111B40;
         }
         .chart-canvas {
             width: 100%;
             height: 350px;
-            background: #0A2463;
-            border-radius: 0.5rem;
-            border: 2px solid #304CB2;
+            background: #FFFFFF;
+            border-radius: 0;
             cursor: crosshair;
         }
         .chart-wrapper {
@@ -168,86 +166,92 @@
         }
         .tooltip {
             position: absolute;
-            background: linear-gradient(135deg, #304CB2 0%, #1B3A6B 100%);
-            border: 3px solid #FFBF3F;
-            border-radius: 0.75rem;
-            padding: 0.75rem;
+            background: white;
+            border: 2px solid #304CB2;
+            border-radius: 0.5rem;
+            padding: 0.875rem;
             pointer-events: none;
             display: none;
             z-index: 1000;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             min-width: 220px;
         }
         .tooltip-date {
-            font-weight: 800;
-            color: #FFBF3F;
-            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: #111B40;
+            margin-bottom: 0.625rem;
             font-size: 0.875rem;
-            border-bottom: 2px solid #C4122F;
-            padding-bottom: 0.25rem;
-            text-transform: uppercase;
+            border-bottom: 2px solid #304CB2;
+            padding-bottom: 0.375rem;
         }
         .tooltip-row {
             display: flex;
             justify-content: space-between;
-            margin: 0.25rem 0;
-            font-size: 0.875rem;
+            margin: 0.375rem 0;
+            font-size: 0.8125rem;
         }
         .tooltip-label {
-            color: #FFBF3F;
+            color: #6B7280;
             margin-right: 1rem;
-            font-weight: 700;
+            font-weight: 600;
         }
         .tooltip-value {
-            font-weight: 800;
-            color: #ffffff;
+            font-weight: 700;
+            color: #111B40;
         }
         .tooltip-value.out-of-control {
             color: #C4122F;
-            text-shadow: 0 0 8px rgba(196, 18, 47, 0.8);
+            font-weight: 800;
         }
         .tooltip-value.in-control {
-            color: #4ade80;
+            color: #10B981;
         }
         .loading {
             text-align: center;
             padding: 4rem;
-            font-size: 1.5rem;
-            color: #FFBF3F;
-            font-weight: 800;
+            font-size: 1.25rem;
+            color: #304CB2;
+            font-weight: 600;
         }
         .error {
             text-align: center;
             padding: 2rem;
-            background: linear-gradient(135deg, #C4122F 0%, #8B0000 100%);
-            border: 3px solid #FFBF3F;
-            border-radius: 0.75rem;
-            color: #ffffff;
-            font-weight: 700;
+            background: #FEF2F2;
+            border: 2px solid #FCA5A5;
+            border-radius: 0.5rem;
+            color: #991B1B;
+            font-weight: 600;
         }
         .message {
             text-align: center;
-            padding: 2rem;
-            background: linear-gradient(135deg, #304CB2 0%, #1B3A6B 100%);
-            border-radius: 0.75rem;
-            color: #FFBF3F;
-            border: 2px solid #FFBF3F;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            color: #111B40;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         .legend {
             display: flex;
             justify-content: center;
             gap: 1.5rem;
-            margin-top: 1rem;
-            font-size: 0.875rem;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            font-size: 0.8125rem;
+            background: #FAFBFC;
+            border-radius: 0 0 0.5rem 0.5rem;
         }
         .legend-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-weight: 500;
+            color: #6B7280;
         }
         .legend-line {
-            width: 30px;
+            width: 32px;
             height: 3px;
+            border-radius: 2px;
         }
     </style>
 </head>
@@ -460,15 +464,15 @@
                             </div>
                             <div class="legend">
                                 <div class="legend-item">
-                                    <div class="legend-line" style="background: #ffffff;"></div>
+                                    <div class="legend-line" style="background: #304CB2;"></div>
                                     <span>Value</span>
                                 </div>
                                 <div class="legend-item">
-                                    <div class="legend-line" style="background: #FFBF3F;"></div>
+                                    <div class="legend-line" style="background: #304CB2;"></div>
                                     <span>CL</span>
                                 </div>
                                 <div class="legend-item">
-                                    <div class="legend-line" style="background: #C4122F;"></div>
+                                    <div class="legend-line" style="background: #F87171;"></div>
                                     <span>UCL/LCL</span>
                                 </div>
                             </div>
@@ -598,11 +602,11 @@
             const yScale = (value) => padding.top + plotHeight - ((value - minValue) / (maxValue - minValue)) * plotHeight;
             
             // Clear canvas
-            ctx.fillStyle = '#0A2463';
+            ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, width, height);
             
             // Draw grid lines
-            ctx.strokeStyle = '#304CB2';
+            ctx.strokeStyle = '#E5E7EB';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 5; i++) {
                 const y = padding.top + (i / 5) * plotHeight;
@@ -613,17 +617,17 @@
                 
                 // Y-axis labels
                 const value = maxValue - (i / 5) * (maxValue - minValue);
-                ctx.fillStyle = '#FFBF3F';
-                ctx.font = 'bold 12px sans-serif';
+                ctx.fillStyle = '#6B7280';
+                ctx.font = '11px sans-serif';
                 ctx.textAlign = 'right';
                 ctx.fillText(value.toFixed(1), padding.left - 10, y + 4);
             }
             
             // Draw control limits (step function)
             if (points[0].ucl != null) {
-                ctx.strokeStyle = '#C4122F';
-                ctx.setLineDash([5, 5]);
-                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#F87171';
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 2;
                 
                 // UCL
                 ctx.beginPath();
@@ -650,8 +654,8 @@
             
             // Draw center line (step function)
             if (points[0].cl != null) {
-                ctx.strokeStyle = '#FFBF3F';
-                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#304CB2';
+                ctx.lineWidth = 2;
                 ctx.beginPath();
                 for (let i = 0; i < points.length; i++) {
                     const x = xScale(i);
@@ -663,8 +667,8 @@
             }
             
             // Draw value line
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#304CB2';
+            ctx.lineWidth = 2.5;
             ctx.beginPath();
             for (let i = 0; i < points.length; i++) {
                 const x = xScale(i);
@@ -676,9 +680,9 @@
             
             // Draw phase boundaries
             if (data.phases && data.phases.length > 1) {
-                ctx.strokeStyle = '#FFBF3F';
-                ctx.setLineDash([2, 2]);
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#9CA3AF';
+                ctx.setLineDash([3, 3]);
+                ctx.lineWidth = 1.5;
                 for (let i = 1; i < data.phases.length; i++) {
                     const x = xScale(data.phases[i].startIndex);
                     ctx.beginPath();
@@ -687,8 +691,8 @@
                     ctx.stroke();
                     
                     // Phase label
-                    ctx.fillStyle = '#FFBF3F';
-                    ctx.font = 'bold 14px sans-serif';
+                    ctx.fillStyle = '#6B7280';
+                    ctx.font = '600 12px sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillText(toRoman(i), x + 30, padding.top + 15);
                 }
@@ -698,16 +702,16 @@
             }
             
             // X-axis
-            ctx.strokeStyle = '#FFBF3F';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#D1D5DB';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(padding.left, height - padding.bottom);
             ctx.lineTo(width - padding.right, height - padding.bottom);
             ctx.stroke();
             
             // X-axis labels (dates)
-            ctx.fillStyle = '#FFBF3F';
-            ctx.font = 'bold 11px sans-serif';
+            ctx.fillStyle = '#6B7280';
+            ctx.font = '11px sans-serif';
             ctx.textAlign = 'center';
             const labelEvery = Math.max(1, Math.floor(points.length / 5));
             for (let i = 0; i < points.length; i += labelEvery) {
@@ -726,7 +730,7 @@
                 
                 // Draw crosshair for highlighted point
                 if (isHighlighted) {
-                    ctx.strokeStyle = '#ffffff';
+                    ctx.strokeStyle = '#D1D5DB';
                     ctx.setLineDash([2, 2]);
                     ctx.lineWidth = 1;
                     ctx.beginPath();
@@ -742,21 +746,21 @@
                 
                 // Draw point
                 ctx.beginPath();
-                ctx.arc(x, y, isHighlighted ? 8 : 4, 0, Math.PI * 2);
-                ctx.fillStyle = outOfControl ? '#C4122F' : '#FFBF3F';
+                ctx.arc(x, y, isHighlighted ? 7 : 4, 0, Math.PI * 2);
+                ctx.fillStyle = outOfControl ? '#C4122F' : '#304CB2';
                 ctx.fill();
+                
+                // Draw border
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
                 
                 // Draw glow for highlighted point
                 if (isHighlighted) {
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                    
-                    // Extra glow
                     ctx.beginPath();
-                    ctx.arc(x, y, 12, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(255, 191, 63, 0.4)';
-                    ctx.lineWidth = 6;
+                    ctx.arc(x, y, 11, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(48, 76, 178, 0.3)';
+                    ctx.lineWidth = 5;
                     ctx.stroke();
                 }
             }
