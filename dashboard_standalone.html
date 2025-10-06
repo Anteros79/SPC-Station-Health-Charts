@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Tech Ops SPC Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #111827;
+            color: #e5e7eb;
+        }
+        .header {
+            background: #1f2937;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header h1 {
+            color: #06b6d4;
+            font-size: 1.5rem;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-secondary {
+            background: #374151;
+            color: #e5e7eb;
+        }
+        .btn-secondary:hover { background: #4b5563; }
+        input[type="text"], select {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid #374151;
+            background: #374151;
+            color: #e5e7eb;
+        }
+        .main {
+            padding: 2rem;
+        }
+        .station-section {
+            margin-bottom: 3rem;
+        }
+        .station-title {
+            color: #06b6d4;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #06b6d4;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+        }
+        .chart-container {
+            background: #1f2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 1px solid #374151;
+        }
+        .chart-header {
+            background: #374151;
+            margin: -1rem -1rem 0.75rem -1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+        .chart-subtitle {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+        }
+        .chart-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: #d1d5db;
+        }
+        .chart-stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-stat-label {
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+        .chart-stat-value {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #06b6d4;
+        }
+        .chart-canvas {
+            width: 100%;
+            height: 350px;
+            background: #0f172a;
+            border-radius: 0.25rem;
+            border: 1px solid #1e293b;
+        }
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.5rem;
+            color: #60a5fa;
+        }
+        .error {
+            text-align: center;
+            padding: 2rem;
+            background: #7f1d1d;
+            border: 1px solid: #991b1b;
+            border-radius: 0.5rem;
+            color: #fca5a5;
+        }
+        .message {
+            text-align: center;
+            padding: 2rem;
+            background: #1f2937;
+            border-radius: 0.5rem;
+            color: #9ca3af;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .legend-line {
+            width: 30px;
+            height: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Airline Tech Ops SPC Dashboard</h1>
+        <div class="controls">
+            <button class="btn-primary" onclick="loadActualData()" style="background: #059669; font-size: 1.1rem; padding: 0.625rem 1.25rem;">📊 Load Test Data</button>
+            <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
+            <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV (Auto-Detect Format)</button>
+            <input type="text" id="newStation" placeholder="Add Station (e.g., SFO)" style="width: 160px">
+            <button class="btn-secondary" onclick="addStation()">Add</button>
+            <select id="stationSelect" onchange="filterStation()">
+                <option value="all">All Stations</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div id="content">
+            <div class="message">
+                <p style="font-size: 1.5rem; margin-bottom: 1rem;">📊 Ready to View SPC Charts</p>
+                <p style="font-size: 1.125rem; color: #9ca3af;">Click <strong style="color: #059669;">"Load Test Data"</strong> above to view:</p>
+                <ul style="list-style: none; padding: 0; margin-top: 1rem; font-size: 1rem; color: #d1d5db;">
+                    <li>✓ Austin (AUS)</li>
+                    <li>✓ Dallas Love Field (DAL)</li>
+                    <li>✓ Houston Hobby (HOU)</li>
+                </ul>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">Simulated test data • January 2023 to present • 4 maintenance metrics</p>
+                <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">Upload supports: timestamp,station,metric_value (filename = measure) OR station,measure,date,value</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = null;
+        let chartData = null;
+        let currentFilter = 'all';
+
+        async function loadActualData() {
+            document.getElementById('content').innerHTML = '<div class="loading">Loading Test Data...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/load-actual', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    chartData = result.chartData;
+                    updateStationSelect(result.stations);
+                    renderCharts();
+                } else {
+                    showError(result.error || 'Failed to load test data');
+                }
+            } catch (err) {
+                showError('Failed to connect to server. Make sure server.py is running.');
+            }
+        }
+
+        async function loadDemoData() {
+            document.getElementById('content').innerHTML = '<div class="loading">Processing Data...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/demo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    chartData = result.chartData;
+                    updateStationSelect(result.stations);
+                    renderCharts();
+                } else {
+                    showError(result.error || 'Failed to process data');
+                }
+            } catch (err) {
+                showError('Failed to connect to server. Make sure server.py is running.');
+            }
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('content').innerHTML = '<div class="loading">Processing ' + file.name + '...</div>';
+            
+            try {
+                const text = await file.text();
+                const response = await fetch('http://localhost:8000/api/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        csvData: text,
+                        filename: file.name
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    chartData = result.chartData;
+                    updateStationSelect(result.stations);
+                    renderCharts();
+                } else {
+                    showError(`Upload Failed: ${result.error || 'Invalid CSV format'}<br><br>
+                        <strong>Supported formats:</strong><br>
+                        1. timestamp,station,metric_value (filename used as measure)<br>
+                        2. station,measure,date,value<br><br>
+                        Your file appears to have a different format.`);
+                }
+            } catch (err) {
+                showError('Failed to process CSV file: ' + err.message);
+            }
+        }
+
+        function updateStationSelect(stations) {
+            const select = document.getElementById('stationSelect');
+            select.innerHTML = '<option value="all">All Stations</option>';
+            stations.forEach(station => {
+                const option = document.createElement('option');
+                option.value = station;
+                option.textContent = station;
+                select.appendChild(option);
+            });
+        }
+
+        function filterStation() {
+            currentFilter = document.getElementById('stationSelect').value;
+            renderCharts();
+        }
+
+        function addStation() {
+            const input = document.getElementById('newStation');
+            const station = input.value.trim().toUpperCase();
+            if (station) {
+                const select = document.getElementById('stationSelect');
+                const exists = Array.from(select.options).some(opt => opt.value === station);
+                if (!exists) {
+                    const option = document.createElement('option');
+                    option.value = station;
+                    option.textContent = station;
+                    select.appendChild(option);
+                }
+                input.value = '';
+            }
+        }
+
+        function renderCharts() {
+            if (!chartData) return;
+            
+            const stations = currentFilter === 'all' 
+                ? Object.keys(chartData) 
+                : [currentFilter];
+            
+            let html = '';
+            
+            stations.forEach(station => {
+                if (!chartData[station]) return;
+                
+                html += `<div class="station-section">`;
+                html += `<h2 class="station-title">${station}</h2>`;
+                html += `<div class="charts-grid">`;
+                
+                const measures = Object.keys(chartData[station]);
+                measures.forEach(measure => {
+                    const data = chartData[station][measure];
+                    const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                    
+                    // Calculate statistics
+                    const points = data.points || [];
+                    const mean = points.length > 0 ? (points.reduce((sum, p) => sum + p.value, 0) / points.length).toFixed(2) : 'N/A';
+                    const ucl = points.length > 0 && points[0].ucl ? points[0].ucl.toFixed(2) : 'N/A';
+                    const lcl = points.length > 0 && points[0].lcl ? points[0].lcl.toFixed(2) : 'N/A';
+                    const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}` : '';
+                    
+                    html += `
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div>
+                                    <div class="chart-title">${measure}</div>
+                                    <div class="chart-subtitle">${station} • ${dateRange}</div>
+                                </div>
+                                <div class="chart-stats">
+                                    <div class="chart-stat">
+                                        <span class="chart-stat-label">Mean</span>
+                                        <span class="chart-stat-value">${mean}</span>
+                                    </div>
+                                    <div class="chart-stat">
+                                        <span class="chart-stat-label">UCL</span>
+                                        <span class="chart-stat-value">${ucl}</span>
+                                    </div>
+                                    <div class="chart-stat">
+                                        <span class="chart-stat-label">LCL</span>
+                                        <span class="chart-stat-value">${lcl}</span>
+                                    </div>
+                                    <button onclick="downloadChart('${canvasId}', '${station}_${measure}')" 
+                                            style="padding: 0.4rem 0.75rem; background: #4f46e5; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
+                                        💾 Save PNG
+                                    </button>
+                                </div>
+                            </div>
+                            <canvas id="${canvasId}" class="chart-canvas"></canvas>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <div class="legend-line" style="background: #38bdf8;"></div>
+                                    <span>Value</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-line" style="background: #4ade80;"></div>
+                                    <span>CL</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-line" style="background: #fb923c; opacity: 0.7;"></div>
+                                    <span>UCL/LCL</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            document.getElementById('content').innerHTML = html;
+            
+            // Draw all charts
+            stations.forEach(station => {
+                if (!chartData[station]) return;
+                const measures = Object.keys(chartData[station]);
+                measures.forEach(measure => {
+                    const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                    const canvas = document.getElementById(canvasId);
+                    if (canvas) {
+                        drawChart(canvas, chartData[station][measure]);
+                    }
+                });
+            });
+        }
+
+        function drawChart(canvas, data) {
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 20, bottom: 40, left: 60 };
+            const plotWidth = width - padding.left - padding.right;
+            const plotHeight = height - padding.top - padding.bottom;
+            
+            const points = data.points;
+            if (!points || points.length === 0) return;
+            
+            // Get value range
+            const values = points.map(p => p.value);
+            const ucls = points.map(p => p.ucl).filter(v => v != null);
+            const lcls = points.map(p => p.lcl).filter(v => v != null);
+            const allValues = [...values, ...ucls, ...lcls];
+            const minValue = Math.min(...allValues) * 0.95;
+            const maxValue = Math.max(...allValues) * 1.05;
+            
+            // Helper functions
+            const xScale = (index) => padding.left + (index / (points.length - 1)) * plotWidth;
+            const yScale = (value) => padding.top + plotHeight - ((value - minValue) / (maxValue - minValue)) * plotHeight;
+            
+            // Clear canvas
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (i / 5) * plotHeight;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+                
+                // Y-axis labels
+                const value = maxValue - (i / 5) * (maxValue - minValue);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(value.toFixed(1), padding.left - 10, y + 4);
+            }
+            
+            // Draw control limits (step function)
+            if (points[0].ucl != null) {
+                ctx.strokeStyle = '#fb923c';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 2;
+                
+                // UCL
+                ctx.beginPath();
+                for (let i = 0; i < points.length; i++) {
+                    const x = xScale(i);
+                    const y = yScale(points[i].ucl);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                // LCL
+                ctx.beginPath();
+                for (let i = 0; i < points.length; i++) {
+                    const x = xScale(i);
+                    const y = yScale(points[i].lcl);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                ctx.setLineDash([]);
+            }
+            
+            // Draw center line (step function)
+            if (points[0].cl != null) {
+                ctx.strokeStyle = '#4ade80';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < points.length; i++) {
+                    const x = xScale(i);
+                    const y = yScale(points[i].cl);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            
+            // Draw value line
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < points.length; i++) {
+                const x = xScale(i);
+                const y = yScale(points[i].value);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            // Draw phase boundaries
+            if (data.phases && data.phases.length > 1) {
+                ctx.strokeStyle = '#ffffff';
+                ctx.setLineDash([2, 2]);
+                ctx.lineWidth = 1;
+                for (let i = 1; i < data.phases.length; i++) {
+                    const x = xScale(data.phases[i].startIndex);
+                    ctx.beginPath();
+                    ctx.moveTo(x, padding.top);
+                    ctx.lineTo(x, height - padding.bottom);
+                    ctx.stroke();
+                    
+                    // Phase label
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(toRoman(i), x + 30, padding.top + 15);
+                }
+                // First phase label
+                ctx.fillText('I', xScale(0) + 30, padding.top + 15);
+                ctx.setLineDash([]);
+            }
+            
+            // X-axis
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, height - padding.bottom);
+            ctx.lineTo(width - padding.right, height - padding.bottom);
+            ctx.stroke();
+            
+            // X-axis labels (dates)
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            const labelEvery = Math.max(1, Math.floor(points.length / 5));
+            for (let i = 0; i < points.length; i += labelEvery) {
+                const x = xScale(i);
+                const date = new Date(points[i].date);
+                const label = `${date.getMonth() + 1}/${date.getDate()}`;
+                ctx.fillText(label, x, height - padding.bottom + 20);
+            }
+        }
+        
+        function toRoman(num) {
+            const vals = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+            const syms = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+            let roman = '';
+            for (let i = 0; i < vals.length; i++) {
+                while (num >= vals[i]) {
+                    roman += syms[i];
+                    num -= vals[i];
+                }
+            }
+            return roman;
+        }
+
+        function downloadChart(canvasId, chartName) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `${chartName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function showError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <h2 style="margin-bottom: 1rem;">Error</h2>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+

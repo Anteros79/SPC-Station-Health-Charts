@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Tech Ops SPC Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Load Recharts 1.8.5 - has better UMD support -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script src="https://unpkg.com/recharts@1.8.5/dist/Recharts.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .server-error {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .server-error strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .server-error p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        .server-error code {
+            background: #fecaca;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+    <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+            <div style="color: #60a5fa; font-size: 24px; margin-bottom: 20px;">Loading Dashboard...</div>
+            <div style="color: #9ca3af;">If this message persists, check browser console (F12) for errors</div>
+        </div>
+    </div>
+
+    <script>
+        // Check if libraries loaded
+        console.log('React loaded:', typeof React !== 'undefined');
+        console.log('ReactDOM loaded:', typeof ReactDOM !== 'undefined');
+        console.log('Recharts loaded:', typeof Recharts !== 'undefined');
+        console.log('Babel loaded:', typeof Babel !== 'undefined');
+        console.log('PropTypes loaded:', typeof PropTypes !== 'undefined');
+        
+        // Wait a bit for all libraries to load
+        setTimeout(() => {
+            if (typeof React === 'undefined') {
+                document.getElementById('root').innerHTML = '<div style="color: red; padding: 40px; text-align: center;"><h1>Error: React failed to load</h1><p>Check your internet connection or firewall settings</p></div>';
+            } else if (typeof Recharts === 'undefined') {
+                document.getElementById('root').innerHTML = '<div style="color: red; padding: 40px; text-align: center;"><h1>Error: Recharts charting library failed to load</h1><p>Check your internet connection. The dashboard requires external charting libraries.</p></div>';
+            }
+        }, 1000);
+    </script>
+
+    <script type="text/babel">
+        console.log('Starting app initialization...');
+        console.log('Recharts object:', window.Recharts);
+        console.log('All Recharts exports:', window.Recharts ? Object.keys(window.Recharts) : 'Recharts not loaded');
+        
+        if (!window.Recharts) {
+            console.error('FATAL: Recharts library not loaded. Cannot start app.');
+            document.getElementById('root').innerHTML = `
+                <div style="color: #ef4444; padding: 40px; text-align: center; font-family: system-ui;">
+                    <h1 style="font-size: 32px; margin-bottom: 20px;">⚠️ Chart Library Failed to Load</h1>
+                    <p style="font-size: 18px; margin-bottom: 10px;">The Recharts charting library could not be loaded from CDN.</p>
+                    <p style="font-size: 16px; color: #9ca3af;">This might be due to:</p>
+                    <ul style="list-style: none; padding: 0; font-size: 16px; color: #d1d5db;">
+                        <li>• Corporate firewall blocking unpkg.com</li>
+                        <li>• No internet connection</li>
+                        <li>• Network proxy issues</li>
+                    </ul>
+                    <p style="margin-top: 20px; font-size: 14px; color: #9ca3af;">Check browser console (F12) for details.</p>
+                </div>
+            `;
+            throw new Error('Recharts library not available');
+        }
+        
+        const { useState, useEffect, useCallback, useMemo, memo } = React;
+        const { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, ReferenceLine, ReferenceArea } = window.Recharts;
+
+        const API_URL = 'http://localhost:8000';
+
+        // Roman numeral converter
+        const romanize = (num) => {
+            const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+            let roman = '';
+            for (let i in lookup) {
+                while (num >= lookup[i]) {
+                    roman += i;
+                    num -= lookup[i];
+                }
+            }
+            return roman;
+        };
+
+        // Custom Tooltip Component
+        const CustomTooltip = memo(({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                    <div className="bg-gray-700 text-white p-3 rounded-md border border-gray-600 shadow-lg">
+                        <p className="font-bold">{`Date: ${new Date(data.date).toLocaleDateString()}`}</p>
+                        <p style={{ color: '#8884d8' }}>{`Value: ${data.value.toFixed(2)}`}</p>
+                        <p style={{ color: '#82ca9d' }}>{`CL: ${data.cl?.toFixed(2)}`}</p>
+                        <p style={{ color: '#ff7300' }}>{`UCL: ${data.ucl?.toFixed(2)}`}</p>
+                        <p style={{ color: '#ff7300' }}>{`LCL: ${data.lcl?.toFixed(2)}`}</p>
+                    </div>
+                );
+            }
+            return null;
+        });
+
+        // Control Chart Component
+        const ControlChart = memo(({ data, title }) => {
+            const { points, phases } = data;
+
+            const yDomain = useMemo(() => {
+                if (!points || points.length === 0) return [0, 100];
+                return [
+                    Math.min(...points.map(p => Math.min(p.value, p.lcl ?? p.value))) * 0.95,
+                    Math.max(...points.map(p => Math.max(p.value, p.ucl ?? p.value))) * 1.05
+                ];
+            }, [points]);
+
+            if (!points || points.length === 0) {
+                return <div className="text-center text-gray-500 p-4">No data available for {title}</div>;
+            }
+
+            return (
+                <div className="h-96 w-full">
+                    <h3 className="text-xl font-semibold text-center mb-4 text-gray-200">{title}</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={points} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#4A5568" />
+                            <XAxis 
+                                dataKey="date" 
+                                tickFormatter={(tick) => new Date(tick).toLocaleDateString()} 
+                                stroke="#A0AEC0"
+                                minTickGap={40}
+                            />
+                            <YAxis stroke="#A0AEC0" domain={yDomain} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend />
+
+                            {phases.map((phase, index) => (
+                                index > 0 && <ReferenceLine key={`phase-line-${index}`} x={points[phase.startIndex].date} stroke="white" strokeDasharray="2 2" />
+                            ))}
+                            
+                            {phases.map((phase, index) => (
+                                <ReferenceArea 
+                                    key={`phase-label-${index}`}
+                                    x1={points[phase.startIndex].date} 
+                                    x2={points[phase.endIndex].date} 
+                                    y1={yDomain[1]}
+                                    y2={yDomain[1]}
+                                    ifOverflow="visible"
+                                    label={{ value: `Phase ${romanize(index + 1)}`, position: 'insideTop', fill: '#E2E8F0', fontSize: 14, dy: -5 }}
+                                />
+                            ))}
+                            
+                            <Line type="monotone" dataKey="value" stroke="#38bdf8" strokeWidth={2} dot={false} name="Value" />
+                            <Line type="stepAfter" dataKey="cl" stroke="#4ade80" strokeWidth={2} dot={false} name="Center Line (CL)" />
+                            <Line type="stepAfter" dataKey="ucl" stroke="#fb923c" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Upper Control Limit (UCL)" />
+                            <Line type="stepAfter" dataKey="lcl" stroke="#fb923c" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Lower Control Limit (LCL)" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+            );
+        });
+
+        // Station Charts Component
+        const StationCharts = memo(({ station, data }) => {
+            const measures = Object.keys(data).sort();
+
+            if (measures.length === 0) {
+                return (
+                    <div className="bg-gray-800 rounded-lg p-4 my-4">
+                        <h2 className="text-2xl font-bold text-cyan-400 mb-4 border-b border-gray-700 pb-2">{station}</h2>
+                        <p className="text-gray-500">No measures found for this station.</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="mb-12">
+                    <h2 className="text-3xl font-bold text-cyan-400 mb-6 border-b-2 border-cyan-500 pb-2">{station}</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {measures.map(measure => (
+                            <div key={`${station}-${measure}`} className="bg-gray-800 p-4 rounded-xl shadow-lg">
+                                <ControlChart data={data[measure]} title={measure} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        });
+
+        // Loading Spinner
+        const LoadingSpinner = () => (
+            <div className="flex justify-center items-center h-64">
+                <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-xl text-gray-400">Processing Data...</span>
+            </div>
+        );
+
+        // Server Connection Error
+        const ServerError = ({ onRetry }) => (
+            <div className="server-error">
+                <strong>⚠️ Server Not Running</strong>
+                <p>Please start the Python server:</p>
+                <p><code>python server.py</code></p>
+                <button 
+                    onClick={onRetry}
+                    className="mt-3 bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm"
+                >
+                    Retry Connection
+                </button>
+            </div>
+        );
+
+        // Main App Component
+        const App = () => {
+            const [chartData, setChartData] = useState(null);
+            const [monitoredStations, setMonitoredStations] = useState(['JFK', 'LAX', 'ORD']);
+            const [selectedStation, setSelectedStation] = useState('All Stations');
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [serverError, setServerError] = useState(false);
+            const [newStation, setNewStation] = useState('');
+
+            const handleLoadDemoData = useCallback(async () => {
+                setIsLoading(true);
+                setError(null);
+                setServerError(false);
+
+                try {
+                    const response = await fetch(`${API_URL}/api/demo`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (!response.ok) throw new Error('Server error');
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        setChartData(result.chartData);
+                        setMonitoredStations(prev => 
+                            Array.from(new Set([...prev, ...result.stations]))
+                        );
+                    } else {
+                        setError(result.error || 'Failed to process data');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setServerError(true);
+                    setError('Failed to connect to Python server. Make sure server.py is running.');
+                } finally {
+                    setIsLoading(false);
+                }
+            }, []);
+
+            const handleFileUpload = useCallback(async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+
+                setIsLoading(true);
+                setError(null);
+                setServerError(false);
+
+                try {
+                    const text = await file.text();
+                    const response = await fetch(`${API_URL}/api/process`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ csvData: text })
+                    });
+
+                    if (!response.ok) throw new Error('Server error');
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        setChartData(result.chartData);
+                        setMonitoredStations(prev => 
+                            Array.from(new Set([...prev, ...result.stations]))
+                        );
+                    } else {
+                        setError(result.error || 'Failed to process data');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setServerError(true);
+                    setError('Failed to connect to Python server. Make sure server.py is running.');
+                } finally {
+                    setIsLoading(false);
+                }
+            }, []);
+
+            const handleAddStation = (station) => {
+                if (station && !monitoredStations.includes(station.toUpperCase())) {
+                    setMonitoredStations(prev => [...prev, station.toUpperCase()].sort());
+                    setNewStation('');
+                }
+            };
+
+            const stationsToRender = selectedStation === 'All Stations'
+                ? monitoredStations.filter(station => chartData?.[station])
+                : [selectedStation];
+
+            return (
+                <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
+                    {serverError && <ServerError onRetry={handleLoadDemoData} />}
+                    
+                    <header className="bg-gray-800 shadow-md p-4 border-b border-gray-700">
+                        <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
+                            <h1 className="text-2xl font-bold text-cyan-400 whitespace-nowrap">
+                                Airline Tech Ops SPC Dashboard
+                            </h1>
+
+                            <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleLoadDemoData}
+                                        className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+                                    >
+                                        Load Demo
+                                    </button>
+                                    <label className="bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-md transition duration-200 cursor-pointer">
+                                        Upload CSV
+                                        <input
+                                            type="file"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            accept=".csv"
+                                        />
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        value={newStation}
+                                        onChange={(e) => setNewStation(e.target.value.toUpperCase())}
+                                        placeholder="Add Station (e.g., SFO)"
+                                        className="bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-gray-200 w-40"
+                                    />
+                                    <button
+                                        onClick={() => handleAddStation(newStation)}
+                                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <label htmlFor="station-select" className="font-semibold">View:</label>
+                                    <select
+                                        id="station-select"
+                                        value={selectedStation}
+                                        onChange={(e) => setSelectedStation(e.target.value)}
+                                        className="bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-gray-200"
+                                    >
+                                        <option value="All Stations">All Stations</option>
+                                        {monitoredStations.map(station => (
+                                            <option key={station} value={station}>{station}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-grow p-4 sm:p-6 lg:p-8">
+                        {isLoading ? (
+                            <LoadingSpinner />
+                        ) : error ? (
+                            <div className="text-center p-8 rounded-lg border border-red-500 bg-red-900/50 text-red-400">
+                                <p className="text-lg">Error: {error}</p>
+                            </div>
+                        ) : !chartData ? (
+                            <div className="text-center p-8 rounded-lg border border-gray-700 bg-gray-800 text-gray-400">
+                                <p className="text-lg">No data loaded. Please upload a CSV or load the demo data.</p>
+                            </div>
+                        ) : (
+                            <div>
+                                {stationsToRender.map(station => (
+                                    chartData[station] && <StationCharts key={station} station={station} data={chartData[station]} />
+                                ))}
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,5 @@
+{
+  "name": "Airline Tech Ops SPC Dashboard",
+  "description": "A dashboard for monitoring airline technical operations using Statistical Process Control (SPC) charts. It allows users to upload CSV data or use demo data to visualize process stability and detect shifts in performance metrics across different stations.",
+  "requestFramePermissions": []
+}
