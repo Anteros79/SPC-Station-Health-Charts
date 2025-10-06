@@ -125,6 +125,50 @@
             background: #0f172a;
             border-radius: 0.25rem;
             border: 1px solid #1e293b;
+            cursor: crosshair;
+        }
+        .chart-wrapper {
+            position: relative;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(31, 41, 55, 0.98);
+            border: 2px solid #4f46e5;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            min-width: 220px;
+        }
+        .tooltip-date {
+            font-weight: 700;
+            color: #06b6d4;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #374151;
+            padding-bottom: 0.25rem;
+        }
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+        }
+        .tooltip-label {
+            color: #9ca3af;
+            margin-right: 1rem;
+        }
+        .tooltip-value {
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+        .tooltip-value.out-of-control {
+            color: #f87171;
+        }
+        .tooltip-value.in-control {
+            color: #4ade80;
         }
         .loading {
             text-align: center;
@@ -343,7 +387,7 @@
                     const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}` : '';
                     
                     html += `
-                        <div class="chart-container">
+                        <div class="chart-container" id="container-${canvasId}">
                             <div class="chart-header">
                                 <div>
                                     <div class="chart-title">${measure}</div>
@@ -362,13 +406,16 @@
                                         <span class="chart-stat-label">LCL</span>
                                         <span class="chart-stat-value">${lcl}</span>
                                     </div>
-                                    <button onclick="downloadChart('${canvasId}', '${station}_${measure}')" 
+                                    <button onclick="downloadChartWithHeader('container-${canvasId}', '${station}_${measure}')" 
                                             style="padding: 0.4rem 0.75rem; background: #4f46e5; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
                                         💾 Save PNG
                                     </button>
                                 </div>
                             </div>
-                            <canvas id="${canvasId}" class="chart-canvas"></canvas>
+                            <div class="chart-wrapper">
+                                <canvas id="${canvasId}" class="chart-canvas"></canvas>
+                                <div id="tooltip-${canvasId}" class="tooltip"></div>
+                            </div>
                             <div class="legend">
                                 <div class="legend-item">
                                     <div class="legend-line" style="background: #38bdf8;"></div>
@@ -392,21 +439,93 @@
             
             document.getElementById('content').innerHTML = html;
             
-            // Draw all charts
+            // Draw all charts with interactive tooltips
             stations.forEach(station => {
                 if (!chartData[station]) return;
                 const measures = Object.keys(chartData[station]);
                 measures.forEach(measure => {
                     const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
                     const canvas = document.getElementById(canvasId);
-                    if (canvas) {
-                        drawChart(canvas, chartData[station][measure]);
+                    const tooltip = document.getElementById(`tooltip-${canvasId}`);
+                    if (canvas && tooltip) {
+                        const data = chartData[station][measure];
+                        drawChart(canvas, data);
+                        setupInteractivity(canvas, tooltip, data);
                     }
                 });
             });
         }
 
-        function drawChart(canvas, data) {
+        function setupInteractivity(canvas, tooltip, data) {
+            const rect = canvas.getBoundingClientRect();
+            const padding = { top: 20, right: 20, bottom: 40, left: 60 };
+            const plotWidth = rect.width - padding.left - padding.right;
+            
+            canvas.addEventListener('mousemove', (e) => {
+                const mouseX = e.offsetX;
+                const mouseY = e.offsetY;
+                
+                // Check if mouse is in plot area
+                if (mouseX < padding.left || mouseX > rect.width - padding.right ||
+                    mouseY < padding.top || mouseY > rect.height - padding.bottom) {
+                    tooltip.style.display = 'none';
+                    return;
+                }
+                
+                // Find nearest data point
+                const points = data.points;
+                const xScale = plotWidth / (points.length - 1);
+                const index = Math.round((mouseX - padding.left) / xScale);
+                
+                if (index >= 0 && index < points.length) {
+                    const point = points[index];
+                    const outOfControl = point.value > point.ucl || point.value < point.lcl;
+                    const dateStr = new Date(point.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    
+                    tooltip.innerHTML = `
+                        <div class="tooltip-date">${dateStr}</div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Value:</span>
+                            <span class="tooltip-value ${outOfControl ? 'out-of-control' : 'in-control'}">${point.value.toFixed(2)}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">UCL:</span>
+                            <span class="tooltip-value">${point.ucl.toFixed(2)}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">CL:</span>
+                            <span class="tooltip-value">${point.cl.toFixed(2)}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">LCL:</span>
+                            <span class="tooltip-value">${point.lcl.toFixed(2)}</span>
+                        </div>
+                        ${outOfControl ? '<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #374151; color: #f87171; font-size: 0.75rem; font-weight: 700;">⚠️ OUT OF CONTROL</div>' : ''}
+                    `;
+                    
+                    // Position tooltip
+                    const tooltipX = Math.min(e.offsetX + 15, rect.width - 240);
+                    const tooltipY = Math.max(e.offsetY - 100, 10);
+                    tooltip.style.left = tooltipX + 'px';
+                    tooltip.style.top = tooltipY + 'px';
+                    tooltip.style.display = 'block';
+                    
+                    // Highlight point
+                    drawChart(canvas, data, index);
+                }
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+                drawChart(canvas, data);
+            });
+        }
+
+        function drawChart(canvas, data, highlightIndex = null) {
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
@@ -555,6 +674,43 @@
                 const label = `${date.getMonth() + 1}/${date.getDate()}`;
                 ctx.fillText(label, x, height - padding.bottom + 20);
             }
+            
+            // Draw data points (with highlighting)
+            for (let i = 0; i < points.length; i++) {
+                const x = xScale(i);
+                const y = yScale(points[i].value);
+                const outOfControl = points[i].value > points[i].ucl || points[i].value < points[i].lcl;
+                const isHighlighted = (highlightIndex !== null && i === highlightIndex);
+                
+                // Draw crosshair for highlighted point
+                if (isHighlighted) {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.setLineDash([2, 2]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, padding.top);
+                    ctx.lineTo(x, height - padding.bottom);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(padding.left, y);
+                    ctx.lineTo(width - padding.right, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                
+                // Draw point
+                ctx.beginPath();
+                ctx.arc(x, y, isHighlighted ? 6 : 3, 0, Math.PI * 2);
+                ctx.fillStyle = outOfControl ? '#f87171' : '#38bdf8';
+                ctx.fill();
+                
+                // Draw glow for highlighted point
+                if (isHighlighted) {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
         }
         
         function toRoman(num) {
@@ -570,14 +726,108 @@
             return roman;
         }
 
-        function downloadChart(canvasId, chartName) {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
+        async function downloadChartWithHeader(containerId, chartName) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
             
-            // Create download link
+            // Use html2canvas if available, otherwise create composite canvas
+            const compositeCanvas = document.createElement('canvas');
+            const ctx = compositeCanvas.getContext('2d');
+            
+            // Set canvas size to match container
+            const rect = container.getBoundingClientRect();
+            compositeCanvas.width = rect.width * 2; // 2x for better quality
+            compositeCanvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            
+            // Draw background
+            ctx.fillStyle = '#1f2937';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+            
+            // Get elements
+            const header = container.querySelector('.chart-header');
+            const canvas = container.querySelector('.chart-canvas');
+            const legend = container.querySelector('.legend');
+            
+            // Draw header
+            const headerRect = header.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const headerY = headerRect.top - containerRect.top;
+            
+            // Header background
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(0, headerY, rect.width, headerRect.height);
+            
+            // Header text
+            const title = header.querySelector('.chart-title').textContent;
+            const subtitle = header.querySelector('.chart-subtitle').textContent;
+            const stats = Array.from(header.querySelectorAll('.chart-stat'));
+            
+            ctx.fillStyle = '#e5e7eb';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText(title, 16, headerY + 30);
+            
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '14px sans-serif';
+            ctx.fillText(subtitle, 16, headerY + 50);
+            
+            // Draw stats on right side
+            let statsX = rect.width - 350;
+            ctx.font = '12px sans-serif';
+            stats.forEach((stat, i) => {
+                const label = stat.querySelector('.chart-stat-label').textContent;
+                const value = stat.querySelector('.chart-stat-value').textContent;
+                
+                ctx.fillStyle = '#9ca3af';
+                ctx.fillText(label, statsX + (i * 90), headerY + 30);
+                
+                ctx.fillStyle = '#06b6d4';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillText(value, statsX + (i * 90), headerY + 50);
+                ctx.font = '12px sans-serif';
+            });
+            
+            // Draw chart canvas
+            const canvasRect = canvas.getBoundingClientRect();
+            const canvasY = canvasRect.top - containerRect.top;
+            ctx.drawImage(canvas, 0, canvasY, canvasRect.width, canvasRect.height);
+            
+            // Draw legend
+            const legendRect = legend.getBoundingClientRect();
+            const legendY = legendRect.top - containerRect.top;
+            
+            ctx.font = '14px sans-serif';
+            const legendItems = Array.from(legend.querySelectorAll('.legend-item'));
+            let legendX = (rect.width - (legendItems.length * 100)) / 2;
+            
+            legendItems.forEach((item) => {
+                const lineColor = item.querySelector('.legend-line').style.background;
+                const text = item.querySelector('span').textContent;
+                
+                // Draw colored line
+                ctx.fillStyle = lineColor;
+                ctx.fillRect(legendX, legendY + 8, 30, 3);
+                
+                // Draw text
+                ctx.fillStyle = '#e5e7eb';
+                ctx.fillText(text, legendX + 40, legendY + 15);
+                
+                legendX += 100;
+            });
+            
+            // Add footer with timestamp and metadata
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(0, rect.height - 30, rect.width, 30);
+            
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '11px sans-serif';
+            const timestamp = new Date().toLocaleString();
+            ctx.fillText(`Generated: ${timestamp} | Wheeler's XmR Charts | NPL: 2.66σ`, 16, rect.height - 12);
+            
+            // Download
             const link = document.createElement('a');
             link.download = `${chartName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.href = compositeCanvas.toDataURL('image/png');
             link.click();
         }
 
