@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airline Tech Ops SPC Dashboard</title>
+    <title>Southwest Airlines Tech Ops SPC Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #111827;
-            color: #e5e7eb;
+            font-family: 'Southwest Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0A2463;
+            color: #f0f0f0;
         }
         .header {
-            background: #1f2937;
+            background: linear-gradient(135deg, #304CB2 0%, #0A2463 100%);
             padding: 1rem 2rem;
-            border-bottom: 1px solid #374151;
+            border-bottom: 3px solid #FFBF3F;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
         .header h1 {
-            color: #06b6d4;
+            color: #FFBF3F;
+            font-size: 1.75rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .header h1::before {
+            content: '♥ ';
+            color: #C4122F;
             font-size: 1.5rem;
         }
         .controls {
@@ -34,27 +42,46 @@
         button {
             padding: 0.5rem 1rem;
             border: none;
-            border-radius: 0.375rem;
-            font-weight: 600;
+            border-radius: 0.5rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
         }
         .btn-primary {
-            background: #4f46e5;
+            background: linear-gradient(135deg, #C4122F 0%, #8B0000 100%);
             color: white;
+            box-shadow: 0 2px 4px rgba(196, 18, 47, 0.4);
         }
-        .btn-primary:hover { background: #4338ca; }
+        .btn-primary:hover { 
+            background: linear-gradient(135deg, #8B0000 0%, #C4122F 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(196, 18, 47, 0.6);
+        }
         .btn-secondary {
-            background: #374151;
-            color: #e5e7eb;
+            background: #304CB2;
+            color: #FFBF3F;
+            border: 2px solid #FFBF3F;
         }
-        .btn-secondary:hover { background: #4b5563; }
+        .btn-secondary:hover { 
+            background: #FFBF3F;
+            color: #304CB2;
+            transform: translateY(-2px);
+        }
         input[type="text"], select {
             padding: 0.5rem;
-            border-radius: 0.375rem;
-            border: 1px solid #374151;
-            background: #374151;
-            color: #e5e7eb;
+            border-radius: 0.5rem;
+            border: 2px solid #FFBF3F;
+            background: #1B3A6B;
+            color: #FFBF3F;
+            font-weight: 600;
+        }
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #C4122F;
+            box-shadow: 0 0 0 3px rgba(196, 18, 47, 0.2);
         }
         .main {
             padding: 2rem;
@@ -63,11 +90,14 @@
             margin-bottom: 3rem;
         }
         .station-title {
-            color: #06b6d4;
+            color: #FFBF3F;
             font-size: 2rem;
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #06b6d4;
+            border-bottom: 3px solid #C4122F;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .charts-grid {
             display: grid;
@@ -75,56 +105,62 @@
             gap: 2rem;
         }
         .chart-container {
-            background: #1f2937;
+            background: #1B3A6B;
             padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            border: 2px solid #304CB2;
         }
         .chart-header {
-            background: #374151;
+            background: linear-gradient(135deg, #304CB2 0%, #1B3A6B 100%);
             margin: -1rem -1rem 0.75rem -1rem;
             padding: 0.75rem 1rem;
-            border-radius: 0.5rem 0.5rem 0 0;
+            border-radius: 0.75rem 0.75rem 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 2px solid #FFBF3F;
         }
         .chart-title {
             font-size: 1.125rem;
-            font-weight: 700;
-            color: #e5e7eb;
+            font-weight: 800;
+            color: #FFBF3F;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .chart-subtitle {
             font-size: 0.875rem;
-            color: #9ca3af;
+            color: #ffffff;
             margin-top: 0.25rem;
+            font-weight: 600;
         }
         .chart-stats {
             display: flex;
             gap: 1.5rem;
             font-size: 0.875rem;
-            color: #d1d5db;
+            color: #ffffff;
         }
         .chart-stat {
             display: flex;
             flex-direction: column;
         }
         .chart-stat-label {
-            color: #9ca3af;
+            color: #FFBF3F;
             font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
         }
         .chart-stat-value {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1rem;
-            color: #06b6d4;
+            color: #ffffff;
         }
         .chart-canvas {
             width: 100%;
             height: 350px;
-            background: #0f172a;
-            border-radius: 0.25rem;
-            border: 1px solid #1e293b;
+            background: #0A2463;
+            border-radius: 0.5rem;
+            border: 2px solid #304CB2;
             cursor: crosshair;
         }
         .chart-wrapper {
@@ -132,23 +168,24 @@
         }
         .tooltip {
             position: absolute;
-            background: rgba(31, 41, 55, 0.98);
-            border: 2px solid #4f46e5;
-            border-radius: 0.5rem;
+            background: linear-gradient(135deg, #304CB2 0%, #1B3A6B 100%);
+            border: 3px solid #FFBF3F;
+            border-radius: 0.75rem;
             padding: 0.75rem;
             pointer-events: none;
             display: none;
             z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
             min-width: 220px;
         }
         .tooltip-date {
-            font-weight: 700;
-            color: #06b6d4;
+            font-weight: 800;
+            color: #FFBF3F;
             margin-bottom: 0.5rem;
             font-size: 0.875rem;
-            border-bottom: 1px solid #374151;
+            border-bottom: 2px solid #C4122F;
             padding-bottom: 0.25rem;
+            text-transform: uppercase;
         }
         .tooltip-row {
             display: flex;
@@ -157,15 +194,17 @@
             font-size: 0.875rem;
         }
         .tooltip-label {
-            color: #9ca3af;
+            color: #FFBF3F;
             margin-right: 1rem;
+            font-weight: 700;
         }
         .tooltip-value {
-            font-weight: 700;
-            color: #e5e7eb;
+            font-weight: 800;
+            color: #ffffff;
         }
         .tooltip-value.out-of-control {
-            color: #f87171;
+            color: #C4122F;
+            text-shadow: 0 0 8px rgba(196, 18, 47, 0.8);
         }
         .tooltip-value.in-control {
             color: #4ade80;
@@ -174,22 +213,25 @@
             text-align: center;
             padding: 4rem;
             font-size: 1.5rem;
-            color: #60a5fa;
+            color: #FFBF3F;
+            font-weight: 800;
         }
         .error {
             text-align: center;
             padding: 2rem;
-            background: #7f1d1d;
-            border: 1px solid: #991b1b;
-            border-radius: 0.5rem;
-            color: #fca5a5;
+            background: linear-gradient(135deg, #C4122F 0%, #8B0000 100%);
+            border: 3px solid #FFBF3F;
+            border-radius: 0.75rem;
+            color: #ffffff;
+            font-weight: 700;
         }
         .message {
             text-align: center;
             padding: 2rem;
-            background: #1f2937;
-            border-radius: 0.5rem;
-            color: #9ca3af;
+            background: linear-gradient(135deg, #304CB2 0%, #1B3A6B 100%);
+            border-radius: 0.75rem;
+            color: #FFBF3F;
+            border: 2px solid #FFBF3F;
         }
         .legend {
             display: flex;
@@ -211,9 +253,9 @@
 </head>
 <body>
     <div class="header">
-        <h1>Airline Tech Ops SPC Dashboard</h1>
+        <h1>Southwest Airlines Tech Ops SPC Dashboard</h1>
         <div class="controls">
-            <button class="btn-primary" onclick="loadActualData()" style="background: #059669; font-size: 1.1rem; padding: 0.625rem 1.25rem;">📊 Load Test Data</button>
+            <button class="btn-primary" onclick="loadActualData()" style="font-size: 1.1rem; padding: 0.625rem 1.25rem;">📊 Load Test Data</button>
             <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
             <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV (Auto-Detect Format)</button>
             <input type="text" id="newStation" placeholder="Add Station (e.g., SFO)" style="width: 160px">
@@ -418,15 +460,15 @@
                             </div>
                             <div class="legend">
                                 <div class="legend-item">
-                                    <div class="legend-line" style="background: #38bdf8;"></div>
+                                    <div class="legend-line" style="background: #ffffff;"></div>
                                     <span>Value</span>
                                 </div>
                                 <div class="legend-item">
-                                    <div class="legend-line" style="background: #4ade80;"></div>
+                                    <div class="legend-line" style="background: #FFBF3F;"></div>
                                     <span>CL</span>
                                 </div>
                                 <div class="legend-item">
-                                    <div class="legend-line" style="background: #fb923c; opacity: 0.7;"></div>
+                                    <div class="legend-line" style="background: #C4122F;"></div>
                                     <span>UCL/LCL</span>
                                 </div>
                             </div>
@@ -556,11 +598,11 @@
             const yScale = (value) => padding.top + plotHeight - ((value - minValue) / (maxValue - minValue)) * plotHeight;
             
             // Clear canvas
-            ctx.fillStyle = '#111827';
+            ctx.fillStyle = '#0A2463';
             ctx.fillRect(0, 0, width, height);
             
             // Draw grid lines
-            ctx.strokeStyle = '#374151';
+            ctx.strokeStyle = '#304CB2';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 5; i++) {
                 const y = padding.top + (i / 5) * plotHeight;
@@ -571,17 +613,17 @@
                 
                 // Y-axis labels
                 const value = maxValue - (i / 5) * (maxValue - minValue);
-                ctx.fillStyle = '#9ca3af';
-                ctx.font = '12px sans-serif';
+                ctx.fillStyle = '#FFBF3F';
+                ctx.font = 'bold 12px sans-serif';
                 ctx.textAlign = 'right';
                 ctx.fillText(value.toFixed(1), padding.left - 10, y + 4);
             }
             
             // Draw control limits (step function)
             if (points[0].ucl != null) {
-                ctx.strokeStyle = '#fb923c';
+                ctx.strokeStyle = '#C4122F';
                 ctx.setLineDash([5, 5]);
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 3;
                 
                 // UCL
                 ctx.beginPath();
@@ -608,8 +650,8 @@
             
             // Draw center line (step function)
             if (points[0].cl != null) {
-                ctx.strokeStyle = '#4ade80';
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#FFBF3F';
+                ctx.lineWidth = 3;
                 ctx.beginPath();
                 for (let i = 0; i < points.length; i++) {
                     const x = xScale(i);
@@ -621,8 +663,8 @@
             }
             
             // Draw value line
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
             ctx.beginPath();
             for (let i = 0; i < points.length; i++) {
                 const x = xScale(i);
@@ -634,9 +676,9 @@
             
             // Draw phase boundaries
             if (data.phases && data.phases.length > 1) {
-                ctx.strokeStyle = '#ffffff';
+                ctx.strokeStyle = '#FFBF3F';
                 ctx.setLineDash([2, 2]);
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 2;
                 for (let i = 1; i < data.phases.length; i++) {
                     const x = xScale(data.phases[i].startIndex);
                     ctx.beginPath();
@@ -645,8 +687,8 @@
                     ctx.stroke();
                     
                     // Phase label
-                    ctx.fillStyle = '#e2e8f0';
-                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillStyle = '#FFBF3F';
+                    ctx.font = 'bold 14px sans-serif';
                     ctx.textAlign = 'center';
                     ctx.fillText(toRoman(i), x + 30, padding.top + 15);
                 }
@@ -656,16 +698,16 @@
             }
             
             // X-axis
-            ctx.strokeStyle = '#9ca3af';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#FFBF3F';
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(padding.left, height - padding.bottom);
             ctx.lineTo(width - padding.right, height - padding.bottom);
             ctx.stroke();
             
             // X-axis labels (dates)
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '11px sans-serif';
+            ctx.fillStyle = '#FFBF3F';
+            ctx.font = 'bold 11px sans-serif';
             ctx.textAlign = 'center';
             const labelEvery = Math.max(1, Math.floor(points.length / 5));
             for (let i = 0; i < points.length; i += labelEvery) {
@@ -700,14 +742,21 @@
                 
                 // Draw point
                 ctx.beginPath();
-                ctx.arc(x, y, isHighlighted ? 6 : 3, 0, Math.PI * 2);
-                ctx.fillStyle = outOfControl ? '#f87171' : '#38bdf8';
+                ctx.arc(x, y, isHighlighted ? 8 : 4, 0, Math.PI * 2);
+                ctx.fillStyle = outOfControl ? '#C4122F' : '#FFBF3F';
                 ctx.fill();
                 
                 // Draw glow for highlighted point
                 if (isHighlighted) {
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    // Extra glow
+                    ctx.beginPath();
+                    ctx.arc(x, y, 12, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(255, 191, 63, 0.4)';
+                    ctx.lineWidth = 6;
                     ctx.stroke();
                 }
             }
