@@ -92,7 +92,10 @@ class SPCHandler(SimpleHTTPRequestHandler):
         elif self.path == '/api/load-actual':
             # Load actual data from input folder
             try:
-                input_folder = r'C:\DevProjects\pythonprocesscontrolstages\input'
+                import os
+                # Use local input folder (relative to script location)
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                input_folder = os.path.join(script_dir, 'input')
                 csv_text = convert_to_spc_format(input_folder)
                 result = process_data(csv_text)
                 

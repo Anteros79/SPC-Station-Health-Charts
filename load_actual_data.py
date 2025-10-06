@@ -86,7 +86,11 @@ def convert_to_spc_format(input_folder):
 
 if __name__ == '__main__':
     # Test the conversion
-    input_folder = r'C:\DevProjects\pythonprocesscontrolstages\input'
+    import os
+    # Use local input folder (relative to script location)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    input_folder = os.path.join(script_dir, 'input')
+    
     csv_text = convert_to_spc_format(input_folder)
     
     print("First 20 lines of converted data:")
