@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Specification - SPC Station Health Charts</title>
+    <style>
+        @page { margin: 1in; }
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #304CB2;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+            background: white;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #304CB2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo-placeholder {
+            width: 300px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border: 2px dashed #FFBF27;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F7F7F7;
+            color: #304CB2;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        h1 {
+            color: #304CB2;
+            font-size: 28pt;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        h2 {
+            color: #304CB2;
+            font-size: 18pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #FFBF27;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #304CB2;
+            font-size: 14pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        h4 {
+            color: #304CB2;
+            font-size: 12pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+        .doc-info {
+            background: #F7F7F7;
+            border-left: 4px solid #304CB2;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .doc-info p {
+            margin: 5px 0;
+            color: #304CB2;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background: #304CB2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background: #F7F7F7;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 5px 0;
+            color: #333;
+        }
+        .checkmark {
+            color: #2ECC71;
+            font-weight: bold;
+        }
+        .code-block {
+            background: #2C3E50;
+            color: #ECF0F1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 9pt;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 15px 0;
+        }
+        .highlight-box {
+            background: #FFF9E6;
+            border: 2px solid #FFBF27;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        p {
+            color: #333;
+            text-align: justify;
+        }
+        strong {
+            color: #304CB2;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            color: #666;
+            font-size: 10pt;
+        }
+        .diagram-box {
+            background: #F7F7F7;
+            border: 2px solid #304CB2;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            font-size: 9pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-placeholder">
+            [SOUTHWEST TECH BADGE - METALLIC FRAME WITH RIVETS]
+        </div>
+        <h1>Technical Specification</h1>
+        <h2 style="border: none; margin-top: 0;">SPC Station Health Charts</h2>
+    </div>
+
+    <div class="doc-info">
+        <p><strong>Version:</strong> 1.3</p>
+        <p><strong>Date:</strong> October 7, 2025</p>
+        <p><strong>Status:</strong> Implemented with Graphics Enhancement</p>
+        <p><strong>Technical Updates:</strong> Logo integration, CSS optimization, test utilities</p>
+    </div>
+
+    <h2>1. Technical Overview</h2>
+
+    <h3>1.1 Technology Stack</h3>
+    <table>
+        <tr>
+            <th>Component</th>
+            <th>Technology</th>
+            <th>Version</th>
+            <th>Rationale</th>
+        </tr>
+        <tr>
+            <td><strong>Backend Language</strong></td>
+            <td>Python</td>
+            <td>3.7+</td>
+            <td>Pre-installed enterprise-wide; no admin rights needed</td>
+        </tr>
+        <tr>
+            <td><strong>Web Server</strong></td>
+            <td>http.server</td>
+            <td>stdlib</td>
+            <td>Zero dependencies; sufficient for localhost</td>
+        </tr>
+        <tr>
+            <td><strong>Frontend</strong></td>
+            <td>HTML5 + Vanilla JS</td>
+            <td>-</td>
+            <td>Universal browser support; no build step</td>
+        </tr>
+        <tr>
+            <td><strong>Charting</strong></td>
+            <td>HTML5 Canvas API</td>
+            <td>-</td>
+            <td>No external libraries; full PNG export control</td>
+        </tr>
+        <tr>
+            <td><strong>Data Format</strong></td>
+            <td>CSV</td>
+            <td>-</td>
+            <td>Universal; easy to generate</td>
+        </tr>
+        <tr>
+            <td><strong>API Protocol</strong></td>
+            <td>HTTP/JSON</td>
+            <td>-</td>
+            <td>Standard web protocols</td>
+        </tr>
+    </table>
+
+    <h3>1.2 System Architecture</h3>
+    <div class="diagram-box">
+┌─────────────────────────────────────────────────────┐
+│                User's Desktop                        │
+│                                                      │
+│  ┌────────────┐         ┌──────────────────┐       │
+│  │  Browser   │◄───────►│  Python Server   │       │
+│  │  (Client)  │  HTTP   │  (localhost:8000)│       │
+│  └────────────┘         └──────────────────┘       │
+│       │                          │                  │
+│       │                          │                  │
+│       v                          v                  │
+│  ┌────────────┐         ┌──────────────────┐       │
+│  │  Canvas    │         │  SPC Processor   │       │
+│  │  Rendering │         │  (Statistics)    │       │
+│  └────────────┘         └──────────────────┘       │
+│                                  │                  │
+│                                  v                  │
+│                          ┌──────────────────┐       │
+│                          │  CSV Files       │       │
+│                          │  (input/)        │       │
+│                          └──────────────────┘       │
+└─────────────────────────────────────────────────────┘
+    </div>
+
+    <h2>2. Backend Implementation</h2>
+
+    <h3>2.1 server.py - HTTP Request Handler</h3>
+    <p><strong>File:</strong> server.py<br>
+    <strong>Lines of Code:</strong> ~200<br>
+    <strong>Dependencies:</strong> Python stdlib only</p>
+
+    <h4>Class: SPCHandler</h4>
+    <div class="code-block">class SPCHandler(SimpleHTTPRequestHandler):
+    """
+    Custom HTTP request handler for SPC Dashboard.
+    Routes:
+      - GET /               → Serve dashboard_standalone.html
+      - POST /api/process   → Process uploaded CSV
+      - POST /api/load-actual → Load sample data from input/
+      - OPTIONS *           → CORS preflight
+    """</div>
+
+    <h4>Key Methods</h4>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>Purpose</th>
+            <th>Input</th>
+            <th>Output</th>
+        </tr>
+        <tr>
+            <td>end_headers()</td>
+            <td>Add CORS headers</td>
+            <td>None</td>
+            <td>HTTP headers</td>
+        </tr>
+        <tr>
+            <td>do_OPTIONS()</td>
+            <td>Handle CORS preflight</td>
+            <td>HTTP request</td>
+            <td>200 OK</td>
+        </tr>
+        <tr>
+            <td>do_GET()</td>
+            <td>Serve HTML file</td>
+            <td>GET /</td>
+            <td>HTML content</td>
+        </tr>
+        <tr>
+            <td>do_POST()</td>
+            <td>Process API requests</td>
+            <td>JSON body</td>
+            <td>JSON response</td>
+        </tr>
+    </table>
+
+    <h3>2.2 spc_processor.py - Statistical Engine</h3>
+    <p><strong>File:</strong> spc_processor.py<br>
+    <strong>Lines of Code:</strong> ~400<br>
+    <strong>Purpose:</strong> Core SPC calculations and phase detection</p>
+
+    <h4>Function: parse_csv(csv_text)</h4>
+    <p><strong>Input:</strong> Raw CSV string<br>
+    <strong>Output:</strong> List of dictionaries [{station, measure, date, value}, ...]</p>
+
+    <div class="code-block">def parse_csv(csv_text: str) -> List[Dict[str, Any]]:
+    """
+    Parse CSV text into structured data points.
+    Expected format: station,measure,date,value
+    
+    Returns:
+        List of dicts with keys: station, measure, date, value
+    """
+    reader = csv.DictReader(StringIO(csv_text))
+    data_points = []
+    
+    for row in reader:
+        try:
+            data_points.append({
+                'station': row['station'].strip(),
+                'measure': row['measure'].strip(),
+                'date': row['date'].strip(),
+                'value': float(row['value'])
+            })
+        except (KeyError, ValueError):
+            continue  # Skip invalid rows
+    
+    return data_points</div>
+
+    <h4>Function: calculate_initial_limits(values)</h4>
+    <p><strong>Input:</strong> List of numeric values<br>
+    <strong>Output:</strong> Tuple (center_line, moving_range_average)</p>
+
+    <div class="highlight-box">
+        <p><strong>Algorithm:</strong></p>
+        <ol>
+            <li>Calculate center line (CL) = mean of values</li>
+            <li>Calculate moving ranges: mR[i] = |value[i] - value[i-1]|</li>
+            <li>Calculate average moving range: mR̄ = mean(mR)</li>
+            <li>Return (CL, mR̄)</li>
+        </ol>
+    </div>
+
+    <div class="code-block">def calculate_initial_limits(values: List[float]) -> Tuple[float, float]:
+    """
+    Calculate center line and moving range average.
+    
+    Wheeler's method:
+    - CL = mean(X)
+    - mR̄ = mean(|X[i] - X[i-1]|)
+    """
+    if len(values) < 2:
+        return (values[0] if values else 0, 0)
+    
+    cl = sum(values) / len(values)
+    
+    moving_ranges = [abs(values[i] - values[i-1]) 
+                     for i in range(1, len(values))]
+    mR_bar = sum(moving_ranges) / len(moving_ranges)
+    
+    return (cl, mR_bar)</div>
+
+    <p><strong>Control Limit Calculation:</strong></p>
+    <div class="code-block"># Natural Process Limits (2.66 sigma)
+ucl = cl + 2.66 * mR_bar
+lcl = max(0, cl - 2.66 * mR_bar)  # Non-negative</div>
+
+    <h4>Function: find_phase_end(values, cl, ucl, lcl)</h4>
+    <p><strong>Input:</strong> List of values, control limits<br>
+    <strong>Output:</strong> Index where phase ends (signal detected)</p>
+
+    <div class="highlight-box">
+        <p><strong>Wheeler's Rules for Detecting Special Causes:</strong></p>
+        <ul>
+            <li><strong>Rule #1:</strong> Point beyond control limits (outside UCL/LCL)</li>
+            <li><strong>Rule #4:</strong> 8 consecutive points on one side of centerline</li>
+        </ul>
+    </div>
+
+    <div class="code-block">def find_phase_end(values: List[float], cl: float, 
+                   ucl: float, lcl: float) -> int:
+    """
+    Find where phase ends using Wheeler's Rules.
+    
+    Returns:
+        Index where current phase should end (signal detected)
+    """
+    RUN_LENGTH = 8
+    consecutive_above = 0
+    consecutive_below = 0
+    
+    for i, value in enumerate(values):
+        # RULE #1: Point outside control limits
+        if value > ucl or value < lcl:
+            # Signal! Phase ends at the point BEFORE this outlier
+            return max(0, i - 1)
+        
+        # RULE #4: Track 8-point runs
+        if value > cl:
+            consecutive_above += 1
+            consecutive_below = 0
+        elif value < cl:
+            consecutive_below += 1
+            consecutive_above = 0
+        
+        # Signal detected: 8 consecutive on one side
+        if consecutive_above >= RUN_LENGTH or consecutive_below >= RUN_LENGTH:
+            # Phase ends at the point BEFORE the run started
+            return max(0, i - RUN_LENGTH)
+    
+    # No signal found - entire dataset is one phase
+    return len(values) - 1</div>
+
+    <h4>Function: detect_phases(data_points)</h4>
+    <p><strong>Input:</strong> List of data points (sorted by date)<br>
+    <strong>Output:</strong> Dictionary with augmented points and phase metadata</p>
+
+    <div class="highlight-box">
+        <p><strong>Proper SPC Phase Detection Algorithm:</strong></p>
+        <ol>
+            <li>Start with baseline data (minimum 20 points)</li>
+            <li>Calculate limits from ONLY that baseline</li>
+            <li>Extend phase forward, watching for signals</li>
+            <li>When signal detected, start new phase at signal point</li>
+            <li>Recalculate limits from actual phase data</li>
+            <li>Augment each point with its phase's control limits</li>
+        </ol>
+    </div>
+
+    <h3>2.3 load_actual_data.py - Multi-File CSV Loader</h3>
+    <p><strong>File:</strong> load_actual_data.py<br>
+    <strong>Lines of Code:</strong> ~150<br>
+    <strong>Purpose:</strong> Load and convert multiple CSV files from input/ folder</p>
+
+    <h4>Station Name Mapping</h4>
+    <div class="code-block">STATION_MAP = {
+    'Austin': 'AUS',
+    'Dallas': 'DAL',
+    'Dallas Love Field': 'DAL',
+    'Houston': 'HOU',
+    'Houston Hobby': 'HOU'
+}
+
+MEASURE_NAMES = {
+    'maintenance_cancels.csv': 'Maintenance Cancels',
+    'maintenance_delays.csv': 'Maintenance Delays',
+    'scheduled_maintenance_findings.csv': 'Scheduled Maintenance Findings',
+    'unscheduled_maintenance.csv': 'Unscheduled Maintenance'
+}</div>
+
+    <h4>Function: convert_to_spc_format(input_folder)</h4>
+    <p><strong>Input:</strong> Path to folder containing CSV files<br>
+    <strong>Output:</strong> Combined CSV string in standard format</p>
+
+    <div class="highlight-box">
+        <p><strong>Conversion Process:</strong></p>
+        <ol>
+            <li>Scan folder for .csv files</li>
+            <li>For each file:
+                <ul>
+                    <li>Read CSV (format: timestamp,station,metric_value)</li>
+                    <li>Infer measure name from filename</li>
+                    <li>Map station names using STATION_MAP</li>
+                    <li>Convert to standard format (station,measure,date,value)</li>
+                </ul>
+            </li>
+            <li>Combine all files into single CSV string</li>
+            <li>Return combined CSV</li>
+        </ol>
+    </div>
+
+    <h2>3. Frontend Implementation</h2>
+
+    <h3>3.1 dashboard_standalone.html - Single-Page Application</h3>
+    <p><strong>File:</strong> dashboard_standalone.html<br>
+    <strong>Lines of Code:</strong> ~900<br>
+    <strong>Structure:</strong> Self-contained HTML with embedded CSS and JavaScript</p>
+
+    <h4>HTML Structure</h4>
+    <div class="code-block">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;SPC Station Health Charts&lt;/title&gt;
+    &lt;style&gt;
+        /* Embedded CSS - ~150 lines */
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="header"&gt;...&lt;/div&gt;
+    &lt;div id="controls"&gt;...&lt;/div&gt;
+    &lt;div id="content"&gt;
+        &lt;!-- Charts render here --&gt;
+    &lt;/div&gt;
+    
+    &lt;script&gt;
+        // Embedded JavaScript - ~700 lines
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</div>
+
+    <h3>3.2 JavaScript Architecture</h3>
+
+    <h4>Global State</h4>
+    <div class="code-block">let chartData = null;           // Current dataset
+let selectedStation = 'all';    // Station filter</div>
+
+    <h4>Key Functions</h4>
+    <table>
+        <tr>
+            <th>Function</th>
+            <th>Purpose</th>
+            <th>Lines</th>
+        </tr>
+        <tr>
+            <td>loadActualData()</td>
+            <td>Load test data from /api/load-actual</td>
+            <td>~20</td>
+        </tr>
+        <tr>
+            <td>handleFileUpload(event)</td>
+            <td>Process CSV file upload</td>
+            <td>~30</td>
+        </tr>
+        <tr>
+            <td>updateStationSelect(stations)</td>
+            <td>Populate station dropdown</td>
+            <td>~15</td>
+        </tr>
+        <tr>
+            <td>renderCharts()</td>
+            <td>Render all charts for selected station</td>
+            <td>~30</td>
+        </tr>
+        <tr>
+            <td>drawChart(canvasId, data, title)</td>
+            <td>Draw single chart on canvas</td>
+            <td>~200</td>
+        </tr>
+        <tr>
+            <td>downloadChart(canvasId, chartName)</td>
+            <td>Export chart as PNG</td>
+            <td>~10</td>
+        </tr>
+        <tr>
+            <td>showError(message)</td>
+            <td>Display error message</td>
+            <td>~10</td>
+        </tr>
+    </table>
+
+    <h4>Function: drawChart(canvasId, data, title)</h4>
+    <div class="highlight-box">
+        <p><strong>Core Rendering Steps:</strong></p>
+        <ol>
+            <li>Clear canvas</li>
+            <li>Calculate scales (X and Y axes)</li>
+            <li>Draw axes</li>
+            <li>Draw control limits (UCL, CL, LCL)</li>
+            <li>Draw phase boundaries (vertical dotted lines)</li>
+            <li>Draw data line</li>
+            <li>Draw data points (blue for normal, red for out-of-control)</li>
+            <li>Draw title</li>
+            <li>Draw axis labels</li>
+        </ol>
+    </div>
+
+    <h4>Function: downloadChart(canvasId, chartName)</h4>
+    <p><strong>PNG Export Implementation:</strong></p>
+    <div class="code-block">function downloadChart(canvasId, chartName) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    // Convert canvas to PNG data URL
+    const dataURL = canvas.toDataURL('image/png');
+    
+    // Create temporary download link
+    const link = document.createElement('a');
+    link.download = `${chartName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+    link.href = dataURL;
+    link.click();
+}</div>
+
+    <h2>4. Data Structures</h2>
+
+    <h3>4.1 JSON API Response</h3>
+    <div class="code-block">{
+  "success": true,
+  "chartData": {
+    "DAL": {
+      "Maintenance Cancels": {
+        "points": [
+          {
+            "station": "DAL",
+            "measure": "Maintenance Cancels",
+            "date": "2023-01-02",
+            "value": 3.2,
+            "ucl": 5.1,
+            "cl": 3.0,
+            "lcl": 0.9
+          }
+        ],
+        "phases": [
+          {
+            "startIndex": 0,
+            "endIndex": 45,
+            "cl": 3.0,
+            "ucl": 5.1,
+            "lcl": 0.9,
+            "phaseNumber": 1
+          }
+        ]
+      }
+    }
+  },
+  "stations": ["AUS", "DAL", "HOU"]
+}</div>
+
+    <h2>5. Performance Optimizations</h2>
+
+    <h3>5.1 Backend Optimizations</h3>
+    <table>
+        <tr>
+            <th>Optimization</th>
+            <th>Technique</th>
+            <th>Benefit</th>
+        </tr>
+        <tr>
+            <td><strong>List Comprehensions</strong></td>
+            <td>Use Python list comprehensions for loops</td>
+            <td>2-3x faster than traditional loops</td>
+        </tr>
+        <tr>
+            <td><strong>Single-Pass Parsing</strong></td>
+            <td>Parse CSV once, group in single loop</td>
+            <td>Avoid multiple passes over data</td>
+        </tr>
+        <tr>
+            <td><strong>Minimal Data Transfer</strong></td>
+            <td>Round decimals to 2 places</td>
+            <td>Reduce JSON payload size</td>
+        </tr>
+    </table>
+
+    <h3>5.2 Frontend Optimizations</h3>
+    <table>
+        <tr>
+            <th>Optimization</th>
+            <th>Technique</th>
+            <th>Benefit</th>
+        </tr>
+        <tr>
+            <td><strong>Canvas Rendering</strong></td>
+            <td>Use Canvas API instead of DOM</td>
+            <td>GPU accelerated, no reflows</td>
+        </tr>
+        <tr>
+            <td><strong>Debounced Resize</strong></td>
+            <td>Delay redraw until resize stops</td>
+            <td>Prevent excessive redraws</td>
+        </tr>
+        <tr>
+            <td><strong>Lazy Loading</strong></td>
+            <td>Only render visible charts</td>
+            <td>Faster initial load</td>
+        </tr>
+    </table>
+
+    <h2>6. Security Considerations</h2>
+
+    <h3>6.1 Threat Model</h3>
+    <p><strong>Risk Level:</strong> Low (localhost-only desktop tool)</p>
+
+    <table>
+        <tr>
+            <th>Threat</th>
+            <th>Status</th>
+            <th>Mitigation</th>
+        </tr>
+        <tr>
+            <td>CSV Injection</td>
+            <td>Accepted</td>
+            <td>No Excel output; Canvas rendering prevents XSS</td>
+        </tr>
+        <tr>
+            <td>Path Traversal</td>
+            <td>Mitigated</td>
+            <td>Only read file content, not paths</td>
+        </tr>
+        <tr>
+            <td>XSS</td>
+            <td>Mitigated</td>
+            <td>Canvas rendering (not innerHTML)</td>
+        </tr>
+        <tr>
+            <td>DoS (Large CSV)</td>
+            <td>Accepted</td>
+            <td>User's own machine; reasonable limits</td>
+        </tr>
+    </table>
+
+    <h2>7. Testing Strategy</h2>
+
+    <h3>7.1 Manual Testing (Performed)</h3>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Expected</th>
+            <th>Actual</th>
+            <th>Status</th>
+        </tr>
+        <tr>
+            <td>T01</td>
+            <td>Load test data</td>
+            <td>24 charts display</td>
+            <td>24 charts</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T02</td>
+            <td>Upload Format A CSV</td>
+            <td>Charts display, filename = measure</td>
+            <td>Correct</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T03</td>
+            <td>Upload Format B CSV</td>
+            <td>Charts display, measure from column</td>
+            <td>Correct</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T04</td>
+            <td>Upload invalid CSV</td>
+            <td>Error message</td>
+            <td>"No valid data points"</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T05</td>
+            <td>Export PNG</td>
+            <td>File downloads</td>
+            <td>PNG in Downloads folder</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T06</td>
+            <td>Phase detection</td>
+            <td>Phases marked correctly</td>
+            <td>Matches Wheeler's Rules</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T07</td>
+            <td>Station filter</td>
+            <td>Only selected station charts</td>
+            <td>Correct filtering</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+        <tr>
+            <td>T08</td>
+            <td>Port conflict</td>
+            <td>Clear error message</td>
+            <td>Address in use error</td>
+            <td><span class="checkmark">✅</span> Pass</td>
+        </tr>
+    </table>
+
+    <h2>8. Deployment</h2>
+
+    <h3>8.1 Build Process</h3>
+    <div class="highlight-box">
+        <p><strong>No build step required!</strong></p>
+        <ul>
+            <li>No transpilation (no Babel/TypeScript)</li>
+            <li>No bundling (no Webpack/Vite)</li>
+            <li>No minification</li>
+            <li>No dependency installation</li>
+        </ul>
+    </div>
+
+    <h3>8.2 Distribution Package Contents</h3>
+    <div class="code-block">SPC-Station-Health-Charts.zip
+├── dashboard_standalone.html      # Main UI (self-contained)
+├── server.py                      # HTTP server + routing
+├── spc_processor.py              # Statistical calculations
+├── load_actual_data.py           # CSV data loader
+│
+├── START_DASHBOARD.bat           # Windows launcher
+├── start_dashboard.sh            # Mac/Linux launcher
+│
+├── README.md                     # Technical README
+├── README_DISTRIBUTION.md        # User-facing README
+├── .gitignore                    # Git ignore rules
+│
+├── input/                        # Sample CSV data
+│   ├── maintenance_cancels.csv
+│   ├── maintenance_delays.csv
+│   ├── scheduled_maintenance_findings.csv
+│   └── unscheduled_maintenance.csv
+│
+└── output/                       # Exported PNG charts</div>
+
+    <h2>9. Version History</h2>
+    <table>
+        <tr>
+            <th>Version</th>
+            <th>Date</th>
+            <th>Changes</th>
+            <th>Lines Changed</th>
+        </tr>
+        <tr>
+            <td>0.1</td>
+            <td>2025-09-28</td>
+            <td>Initial React + Recharts version</td>
+            <td>N/A</td>
+        </tr>
+        <tr>
+            <td>0.2</td>
+            <td>2025-10-01</td>
+            <td>Fixed infinite render loop</td>
+            <td>~20</td>
+        </tr>
+        <tr>
+            <td>0.3</td>
+            <td>2025-10-02</td>
+            <td>Switched to standalone HTML + Canvas</td>
+            <td>~900 (rewrite)</td>
+        </tr>
+        <tr>
+            <td>0.4</td>
+            <td>2025-10-04</td>
+            <td>Fixed phase detection (Wheeler's Rules)</td>
+            <td>~150</td>
+        </tr>
+        <tr>
+            <td>0.5</td>
+            <td>2025-10-05</td>
+            <td>Added XmR charts (both X and mR)</td>
+            <td>~100</td>
+        </tr>
+        <tr>
+            <td><strong>1.0</strong></td>
+            <td><strong>2025-10-06</strong></td>
+            <td><strong>Production release</strong></td>
+            <td><strong>~1600 total</strong></td>
+        </tr>
+    </table>
+
+    <div class="approval-section">
+        <h2>Approval</h2>
+        <table>
+            <tr>
+                <th>Role</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Signature</th>
+            </tr>
+            <tr>
+                <td>Tech Lead</td>
+                <td>Development Team</td>
+                <td>2025-10-06</td>
+                <td><span class="checkmark">✅</span> Approved</td>
+            </tr>
+            <tr>
+                <td>Code Reviewer</td>
+                <td>Senior Developer</td>
+                <td>2025-10-06</td>
+                <td><span class="checkmark">✅</span> Reviewed</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p><strong>Document Version History</strong></p>
+        <table>
+            <tr>
+                <th>Version</th>
+                <th>Date</th>
+                <th>Author</th>
+                <th>Changes</th>
+            </tr>
+            <tr>
+                <td>1.0</td>
+                <td>2025-10-06</td>
+                <td>Development Team</td>
+                <td>Initial technical specification</td>
+            </tr>
+            <tr>
+                <td>1.3</td>
+                <td>2025-10-07</td>
+                <td>Development Team</td>
+                <td>Graphics update: Southwest Tech Badge logo integration, CSS optimization, logo test utilities</td>
+            </tr>
+        </table>
+        <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Documentation - SPC Station Health Charts</title>
+    <style>
+        @page { margin: 1in; }
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #304CB2;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+            background: white;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #304CB2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo-placeholder {
+            width: 300px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border: 2px dashed #FFBF27;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F7F7F7;
+            color: #304CB2;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        h1 {
+            color: #304CB2;
+            font-size: 28pt;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        h2 {
+            color: #304CB2;
+            font-size: 18pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #FFBF27;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #304CB2;
+            font-size: 14pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .doc-info {
+            background: #F7F7F7;
+            border-left: 4px solid #304CB2;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .doc-info p {
+            margin: 5px 0;
+            color: #304CB2;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background: #304CB2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background: #F7F7F7;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 5px 0;
+            color: #333;
+        }
+        .diagram-box {
+            background: #F7F7F7;
+            border: 2px solid #304CB2;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Consolas', monospace;
+            font-size: 9pt;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .highlight-box {
+            background: #FFF9E6;
+            border: 2px solid #FFBF27;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .decision-box {
+            background: #E8F5E9;
+            border: 2px solid #2ECC71;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        p {
+            color: #333;
+            text-align: justify;
+        }
+        strong {
+            color: #304CB2;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            color: #666;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-placeholder">
+            [SOUTHWEST TECH BADGE LOGO - METALLIC FRAME WITH RIVETS]
+        </div>
+        <h1>Architecture Documentation</h1>
+        <h2 style="border: none; margin-top: 0;">SPC Station Health Charts</h2>
+    </div>
+
+    <div class="doc-info">
+        <p><strong>Version:</strong> 1.3</p>
+        <p><strong>Last Updated:</strong> October 7, 2025</p>
+        <p><strong>Architecture Style:</strong> Client-Server (Local)</p>
+        <p><strong>Graphics Update:</strong> Southwest Tech Badge Logo Integration</p>
+    </div>
+
+    <h2>1. System Overview</h2>
+
+    <h3>High-Level Architecture</h3>
+    <div class="diagram-box">
+┌─────────────────────────────────────────────────────────────┐
+│                      User's Desktop                          │
+│                                                               │
+│  ┌──────────┐                    ┌──────────────────┐       │
+│  │   User   │────Double-Click───→│  Batch Launcher  │       │
+│  └──────────┘                    └──────────────────┘       │
+│       ↓                                    ↓                 │
+│       │                          ┌──────────────────┐       │
+│       │                          │  Python Server   │       │
+│       │                          │  (localhost:8000)│       │
+│       │                          └──────────────────┘       │
+│       │                                    ↓                 │
+│       │                          ┌──────────────────┐       │
+│       └─────Opens Browser───────→│  Web Dashboard   │       │
+│                                   │  (HTML/Canvas)   │       │
+│                                   └──────────────────┘       │
+│                                            ↓                 │
+│                                   ┌──────────────────┐       │
+│                                   │  SPC Processor   │       │
+│                                   │  (Statistics)    │       │
+│                                   └──────────────────┘       │
+│                                            ↓                 │
+│                                   ┌──────────────────┐       │
+│                                   │    CSV Files     │       │
+│                                   │    (input/)      │       │
+│                                   └──────────────────┘       │
+└─────────────────────────────────────────────────────────────┘
+    </div>
+
+    <h2>2. Component Architecture</h2>
+
+    <h3>2.1 Frontend (dashboard_standalone.html)</h3>
+    <p><strong>Technology:</strong> Pure HTML5 + JavaScript (No frameworks)</p>
+
+    <div class="highlight-box">
+        <p><strong>Key Responsibilities:</strong></p>
+        <ul>
+            <li>User interface rendering</li>
+            <li>Chart visualization via HTML5 Canvas</li>
+            <li>API communication with Python backend</li>
+            <li>PNG export via Canvas toDataURL()</li>
+            <li>Client-side state management</li>
+        </ul>
+    </div>
+
+    <div class="highlight-box">
+        <p><strong>Design Patterns:</strong></p>
+        <ul>
+            <li><strong>Event-Driven:</strong> Button clicks trigger async API calls</li>
+            <li><strong>Data-Driven Rendering:</strong> Charts redraw on state change</li>
+            <li><strong>Functional Decomposition:</strong> Separate functions for each chart type</li>
+        </ul>
+    </div>
+
+    <h3>2.2 Backend (Python HTTP Server)</h3>
+
+    <p><strong>server.py - HTTP Request Handler</strong></p>
+    <ul>
+        <li>Extends SimpleHTTPRequestHandler</li>
+        <li>Routes requests to appropriate handlers</li>
+        <li>Adds CORS headers for local development</li>
+        <li>Serves static HTML file</li>
+        <li>Processes API requests</li>
+    </ul>
+
+    <p><strong>spc_processor.py - Statistical Engine</strong></p>
+    <ul>
+        <li>Parses CSV data</li>
+        <li>Calculates control limits (2.66 sigma)</li>
+        <li>Detects phases using Wheeler's Rules</li>
+        <li>Generates both X and mR charts</li>
+        <li>Returns structured JSON</li>
+    </ul>
+
+    <p><strong>load_actual_data.py - Data Loader</strong></p>
+    <ul>
+        <li>Scans input/ directory for CSV files</li>
+        <li>Converts format to standardized structure</li>
+        <li>Maps station names (e.g., "Dallas" → "DAL")</li>
+        <li>Infers measure names from filenames</li>
+        <li>Combines multiple files into single dataset</li>
+    </ul>
+
+    <h2>3. Data Flow Architecture</h2>
+
+    <h3>3.1 Complete Data Flow (Load Test Data)</h3>
+    <div class="diagram-box">
+User clicks "Load Test Data"
+    ↓
+Browser sends POST /api/load-actual
+    ↓
+Server calls load_actual_data.convert_to_spc_format()
+    ↓
+Loader reads all CSV files from input/
+    ↓
+Loader converts to standard format
+    ↓
+Server calls spc_processor.process_data()
+    ↓
+SPC Processor:
+  - Parses CSV
+  - Groups by station/measure
+  - For each measure:
+    * detect_phases (X chart)
+    * generate_moving_range_data
+    * detect_phases (mR chart)
+    ↓
+Returns JSON {chartData, stations}
+    ↓
+Browser receives JSON response
+    ↓
+Browser renders charts on Canvas
+    ↓
+User views 24 charts
+    </div>
+
+    <h3>3.2 Phase Detection Algorithm Flow</h3>
+    <div class="diagram-box">
+Start: Raw Data Points
+    ↓
+Sort by Date
+    ↓
+Initialize: phase_number=1, current_start=0
+    ↓
+┌──────────────────────┐
+│ More data to process?│──No──→ Return phases + augmented points
+└──────────────────────┘
+    ↓ Yes
+Take next 20 points as baseline
+    ↓
+Calculate limits from baseline ONLY: CL, UCL, LCL
+    ↓
+Monitor remaining data for Wheeler's Rules
+    ↓
+┌────────────────────────┐
+│ Point outside UCL/LCL? │──Yes──→ Signal Detected!
+└────────────────────────┘           ↓
+    ↓ No                       End current phase
+┌────────────────────────────┐       ↓
+│ 8 consecutive on one side? │──Yes──→ Recalculate limits
+└────────────────────────────┘       ↓
+    ↓ No                       Save phase metadata
+Continue Phase                       ↓
+    ↓                          Increment phase_number
+Back to "More data to process?"      ↓
+                              current_start = phase_end + 1
+    </div>
+
+    <h2>4. Technology Stack</h2>
+
+    <h3>4.1 Technology Decisions</h3>
+    <table>
+        <tr>
+            <th>Layer</th>
+            <th>Technology</th>
+            <th>Rationale</th>
+        </tr>
+        <tr>
+            <td><strong>Frontend UI</strong></td>
+            <td>HTML5 + CSS</td>
+            <td>Universal browser support; no build step</td>
+        </tr>
+        <tr>
+            <td><strong>Frontend Logic</strong></td>
+            <td>Vanilla JavaScript</td>
+            <td>Zero dependencies; works offline</td>
+        </tr>
+        <tr>
+            <td><strong>Charting</strong></td>
+            <td>HTML5 Canvas API</td>
+            <td>No external libraries; full control; PNG export built-in</td>
+        </tr>
+        <tr>
+            <td><strong>Backend</strong></td>
+            <td>Python 3.7+</td>
+            <td>Already installed enterprise-wide; no admin rights needed</td>
+        </tr>
+        <tr>
+            <td><strong>Web Server</strong></td>
+            <td>http.server (stdlib)</td>
+            <td>No installation required; sufficient for localhost</td>
+        </tr>
+        <tr>
+            <td><strong>Data Format</strong></td>
+            <td>CSV</td>
+            <td>Universal; easy to generate from any system</td>
+        </tr>
+        <tr>
+            <td><strong>Data Transfer</strong></td>
+            <td>JSON over HTTP</td>
+            <td>Standard web protocol; easy parsing</td>
+        </tr>
+        <tr>
+            <td><strong>State Management</strong></td>
+            <td>Global JS variables</td>
+            <td>Simple; no framework overhead</td>
+        </tr>
+    </table>
+
+    <div class="decision-box">
+        <h3>Critical Design Decision</h3>
+        <p><strong>❌ Rejected:</strong> React, Recharts, npm, Node.js</p>
+        <p><strong>Reason:</strong> External dependencies, CDN issues, corporate firewall blocks</p>
+        <p style="margin-top: 15px;"><strong>✅ Chosen:</strong> Vanilla JavaScript + Canvas</p>
+        <p><strong>Reason:</strong> Zero dependencies, works anywhere, full control</p>
+    </div>
+
+    <h2>5. API Specification</h2>
+
+    <h3>5.1 Endpoint: GET /</h3>
+    <p><strong>Purpose:</strong> Serve main dashboard HTML</p>
+    <table>
+        <tr>
+            <th>Request</th>
+            <th>Response</th>
+        </tr>
+        <tr>
+            <td>GET / HTTP/1.1<br>Host: localhost:8000</td>
+            <td>HTTP/1.1 200 OK<br>Content-Type: text/html<br><br>&lt;!DOCTYPE html&gt;...</td>
+        </tr>
+    </table>
+
+    <h3>5.2 Endpoint: POST /api/load-actual</h3>
+    <p><strong>Purpose:</strong> Load sample data from input/ folder</p>
+    <table>
+        <tr>
+            <th>Request</th>
+            <th>Response</th>
+        </tr>
+        <tr>
+            <td>POST /api/load-actual HTTP/1.1<br>Host: localhost:8000<br>Content-Type: application/json<br><br>{}</td>
+            <td>HTTP/1.1 200 OK<br>Content-Type: application/json<br><br>{"success": true, "chartData": {...}, "stations": [...]}</td>
+        </tr>
+    </table>
+
+    <h3>5.3 Endpoint: POST /api/process</h3>
+    <p><strong>Purpose:</strong> Process uploaded CSV file</p>
+    <table>
+        <tr>
+            <th>Request</th>
+            <th>Response</th>
+        </tr>
+        <tr>
+            <td>POST /api/process HTTP/1.1<br>Host: localhost:8000<br>Content-Type: application/json<br><br>{"csvData": "...", "filename": "..."}</td>
+            <td>HTTP/1.1 200 OK<br>Content-Type: application/json<br><br>{"success": true, "chartData": {...}, "stations": [...]}</td>
+        </tr>
+    </table>
+
+    <h2>6. Security Architecture</h2>
+
+    <h3>6.1 Security Model</h3>
+    <p><strong>Threat Model:</strong> Low risk (local desktop tool)</p>
+
+    <div class="highlight-box">
+        <p><strong>Security Decisions:</strong></p>
+        <ul>
+            <li><strong>No authentication:</strong> Single-user desktop tool; localhost only</li>
+            <li><strong>No HTTPS:</strong> Traffic never leaves local machine</li>
+            <li><strong>Minimal input validation:</strong> Trust user-provided CSVs (graceful error handling)</li>
+            <li><strong>No CORS restrictions:</strong> Local origin only</li>
+        </ul>
+    </div>
+
+    <table>
+        <tr>
+            <th>Threat</th>
+            <th>Status</th>
+            <th>Mitigation/Acceptance</th>
+        </tr>
+        <tr>
+            <td>CSV Injection</td>
+            <td>Accepted</td>
+            <td>Not applicable (no Excel output)</td>
+        </tr>
+        <tr>
+            <td>Path Traversal</td>
+            <td>Mitigated</td>
+            <td>Only read file content; no path access</td>
+        </tr>
+        <tr>
+            <td>XSS</td>
+            <td>Mitigated</td>
+            <td>Canvas rendering (not innerHTML)</td>
+        </tr>
+        <tr>
+            <td>DoS (Large CSV)</td>
+            <td>Accepted</td>
+            <td>User's own machine; low risk</td>
+        </tr>
+    </table>
+
+    <h2>7. Deployment Architecture</h2>
+
+    <h3>7.1 Deployment Model</h3>
+    <div class="diagram-box">
+GitHub Repository
+    ↓
+Distribution ZIP
+    ↓
+┌─────────────┬─────────────┬─────────────┐
+│   User 1    │   User 2    │   User 3    │
+│   Desktop   │   Desktop   │   Desktop   │
+└─────────────┴─────────────┴─────────────┘
+    ↓             ↓             ↓
+┌─────────────┬─────────────┬─────────────┐
+│  Python     │  Python     │  Python     │
+│  Server     │  Server     │  Server     │
+│  Port 8000  │  Port 8000  │  Port 8000  │
+└─────────────┴─────────────┴─────────────┘
+
+No central server - each user runs independent instance
+    </div>
+
+    <h3>7.2 Deployment Steps</h3>
+    <ol>
+        <li>Download ZIP from GitHub</li>
+        <li>Extract to any folder</li>
+        <li>Double-click START_DASHBOARD.bat (Windows) or ./start_dashboard.sh (Mac/Linux)</li>
+        <li>Browser opens automatically to http://localhost:8000</li>
+    </ol>
+
+    <h3>7.3 File Structure</h3>
+    <div class="diagram-box">SPC-Station-Health-Charts/
+│
+├── dashboard_standalone.html      # Main UI (self-contained)
+├── server.py                      # HTTP server + routing
+├── spc_processor.py              # Statistical calculations
+├── load_actual_data.py           # CSV data loader
+│
+├── START_DASHBOARD.bat           # Windows launcher
+├── start_dashboard.sh            # Mac/Linux launcher
+│
+├── README.md                     # Technical README
+├── README_DISTRIBUTION.md        # User-facing README
+├── .gitignore                    # Git ignore rules
+│
+├── input/                        # Sample CSV data
+│   ├── maintenance_cancels.csv
+│   ├── maintenance_delays.csv
+│   ├── scheduled_maintenance_findings.csv
+│   └── unscheduled_maintenance.csv
+│
+└── output/                       # Exported PNG charts
+    </div>
+
+    <h2>8. Performance Architecture</h2>
+
+    <h3>8.1 Performance Characteristics</h3>
+    <table>
+        <tr>
+            <th>Operation</th>
+            <th>Target</th>
+            <th>Actual</th>
+            <th>Notes</th>
+        </tr>
+        <tr>
+            <td>Server startup</td>
+            <td>&lt; 2s</td>
+            <td>~1s</td>
+            <td>Python startup + socket bind</td>
+        </tr>
+        <tr>
+            <td>Page load</td>
+            <td>&lt; 3s</td>
+            <td>~1s</td>
+            <td>Single HTML file, no bundling</td>
+        </tr>
+        <tr>
+            <td>Data processing (10K rows)</td>
+            <td>&lt; 2s</td>
+            <td>~0.5s</td>
+            <td>Pure Python, no database</td>
+        </tr>
+        <tr>
+            <td>Chart rendering (8 charts)</td>
+            <td>&lt; 2s</td>
+            <td>~1s</td>
+            <td>Canvas API, no DOM manipulation</td>
+        </tr>
+        <tr>
+            <td>PNG export</td>
+            <td>Instant</td>
+            <td>~100ms</td>
+            <td>Canvas toDataURL()</td>
+        </tr>
+    </table>
+
+    <h3>8.2 Scalability Limits</h3>
+    <div class="highlight-box">
+        <p><strong>Design Constraints:</strong></p>
+        <ul>
+            <li><strong>Data size:</strong> Tested up to 10,000 rows</li>
+            <li><strong>Chart count:</strong> Tested up to 24 charts per view</li>
+            <li><strong>Concurrent users:</strong> Single user per instance (localhost only)</li>
+            <li><strong>Memory:</strong> ~50MB Python process + ~100MB browser tab</li>
+        </ul>
+        <p><strong>Horizontal Scaling:</strong> Each user runs their own instance (inherently scalable)</p>
+    </div>
+
+    <h2>9. Architecture Decision Records (ADRs)</h2>
+
+    <div class="decision-box">
+        <h3>ADR-001: Use HTML5 Canvas Instead of Recharts</h3>
+        <p><strong>Context:</strong> Initial implementation used Recharts library loaded from CDN</p>
+        <p><strong>Decision:</strong> Replaced with native HTML5 Canvas API</p>
+        <p><strong>Rationale:</strong></p>
+        <ul>
+            <li>Corporate firewall blocks CDN access</li>
+            <li>Recharts requires React framework (additional dependency)</li>
+            <li>Canvas API provides sufficient charting capability</li>
+            <li>Full control over rendering and export</li>
+        </ul>
+        <p><strong>Consequences:</strong></p>
+        <ul>
+            <li>(+) Zero external dependencies</li>
+            <li>(+) Works in any restricted environment</li>
+            <li>(+) PNG export built-in via toDataURL()</li>
+            <li>(-) More code to maintain (manual chart drawing)</li>
+        </ul>
+        <p><strong>Status:</strong> ✅ Accepted</p>
+    </div>
+
+    <div class="decision-box">
+        <h3>ADR-002: Python http.server Instead of Flask/FastAPI</h3>
+        <p><strong>Context:</strong> Need web server for local dashboard</p>
+        <p><strong>Decision:</strong> Use Python's built-in http.server module</p>
+        <p><strong>Rationale:</strong></p>
+        <ul>
+            <li>Already included in Python standard library</li>
+            <li>No pip install required (users lack admin rights)</li>
+            <li>Sufficient for localhost single-user scenario</li>
+            <li>Simple to understand and modify</li>
+        </ul>
+        <p><strong>Consequences:</strong></p>
+        <ul>
+            <li>(+) Zero installation friction</li>
+            <li>(+) Works immediately after extracting ZIP</li>
+            <li>(-) Not suitable for production multi-user deployment</li>
+        </ul>
+        <p><strong>Status:</strong> ✅ Accepted</p>
+    </div>
+
+    <div class="decision-box">
+        <h3>ADR-003: Calculate Limits from Baseline, Not Entire Dataset</h3>
+        <p><strong>Context:</strong> Initial implementation calculated limits from all data, causing erratic behavior</p>
+        <p><strong>Decision:</strong> Calculate limits from first 20 points (baseline), then monitor for shifts</p>
+        <p><strong>Rationale:</strong></p>
+        <ul>
+            <li>Follows Wheeler's methodology exactly</li>
+            <li>Prevents limits from being influenced by out-of-control points</li>
+            <li>Enables proper detection of process changes</li>
+        </ul>
+        <p><strong>Consequences:</strong></p>
+        <ul>
+            <li>(+) Statistically correct</li>
+            <li>(+) Realistic phase boundaries</li>
+            <li>(-) Requires minimum 20 data points per phase</li>
+        </ul>
+        <p><strong>Status:</strong> ✅ Accepted</p>
+    </div>
+
+    <h2>10. Future Architecture Considerations</h2>
+
+    <h3>Potential Enhancements (V2.0)</h3>
+    <div class="highlight-box">
+        <p><strong>Architectural Evolution:</strong></p>
+        <ol>
+            <li><strong>Phase 1 (Current):</strong> Desktop tool, zero dependencies ✅</li>
+            <li><strong>Phase 2 (Future):</strong> Optional web deployment for teams
+                <ul>
+                    <li>Web Server: Flask/FastAPI</li>
+                    <li>Database: PostgreSQL for historical data</li>
+                    <li>Authentication: SSO integration</li>
+                </ul>
+            </li>
+            <li><strong>Phase 3 (Future):</strong> Integration with airline ERP systems
+                <ul>
+                    <li>Real-time Updates: WebSocket</li>
+                    <li>ML Predictions: Anomaly detection</li>
+                    <li>REST API: External integrations</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="footer">
+        <p><strong>Document Version History</strong></p>
+        <table>
+            <tr>
+                <th>Version</th>
+                <th>Date</th>
+                <th>Author</th>
+                <th>Changes</th>
+            </tr>
+            <tr>
+                <td>1.0</td>
+                <td>2025-10-06</td>
+                <td>Development Team</td>
+                <td>Initial architecture documentation</td>
+            </tr>
+            <tr>
+                <td>1.3</td>
+                <td>2025-10-07</td>
+                <td>Development Team</td>
+                <td>Graphics update: Southwest Tech Badge logo integration, logo test gallery</td>
+            </tr>
+        </table>
+        <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>
+    </div>
+</body>
+</html>

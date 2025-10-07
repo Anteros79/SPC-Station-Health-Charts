@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functional Specification - SPC Station Health Charts</title>
+    <style>
+        @page { margin: 1in; }
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #304CB2;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+            background: white;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #304CB2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo-placeholder {
+            width: 300px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border: 2px dashed #FFBF27;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F7F7F7;
+            color: #304CB2;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        h1 {
+            color: #304CB2;
+            font-size: 28pt;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        h2 {
+            color: #304CB2;
+            font-size: 18pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #FFBF27;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #304CB2;
+            font-size: 14pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        h4 {
+            color: #304CB2;
+            font-size: 12pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+        .doc-info {
+            background: #F7F7F7;
+            border-left: 4px solid #304CB2;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .doc-info p {
+            margin: 5px 0;
+            color: #304CB2;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background: #304CB2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background: #F7F7F7;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 5px 0;
+            color: #333;
+        }
+        .checkmark {
+            color: #2ECC71;
+            font-weight: bold;
+        }
+        .crossmark {
+            color: #E74C3C;
+            font-weight: bold;
+        }
+        .highlight-box {
+            background: #FFF9E6;
+            border: 2px solid #FFBF27;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .code-block {
+            background: #2C3E50;
+            color: #ECF0F1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 10pt;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        p {
+            color: #333;
+            text-align: justify;
+        }
+        strong {
+            color: #304CB2;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            color: #666;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-placeholder">
+            [SOUTHWEST TECH BADGE - METALLIC FRAME WITH RIVETS]
+        </div>
+        <h1>Functional Specification</h1>
+        <h2 style="border: none; margin-top: 0;">SPC Station Health Charts</h2>
+    </div>
+
+    <div class="doc-info">
+        <p><strong>Version:</strong> 1.3</p>
+        <p><strong>Date:</strong> October 7, 2025</p>
+        <p><strong>Status:</strong> Implemented with Graphics Update</p>
+        <p><strong>New Features:</strong> Southwest Tech Badge Logo, Logo Test Gallery</p>
+    </div>
+
+    <h2>1. Introduction</h2>
+
+    <h3>1.1 Purpose</h3>
+    <p>This document specifies the functional behavior of the SPC Station Health Charts application from an end-user perspective. It describes what the system does, not how it does it (see Technical Spec for implementation details).</p>
+
+    <h3>1.2 Scope</h3>
+    <p>Desktop application for visualizing Statistical Process Control charts for airline maintenance metrics. Covers data loading, visualization, phase detection, and chart export.</p>
+
+    <h3>1.3 Audience</h3>
+    <ul>
+        <li>Product managers</li>
+        <li>Quality assurance testers</li>
+        <li>End users (maintenance managers, analysts)</li>
+        <li>Training documentation authors</li>
+    </ul>
+
+    <h2>2. User Roles & Personas</h2>
+
+    <div class="highlight-box">
+        <h3>2.1 Primary User: Maintenance Station Manager</h3>
+        <p><strong>Name:</strong> Sarah Chen<br>
+        <strong>Role:</strong> Maintenance Manager, Dallas Love Field (DAL)<br>
+        <strong>Technical Skills:</strong> Moderate (Excel power user, not a programmer)<br>
+        <strong>Environment:</strong> Corporate Windows laptop, no admin rights, restricted firewall</p>
+        
+        <p><strong>Goals:</strong></p>
+        <ul>
+            <li>Monitor weekly maintenance KPIs</li>
+            <li>Identify when process shifts occur</li>
+            <li>Report trends to regional leadership</li>
+            <li>Create charts for monthly presentations</li>
+        </ul>
+        
+        <p><strong>Pain Points:</strong></p>
+        <ul>
+            <li>Current Excel charts take 30+ minutes to update</li>
+            <li>Manual calculation of control limits prone to errors</li>
+            <li>Difficult to identify genuine process shifts vs. noise</li>
+        </ul>
+    </div>
+
+    <div class="highlight-box">
+        <h3>2.2 Secondary User: Technical Operations Analyst</h3>
+        <p><strong>Name:</strong> Mike Rodriguez<br>
+        <strong>Role:</strong> Senior Tech Ops Analyst, Corporate HQ<br>
+        <strong>Technical Skills:</strong> Advanced (SQL, Python, data analysis)<br>
+        <strong>Environment:</strong> Workstation with Python installed</p>
+        
+        <p><strong>Goals:</strong></p>
+        <ul>
+            <li>Analyze custom metrics not in standard reports</li>
+            <li>Compare performance across multiple stations</li>
+            <li>Validate statistical methodology</li>
+            <li>Export charts for executive dashboards</li>
+        </ul>
+        
+        <p><strong>Pain Points:</strong></p>
+        <ul>
+            <li>Need flexibility to upload ad-hoc data</li>
+            <li>Require statistically rigorous methods</li>
+            <li>Must work offline (travels to remote stations)</li>
+        </ul>
+    </div>
+
+    <h2>3. Functional Requirements</h2>
+
+    <h3>3.1 Application Launch</h3>
+
+    <h4>FR-3.1.1: Windows Launch</h4>
+    <p><strong>Trigger:</strong> User double-clicks START_DASHBOARD.bat<br>
+    <strong>Preconditions:</strong> Python 3.7+ installed</p>
+
+    <p><strong>Process:</strong></p>
+    <ol>
+        <li>Batch file starts Python HTTP server on port 8000</li>
+        <li>Command Prompt window opens with server status</li>
+        <li>Default browser opens automatically to http://localhost:8000</li>
+        <li>Dashboard welcome screen displays</li>
+    </ol>
+
+    <p><strong>Expected Output:</strong></p>
+    <div class="code-block">╔════════════════════════════════════════════════════════════╗
+║  Airline Tech Ops SPC Dashboard Server                    ║
+╚════════════════════════════════════════════════════════════╝
+✓ Server running on: http://localhost:8000
+📋 Instructions:
+   1. Open your web browser
+   2. Navigate to: http://localhost:8000
+   3. Click 'Load Demo' or upload your CSV file
+   4. Press Ctrl+C to stop the server
+⚠️  Keep this window open while using the dashboard!</div>
+
+    <p><strong>Success Criteria:</strong></p>
+    <ul>
+        <li>Server starts within 2 seconds</li>
+        <li>Browser opens to dashboard</li>
+        <li>No error messages displayed</li>
+    </ul>
+
+    <h3>3.2 Welcome Screen</h3>
+
+    <h4>FR-3.2.1: Initial Display</h4>
+    <p><strong>When:</strong> User navigates to http://localhost:8000</p>
+    
+    <p><strong>Display Elements:</strong></p>
+    <ul>
+        <li><span class="checkmark">✅</span> Application title: "SPC Station Health Charts"</li>
+        <li><span class="checkmark">✅</span> Subtitle: "Statistical Process Control • Wheeler's XmR Methodology"</li>
+        <li><span class="checkmark">✅</span> Two prominent buttons:
+            <ul>
+                <li>"📊 Load Test Data" (green, primary action)</li>
+                <li>"📤 Upload CSV (Auto-Detect Format)" (blue, secondary action)</li>
+            </ul>
+        </li>
+        <li><span class="checkmark">✅</span> Description text: "Simulated test data • January 2023 to present • 4 maintenance metrics"</li>
+        <li><span class="checkmark">✅</span> Format support note: "Upload supports: timestamp,station,metric_value OR station,measure,date,value"</li>
+    </ul>
+
+    <h3>3.3 Load Test Data</h3>
+
+    <h4>FR-3.3.1: Load Button Click</h4>
+    <p><strong>Trigger:</strong> User clicks "📊 Load Test Data" button</p>
+
+    <p><strong>Process:</strong></p>
+    <ol>
+        <li>Button becomes disabled (prevent double-click)</li>
+        <li>Loading indicator displays: "Loading Test Data..."</li>
+        <li>Browser sends POST request to /api/load-actual</li>
+        <li>Server reads CSV files from input/ folder</li>
+        <li>Server processes data and returns JSON</li>
+        <li>Dashboard renders charts</li>
+        <li>Loading indicator disappears</li>
+    </ol>
+
+    <p><strong>Expected Timeline:</strong></p>
+    <ul>
+        <li>Loading indicator appears: &lt; 100ms</li>
+        <li>Data processing: &lt; 2 seconds</li>
+        <li>Chart rendering: &lt; 1 second</li>
+        <li><strong>Total:</strong> &lt; 3 seconds</li>
+    </ul>
+
+    <h4>FR-3.3.2: Test Data Content</h4>
+    <p><strong>Data Specifications:</strong></p>
+    <ul>
+        <li><strong>Time Range:</strong> January 2, 2023 to current week (140+ weeks)</li>
+        <li><strong>Stations:</strong> 3 (Austin/AUS, Dallas/DAL, Houston/HOU)</li>
+        <li><strong>Measures:</strong> 4
+            <ol>
+                <li>Maintenance Cancels</li>
+                <li>Maintenance Delays</li>
+                <li>Scheduled Maintenance Findings</li>
+                <li>Unscheduled Maintenance</li>
+            </ol>
+        </li>
+        <li><strong>Chart Count:</strong> 24 total (3 stations × 4 measures × 2 chart types)</li>
+    </ul>
+
+    <h3>3.4 Station Selection</h3>
+
+    <h4>FR-3.4.1: Station Dropdown</h4>
+    <p><strong>Location:</strong> Top-right of dashboard<br>
+    <strong>Default Value:</strong> First station alphabetically (AUS)</p>
+
+    <p><strong>Options:</strong></p>
+    <ul>
+        <li>"All Stations" (shows all station charts)</li>
+        <li>"AUS" (Austin)</li>
+        <li>"DAL" (Dallas Love Field)</li>
+        <li>"HOU" (Houston Hobby)</li>
+    </ul>
+
+    <p><strong>Behavior:</strong></p>
+    <ul>
+        <li>Dropdown updates after data loads</li>
+        <li>Selecting station filters charts dynamically</li>
+        <li>Page does not reload</li>
+        <li>Charts re-render smoothly</li>
+    </ul>
+
+    <h3>3.5 Chart Visualization</h3>
+
+    <h4>FR-3.5.1: Chart Components</h4>
+    <p>Each chart displays:</p>
+
+    <p><strong>Title Bar:</strong></p>
+    <ul>
+        <li>Station code (e.g., "DAL")</li>
+        <li>Measure name (e.g., "Maintenance Cancels")</li>
+        <li>Chart type: "(X Chart - Individuals)" or "(mR Chart - Moving Range)"</li>
+    </ul>
+
+    <p><strong>Chart Area:</strong></p>
+    <ul>
+        <li>X-axis: Date (weekly intervals)</li>
+        <li>Y-axis: Metric value (auto-scaled)</li>
+        <li>Data points: Blue dots connected by lines</li>
+        <li>Out-of-control points: Red dots</li>
+        <li>Control limits: Horizontal lines (UCL, CL, LCL) in different colors</li>
+        <li>Phase boundaries: Vertical dotted lines (if multiple phases)</li>
+    </ul>
+
+    <p><strong>Legend:</strong></p>
+    <ul>
+        <li>UCL (Upper Control Limit)</li>
+        <li>CL (Center Line / Mean)</li>
+        <li>LCL (Lower Control Limit)</li>
+        <li>Data Points</li>
+    </ul>
+
+    <p><strong>Action Button:</strong></p>
+    <ul>
+        <li>"💾 Save PNG" button below chart</li>
+    </ul>
+
+    <h4>FR-3.5.2: X Chart (Individuals)</h4>
+    <p><strong>Purpose:</strong> Monitors process location (average level)<br>
+    <strong>Y-axis Label:</strong> Metric name (e.g., "Maintenance Cancels")<br>
+    <strong>Data Points:</strong> Actual weekly values</p>
+
+    <p><strong>Control Limits:</strong></p>
+    <ul>
+        <li>Calculated using 2.66 sigma</li>
+        <li>Based on moving range</li>
+        <li>Recalculate per phase</li>
+    </ul>
+
+    <p><strong>Visual Indicators:</strong></p>
+    <ul>
+        <li>Points within limits: Blue</li>
+        <li>Points outside limits: Red (signals special cause)</li>
+        <li>Line connects sequential points</li>
+    </ul>
+
+    <h4>FR-3.5.3: mR Chart (Moving Range)</h4>
+    <p><strong>Purpose:</strong> Monitors process variation (consistency)<br>
+    <strong>Y-axis Label:</strong> "Moving Range"<br>
+    <strong>Data Points:</strong> Absolute difference between consecutive values: |X[i] - X[i-1]|</p>
+
+    <p><strong>Control Limits:</strong></p>
+    <ul>
+        <li>UCL calculated from average moving range</li>
+        <li>CL = average moving range</li>
+        <li>LCL typically 0 (ranges cannot be negative)</li>
+    </ul>
+
+    <p><strong>Note:</strong> mR chart has one fewer data point than X chart (first point has no previous value)</p>
+
+    <h3>3.6 CSV Upload</h3>
+
+    <h4>FR-3.6.1: File Selection</h4>
+    <p><strong>Trigger:</strong> User clicks "📤 Upload CSV" button</p>
+
+    <p><strong>Process:</strong></p>
+    <ol>
+        <li>Hidden file input dialog opens</li>
+        <li>User selects .csv file</li>
+        <li>File name displays briefly</li>
+        <li>Loading indicator: "Processing [filename]..."</li>
+    </ol>
+
+    <p><strong>Accepted File Types:</strong> .csv only<br>
+    <strong>Max File Size:</strong> No explicit limit (tested up to 10MB)</p>
+
+    <h4>FR-3.6.2: Format Auto-Detection</h4>
+    <p><strong>Supported Formats:</strong></p>
+
+    <p><strong>Format A: timestamp,station,metric_value</strong></p>
+    <div class="code-block">timestamp,station,metric_value
+2023-01-02,Austin,2.5
+2023-01-02,Dallas,3.1
+2023-01-09,Austin,2.8</div>
+    <ul>
+        <li><strong>Measure name:</strong> Inferred from filename (e.g., maintenance_cancels.csv → "Maintenance Cancels")</li>
+        <li><strong>Station names:</strong> Auto-mapped (e.g., "Dallas" → "DAL", "Houston" → "HOU")</li>
+    </ul>
+
+    <p><strong>Format B: station,measure,date,value</strong></p>
+    <div class="code-block">station,measure,date,value
+AUS,Maintenance Cancels,2023-01-02,2.5
+DAL,Maintenance Cancels,2023-01-02,3.1
+AUS,Maintenance Cancels,2023-01-09,2.8</div>
+    <ul>
+        <li><strong>Measure name:</strong> Taken from measure column</li>
+        <li><strong>Station codes:</strong> Used as-is</li>
+    </ul>
+
+    <h3>3.7 Chart Export</h3>
+
+    <h4>FR-3.7.1: Save PNG Button</h4>
+    <p><strong>Location:</strong> Below each chart<br>
+    <strong>Label:</strong> "💾 Save PNG"<br>
+    <strong>Trigger:</strong> User clicks button</p>
+
+    <p><strong>Process:</strong></p>
+    <ol>
+        <li>Button click captured</li>
+        <li>Canvas element converted to PNG data URL</li>
+        <li>Temporary download link created</li>
+        <li>Browser "Save As" dialog appears</li>
+        <li>User chooses save location</li>
+        <li>File saves</li>
+    </ol>
+
+    <p><strong>Default Filename:</strong> [Station]_[Measure]_[ChartType].png<br>
+    <strong>Example:</strong> DAL_Maintenance_Cancels_X_Chart.png</p>
+
+    <h4>FR-3.7.2: PNG Image Specifications</h4>
+    <ul>
+        <li><strong>Resolution:</strong> Matches canvas size (~1200×600 pixels)</li>
+        <li><strong>Format:</strong> PNG (lossless)</li>
+        <li><strong>Background:</strong> White</li>
+        <li><strong>Quality:</strong> Suitable for printing and presentations</li>
+        <li><strong>File Size:</strong> Typically 50-150 KB per chart</li>
+    </ul>
+
+    <p><strong>Image Contents:</strong></p>
+    <ul>
+        <li>Complete chart (data, axes, labels, legend)</li>
+        <li>Title clearly visible</li>
+        <li>Control limits labeled</li>
+        <li>Legend included</li>
+    </ul>
+
+    <h2>4. Acceptance Criteria</h2>
+
+    <h3>4.1 Launch Criteria</h3>
+    <ul>
+        <li><span class="checkmark">✅</span> User can start application with single double-click</li>
+        <li><span class="checkmark">✅</span> No installation required beyond Python</li>
+        <li><span class="checkmark">✅</span> Dashboard loads without errors</li>
+        <li><span class="checkmark">✅</span> Test data displays correctly</li>
+    </ul>
+
+    <h3>4.2 Visualization Criteria</h3>
+    <ul>
+        <li><span class="checkmark">✅</span> Both X and mR charts display for each measure</li>
+        <li><span class="checkmark">✅</span> Control limits calculated using 2.66 sigma</li>
+        <li><span class="checkmark">✅</span> Phase boundaries marked when shifts detected</li>
+        <li><span class="checkmark">✅</span> Out-of-control points highlighted in red</li>
+        <li><span class="checkmark">✅</span> Charts scale appropriately to data range</li>
+    </ul>
+
+    <h3>4.3 Export Criteria</h3>
+    <ul>
+        <li><span class="checkmark">✅</span> PNG download triggers on button click</li>
+        <li><span class="checkmark">✅</span> Image includes complete chart with labels</li>
+        <li><span class="checkmark">✅</span> Filename descriptive and valid</li>
+        <li><span class="checkmark">✅</span> Image quality suitable for presentations</li>
+    </ul>
+
+    <h2>5. Out of Scope</h2>
+
+    <h3>Explicitly Excluded from V1.0:</h3>
+    <ul>
+        <li><span class="crossmark">❌</span> Real-time data updates</li>
+        <li><span class="crossmark">❌</span> Data persistence / database</li>
+        <li><span class="crossmark">❌</span> Multi-user collaboration</li>
+        <li><span class="crossmark">❌</span> User authentication</li>
+        <li><span class="crossmark">❌</span> Mobile responsive design</li>
+        <li><span class="crossmark">❌</span> Internationalization (English only)</li>
+        <li><span class="crossmark">❌</span> Accessibility features (screen readers, etc.)</li>
+        <li><span class="crossmark">❌</span> Advanced SPC rules (beyond Rule #1 and #4)</li>
+    </ul>
+
+    <div class="approval-section">
+        <h2>Approval</h2>
+        <table>
+            <tr>
+                <th>Role</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Signature</th>
+            </tr>
+            <tr>
+                <td>Product Owner</td>
+                <td>Tech Ops Manager</td>
+                <td>2025-10-06</td>
+                <td><span class="checkmark">✅</span> Approved</td>
+            </tr>
+            <tr>
+                <td>QA Lead</td>
+                <td>Quality Assurance</td>
+                <td>2025-10-06</td>
+                <td><span class="checkmark">✅</span> Tested</td>
+            </tr>
+            <tr>
+                <td>End User</td>
+                <td>Station Manager</td>
+                <td>2025-10-06</td>
+                <td><span class="checkmark">✅</span> Accepted</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p><strong>Document Version History</strong></p>
+        <table>
+            <tr>
+                <th>Version</th>
+                <th>Date</th>
+                <th>Author</th>
+                <th>Changes</th>
+            </tr>
+            <tr>
+                <td>1.0</td>
+                <td>2025-10-06</td>
+                <td>Development Team</td>
+                <td>Initial functional specification</td>
+            </tr>
+            <tr>
+                <td>1.3</td>
+                <td>2025-10-07</td>
+                <td>Development Team</td>
+                <td>Graphics update: Southwest Tech Badge logo, logo test gallery, improved branding</td>
+            </tr>
+        </table>
+        <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>
+    </div>
+</body>
+</html>
