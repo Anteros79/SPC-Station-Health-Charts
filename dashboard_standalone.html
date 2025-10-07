@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Southwest Airlines® Tech Ops SPC Dashboard</title>
+    <title>Southwest Tech Ops Station Health Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -28,12 +28,20 @@
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
         }
-        .header h1::before {
-            content: '♥';
-            color: #C4122F;
-            font-size: 1.75rem;
+        .logo {
+            height: 100px;
+            width: auto;
+            object-fit: contain;
+        }
+        .app-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            white-space: normal;
+            word-wrap: break-word;
         }
         .controls {
             display: flex;
@@ -257,7 +265,10 @@
 </head>
 <body>
     <div class="header">
-        <h1>Southwest Airlines Tech Ops SPC Dashboard</h1>
+        <h1>
+            <img src="SW Tech Ops logo.png" alt="Southwest Tech Ops" class="logo">
+            <span class="app-title">Station Health Dashboard</span>
+        </h1>
         <div class="controls">
             <button class="btn-primary" onclick="loadActualData()" style="font-size: 1.1rem; padding: 0.625rem 1.25rem;">📊 Load Test Data</button>
             <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
