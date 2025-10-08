@@ -128,5 +128,5 @@ For technical details about the SPC methodology used, see:
 
 **Built with:** Python, HTML5 Canvas, Statistical Process Control
 **License:** Internal use only
-**Version:** 1.5 (October 2025)
+**Version:** 1.5.1 (October 2025)
 
