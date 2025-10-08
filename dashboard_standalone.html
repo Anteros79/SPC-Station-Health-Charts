@@ -432,6 +432,35 @@
                 html += `<div class="charts-grid">`;
                 
                 const measures = Object.keys(chartData[station]);
+
+                // Group measures by their base name (without suffixes)
+                // This ensures X, mR, and Distribution charts for the same measure appear together
+                measures.sort((a, b) => {
+                    // Extract base measure name (remove suffixes)
+                    const getBaseMeasure = (name) => {
+                        return name
+                            .replace(' (Moving Range)', '')
+                            .replace(' (Distribution)', '');
+                    };
+                    
+                    const getChartType = (name) => {
+                        if (name.includes('(Distribution)')) return 2;  // Distribution last
+                        if (name.includes('(Moving Range)')) return 1;  // mR second
+                        return 0;  // X chart first
+                    };
+                    
+                    const baseA = getBaseMeasure(a);
+                    const baseB = getBaseMeasure(b);
+                    
+                    // First sort by base measure name
+                    if (baseA !== baseB) {
+                        return baseA.localeCompare(baseB);
+                    }
+                    
+                    // Then sort by chart type (X, mR, Distribution)
+                    return getChartType(a) - getChartType(b);
+                });
+
                 measures.forEach(measure => {
                     const data = chartData[station][measure];
                     const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
@@ -443,11 +472,23 @@
                     const lcl = points.length > 0 && points[0].lcl ? points[0].lcl.toFixed(2) : 'N/A';
                     const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}` : '';
                     
+                    // Determine if this is X or mR chart and get signal status
+                    const isXChart = !measure.includes('Moving Range') && !measure.includes('Distribution');
+                    const isMRChart = measure.includes('Moving Range');
+                    const signalInfo = data.signal_info || {};
+
+                    let headerBadge = '';
+                    if (isXChart && signalInfo.x_signal_count > 0) {
+                        headerBadge = '<span style="margin-left: 0.5rem; padding: 0.125rem 0.5rem; background: #DBEAFE; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #1E40AF;">🔔 Signaling</span>';
+                    } else if (isMRChart && signalInfo.mr_signal_count > 0) {
+                        headerBadge = '<span style="margin-left: 0.5rem; padding: 0.125rem 0.5rem; background: #FCE7F3; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #9F1239;">🔔 Signaling</span>';
+                    }
+
                     html += `
                         <div class="chart-container" id="container-${canvasId}">
                             <div class="chart-header">
                                 <div>
-                                    <div class="chart-title">${measure}</div>
+                                    <div class="chart-title">${measure}${headerBadge}</div>
                                     <div class="chart-subtitle">${station} • ${dateRange}</div>
                                 </div>
                                 <div class="chart-stats">
@@ -500,14 +541,45 @@
             stations.forEach(station => {
                 if (!chartData[station]) return;
                 const measures = Object.keys(chartData[station]);
+
+                // Group measures by their base name (without suffixes)
+                measures.sort((a, b) => {
+                    const getBaseMeasure = (name) => {
+                        return name
+                            .replace(' (Moving Range)', '')
+                            .replace(' (Distribution)', '');
+                    };
+                    
+                    const getChartType = (name) => {
+                        if (name.includes('(Distribution)')) return 2;
+                        if (name.includes('(Moving Range)')) return 1;
+                        return 0;
+                    };
+                    
+                    const baseA = getBaseMeasure(a);
+                    const baseB = getBaseMeasure(b);
+                    
+                    if (baseA !== baseB) {
+                        return baseA.localeCompare(baseB);
+                    }
+                    
+                    return getChartType(a) - getChartType(b);
+                });
+
                 measures.forEach(measure => {
                     const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
                     const canvas = document.getElementById(canvasId);
                     const tooltip = document.getElementById(`tooltip-${canvasId}`);
                     if (canvas && tooltip) {
                         const data = chartData[station][measure];
-                        drawChart(canvas, data);
-                        setupInteractivity(canvas, tooltip, data);
+                        
+                        // Check if this is a distribution chart
+                        if (data.type === 'distribution' && data.histogram) {
+                            drawHistogram(canvas, data.histogram);
+                        } else {
+                            drawChart(canvas, data);
+                            setupInteractivity(canvas, tooltip, data);
+                        }
                     }
                 });
             });
@@ -543,6 +615,20 @@
                         day: 'numeric' 
                     });
                     
+                    // Calculate odds display - "1 in X" format
+                    const odds = point.odds || 1;
+                    const oddsText = odds >= 10000 ? '1 in 10,000+' : `1 in ${Math.round(odds)}`;
+
+                    // Determine signal status for this specific point
+                    let signalBadge = '';
+                    if (point.both_signaling) {
+                        signalBadge = '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #92400E;">⚠️ Both X & mR Signaling</div>';
+                    } else if (point.x_only_signal) {
+                        signalBadge = '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #DBEAFE; border: 1px solid #3B82F6; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #1E40AF;">📊 X Chart Signal</div>';
+                    } else if (point.mr_only_signal) {
+                        signalBadge = '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #FCE7F3; border: 1px solid #EC4899; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #9F1239;">📈 mR Chart Signal</div>';
+                    }
+                    
                     tooltip.innerHTML = `
                         <div class="tooltip-date">${dateStr}</div>
                         <div class="tooltip-row">
@@ -561,12 +647,25 @@
                             <span class="tooltip-label">LCL:</span>
                             <span class="tooltip-value">${point.lcl.toFixed(2)}</span>
                         </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Odds:</span>
+                            <span class="tooltip-value" style="color: #7C3AED; font-weight: 700;">${oddsText}</span>
+                        </div>
+                        ${signalBadge}
                         ${outOfControl ? '<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #374151; color: #f87171; font-size: 0.75rem; font-weight: 700;">⚠️ OUT OF CONTROL</div>' : ''}
                     `;
                     
-                    // Position tooltip
-                    const tooltipX = Math.min(e.offsetX + 15, rect.width - 240);
-                    const tooltipY = Math.max(e.offsetY - 100, 10);
+                    // Position tooltip to avoid obscuring the data point
+                    // Show to left/right based on mouse position in chart
+                    const tooltipX = e.offsetX > rect.width / 2 ? 
+                        Math.max(e.offsetX - 260, 10) :  // Left side if mouse is on right
+                        Math.min(e.offsetX + 15, rect.width - 250);  // Right side if mouse is on left
+
+                    // Show above/below based on mouse position in chart
+                    const tooltipY = e.offsetY > rect.height / 2 ? 
+                        Math.max(e.offsetY - 140, 10) :  // Above if mouse is in lower half
+                        Math.min(e.offsetY + 15, rect.height - 130);  // Below if mouse is in upper half
+                    
                     tooltip.style.left = tooltipX + 'px';
                     tooltip.style.top = tooltipY + 'px';
                     tooltip.style.display = 'block';
@@ -580,6 +679,71 @@
                 tooltip.style.display = 'none';
                 drawChart(canvas, data);
             });
+        }
+
+        function drawHistogram(canvas, histogramData) {
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 20, bottom: 40, left: 60 };
+            const plotWidth = width - padding.left - padding.right;
+            const plotHeight = height - padding.top - padding.bottom;
+            
+            const bins = histogramData.bins || [];
+            const frequencies = histogramData.frequencies || [];
+            const normalCurve = histogramData.normal_curve || [];
+            
+            if (bins.length === 0) return;
+            
+            const maxFreq = Math.max(...frequencies, ...normalCurve);
+            const barWidth = plotWidth / bins.length;
+            
+            // Clear canvas
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw bars
+            ctx.fillStyle = '#3B82F6';
+            frequencies.forEach((freq, i) => {
+                const barHeight = (freq / maxFreq) * plotHeight;
+                const x = padding.left + i * barWidth;
+                const y = padding.top + plotHeight - barHeight;
+                ctx.fillRect(x, y, barWidth * 0.9, barHeight);
+            });
+            
+            // Draw normal curve overlay
+            ctx.strokeStyle = '#EF4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            normalCurve.forEach((value, i) => {
+                const x = padding.left + (i + 0.5) * barWidth;
+                const y = padding.top + plotHeight - (value / maxFreq) * plotHeight;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // Draw axes
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top);
+            ctx.lineTo(padding.left, padding.top + plotHeight);
+            ctx.lineTo(padding.left + plotWidth, padding.top + plotHeight);
+            ctx.stroke();
+            
+            // Add labels
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px Inter, system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Mean: ${histogramData.mean}, SD: ${histogramData.std_dev}`, width / 2, height - 10);
         }
 
         function drawChart(canvas, data, highlightIndex = null) {

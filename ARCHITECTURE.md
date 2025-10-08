@@ -1,9 +1,10 @@
 # Architecture Documentation
 ## SPC Station Health Charts
 
-**Version:** 1.0  
-**Last Updated:** October 6, 2025  
-**Architecture Style:** Client-Server (Local)
+**Version:** 1.4  
+**Last Updated:** October 7, 2025  
+**Architecture Style:** Client-Server (Local)  
+**Enhancement:** Debug Tools & CSV Troubleshooting
 
 ---
 
@@ -236,7 +237,7 @@ flowchart TD
     
     Monitor --> Rule1{Point outside<br/>UCL/LCL?}
     Rule1 -->|Yes| Signal[Signal Detected!]
-    Rule1 -->|No| Rule4{8 consecutive<br/>on one side of CL?}
+    Rule1 -->|No| Rule4{7 consecutive<br/>on one side of CL?}
     Rule4 -->|Yes| Signal
     Rule4 -->|No| ContinuePhase[Extend phase]
     
@@ -488,9 +489,11 @@ graph TD
 SPC-Station-Health-Charts/
 │
 ├── dashboard_standalone.html      # Main UI (self-contained)
-├── server.py                      # HTTP server + routing
-├── spc_processor.py              # Statistical calculations
+├── server.py                      # HTTP server + routing + debug logging
+├── spc_processor.py              # Statistical calculations + debug logging
 ├── load_actual_data.py           # CSV data loader
+├── csv_format_checker.html       # CSV diagnostic tool
+├── logotest.html                 # Logo comparison gallery
 │
 ├── START_DASHBOARD.bat           # Windows launcher
 ├── start_dashboard.sh            # Mac/Linux launcher
@@ -720,4 +723,5 @@ All diagrams in this document use Mermaid markdown syntax and can be rendered in
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-10-06 | Development Team | Initial architecture documentation |
+| 1.4 | 2025-10-07 | Development Team | Debug tools, CSV troubleshooting, enhanced error reporting |
 

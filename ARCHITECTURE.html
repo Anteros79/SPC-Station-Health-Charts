@@ -143,10 +143,10 @@
     </div>
 
     <div class="doc-info">
-        <p><strong>Version:</strong> 1.3</p>
+        <p><strong>Version:</strong> 1.5</p>
         <p><strong>Last Updated:</strong> October 7, 2025</p>
         <p><strong>Architecture Style:</strong> Client-Server (Local)</p>
-        <p><strong>Graphics Update:</strong> Southwest Tech Badge Logo Integration</p>
+        <p><strong>Enhancement:</strong> Debug Tools & CSV Troubleshooting</p>
     </div>
 
     <h2>1. System Overview</h2>
@@ -292,7 +292,7 @@ Monitor remaining data for Wheeler's Rules
 └────────────────────────┘           ↓
     ↓ No                       End current phase
 ┌────────────────────────────┐       ↓
-│ 8 consecutive on one side? │──Yes──→ Recalculate limits
+│ 7 consecutive on one side? │──Yes──→ Recalculate limits
 └────────────────────────────┘       ↓
     ↓ No                       Save phase metadata
 Continue Phase                       ↓
@@ -478,9 +478,11 @@ No central server - each user runs independent instance
     <div class="diagram-box">SPC-Station-Health-Charts/
 │
 ├── dashboard_standalone.html      # Main UI (self-contained)
-├── server.py                      # HTTP server + routing
-├── spc_processor.py              # Statistical calculations
+├── server.py                      # HTTP server + routing + debug logging
+├── spc_processor.py              # Statistical calculations + debug logging
 ├── load_actual_data.py           # CSV data loader
+├── csv_format_checker.html       # CSV diagnostic tool
+├── logotest.html                 # Logo comparison gallery
 │
 ├── START_DASHBOARD.bat           # Windows launcher
 ├── start_dashboard.sh            # Mac/Linux launcher
@@ -658,6 +660,12 @@ No central server - each user runs independent instance
                 <td>2025-10-07</td>
                 <td>Development Team</td>
                 <td>Graphics update: Southwest Tech Badge logo integration, logo test gallery</td>
+            </tr>
+            <tr>
+                <td>1.4</td>
+                <td>2025-10-07</td>
+                <td>Development Team</td>
+                <td>Debug tools, CSV troubleshooting, enhanced error reporting</td>
             </tr>
         </table>
         <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>

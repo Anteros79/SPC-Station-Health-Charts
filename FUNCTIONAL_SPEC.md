@@ -1,9 +1,10 @@
 # Functional Specification
 ## SPC Station Health Charts
 
-**Version:** 1.0  
-**Date:** October 6, 2025  
-**Status:** Implemented
+**Version:** 1.4  
+**Date:** October 7, 2025  
+**Status:** Implemented with Debug Tools  
+**Enhancement:** CSV Troubleshooting & Enhanced Error Reporting
 
 ---
 
@@ -456,9 +457,39 @@ Your file appears to have a different format.
 
 ---
 
-### 3.8 Error Handling
+### 3.8 CSV Troubleshooting Tools
 
-#### FR-3.8.1: Server Not Running
+#### FR-3.8.1: CSV Format Checker
+**Purpose:** Diagnose CSV format issues before upload  
+**Location:** `http://localhost:8000/csv_format_checker.html`  
+**Features:**
+- Auto-detects CSV format (A or B)
+- Validates column names and data types
+- Identifies decimal format issues (commas vs. periods)
+- Provides specific fix suggestions
+- Shows sample data analysis
+
+**Usage:**
+1. Open CSV Format Checker in browser
+2. Paste CSV content into text area
+3. Click "Check Format" to analyze
+4. Review results and apply suggested fixes
+
+#### FR-3.8.2: Enhanced Error Reporting
+**Server Console Debugging:**
+- Shows detailed CSV parsing information
+- Displays each row being processed
+- Identifies specific parsing errors
+- Reports total valid data points found
+
+**Client-Side Error Messages:**
+- Clear format requirements
+- Specific error descriptions
+- Actionable fix suggestions
+
+### 3.9 Error Handling
+
+#### FR-3.9.1: Server Not Running
 **Scenario:** User navigates to `http://localhost:8000` but server not started  
 **Browser Display:** "This site can't be reached • localhost refused to connect"
 
@@ -694,4 +725,5 @@ sequenceDiagram
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-10-06 | Development Team | Initial functional specification |
+| 1.4 | 2025-10-07 | Development Team | CSV troubleshooting tools, enhanced error reporting, debug logging |
 

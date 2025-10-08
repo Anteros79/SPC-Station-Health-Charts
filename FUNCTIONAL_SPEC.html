@@ -150,10 +150,10 @@
     </div>
 
     <div class="doc-info">
-        <p><strong>Version:</strong> 1.3</p>
+        <p><strong>Version:</strong> 1.4</p>
         <p><strong>Date:</strong> October 7, 2025</p>
-        <p><strong>Status:</strong> Implemented with Graphics Update</p>
-        <p><strong>New Features:</strong> Southwest Tech Badge Logo, Logo Test Gallery</p>
+        <p><strong>Status:</strong> Implemented with Debug Tools</p>
+        <p><strong>Enhancement:</strong> CSV Troubleshooting & Enhanced Error Reporting</p>
     </div>
 
     <h2>1. Introduction</h2>
@@ -480,6 +480,45 @@ AUS,Maintenance Cancels,2023-01-09,2.8</div>
         <li>Legend included</li>
     </ul>
 
+    <h2>3.8 CSV Troubleshooting Tools</h2>
+
+    <h3>3.8.1 CSV Format Checker</h3>
+    <p><strong>Purpose:</strong> Diagnose CSV format issues before upload<br>
+    <strong>Location:</strong> http://localhost:8000/csv_format_checker.html</p>
+
+    <p><strong>Features:</strong></p>
+    <ul>
+        <li>Auto-detects CSV format (A or B)</li>
+        <li>Validates column names and data types</li>
+        <li>Identifies decimal format issues (commas vs. periods)</li>
+        <li>Provides specific fix suggestions</li>
+        <li>Shows sample data analysis</li>
+    </ul>
+
+    <p><strong>Usage:</strong></p>
+    <ol>
+        <li>Open CSV Format Checker in browser</li>
+        <li>Paste CSV content into text area</li>
+        <li>Click "Check Format" to analyze</li>
+        <li>Review results and apply suggested fixes</li>
+    </ol>
+
+    <h3>3.8.2 Enhanced Error Reporting</h3>
+    <p><strong>Server Console Debugging:</strong></p>
+    <ul>
+        <li>Shows detailed CSV parsing information</li>
+        <li>Displays each row being processed</li>
+        <li>Identifies specific parsing errors</li>
+        <li>Reports total valid data points found</li>
+    </ul>
+
+    <p><strong>Client-Side Error Messages:</strong></p>
+    <ul>
+        <li>Clear format requirements</li>
+        <li>Specific error descriptions</li>
+        <li>Actionable fix suggestions</li>
+    </ul>
+
     <h2>4. Acceptance Criteria</h2>
 
     <h3>4.1 Launch Criteria</h3>
@@ -571,6 +610,12 @@ AUS,Maintenance Cancels,2023-01-09,2.8</div>
                 <td>2025-10-07</td>
                 <td>Development Team</td>
                 <td>Graphics update: Southwest Tech Badge logo, logo test gallery, improved branding</td>
+            </tr>
+            <tr>
+                <td>1.4</td>
+                <td>2025-10-07</td>
+                <td>Development Team</td>
+                <td>CSV troubleshooting tools, enhanced error reporting, debug logging</td>
             </tr>
         </table>
         <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>

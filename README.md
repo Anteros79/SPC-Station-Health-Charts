@@ -10,9 +10,11 @@ Lightweight desktop tool for monitoring maintenance performance across multiple 
 - ✅ **Zero external dependencies** - Python standard library only
 - ✅ **No web server installation required** - Uses Python's built-in http.server
 - ✅ **Wheeler's XmR Charts** - Both Individuals (X) and Moving Range (mR)
-- ✅ **Automatic phase detection** - Rule #1 (points beyond limits) and Rule #4 (8-point runs)
+- ✅ **Automatic phase detection** - Rule #1 (points beyond limits) and Rule #4 (7-point runs)
 - ✅ **PNG export** - Save charts for reports and presentations
 - ✅ **Offline capable** - All processing happens locally on your machine
+- ✅ **CSV troubleshooting tools** - Built-in format checker and debug logging
+- ✅ **Southwest Tech Badge branding** - Professional metallic logo integration
 
 ## 📋 Requirements
 
@@ -40,14 +42,30 @@ chmod +x start_dashboard.sh
 
 The dashboard will automatically open in your browser at `http://localhost:8000`
 
+## 🔧 Troubleshooting CSV Uploads
+
+If you're having trouble uploading CSV files, use the built-in troubleshooting tools:
+
+### **CSV Format Checker**
+- Navigate to `http://localhost:8000/csv_format_checker.html`
+- Paste your CSV content to diagnose format issues
+- Get specific fix suggestions for common problems
+
+### **Debug Logging**
+- Check the server console (Command Prompt window) for detailed error messages
+- Shows exactly what's wrong with your CSV format
+- Identifies decimal format issues (commas vs. periods)
+
 ## 📁 Project Structure
 
 ```
 SPC-Station-Health-Charts/
 ├── dashboard_standalone.html      # Main dashboard UI
-├── server.py                      # Python HTTP server
-├── spc_processor.py              # Statistical calculations (Wheeler's Rules)
+├── server.py                      # Python HTTP server + debug logging
+├── spc_processor.py              # Statistical calculations + debug logging
 ├── load_actual_data.py           # CSV data processing
+├── csv_format_checker.html       # CSV diagnostic tool
+├── logotest.html                 # Logo comparison gallery
 ├── START_DASHBOARD.bat           # Windows launcher
 ├── start_dashboard.sh            # Mac/Linux launcher
 ├── input/                        # Sample CSV files
@@ -63,7 +81,7 @@ SPC-Station-Health-Charts/
 ### Load Sample Data
 1. Click **"Load Test Data"** to view sample maintenance metrics
 2. Data includes 3 stations (AUS, DAL, HOU) from Jan 2023 to present
-3. View 4 maintenance measures with both X and mR charts
+3. View 4 maintenance measures with X chart, mR chart, and Distribution chart grouped together
 
 ### Upload Your Own Data
 
@@ -97,6 +115,7 @@ The dashboard automatically detects which format you're using.
 ### Wheeler's XmR Charts
 - **X Chart (Individuals):** Monitors process location (average)
 - **mR Chart (Moving Range):** Monitors process variation (consistency)
+- **Distribution Chart:** Histogram with normal curve overlay to assess data normality
 
 ### Natural Process Limits (NPL)
 - **Sigma:** 2.66 (natural process limits)
@@ -106,7 +125,7 @@ The dashboard automatically detects which format you're using.
 ### Phase Detection
 **Wheeler's Rules implemented:**
 - **Rule #1:** Point beyond control limits (outside UCL/LCL)
-- **Rule #4:** 8 consecutive points on one side of centerline
+- **Rule #4:** 7 consecutive points on one side of centerline
 
 When a signal is detected:
 1. Current phase ends
@@ -168,6 +187,6 @@ Internal use only - Airline Technical Operations
 
 ---
 
-**Version:** 1.0  
+**Version:** 1.5  
 **Last Updated:** October 2025  
 **Maintained by:** Technical Operations Analytics Team

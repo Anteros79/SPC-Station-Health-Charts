@@ -64,11 +64,13 @@ Click **"Upload CSV"** in the dashboard to analyze a single file.
 ## 📈 Features
 
 ### Statistical Methods
-- **Wheeler's XmR Charts** - Both Individuals (X) and Moving Range (mR) charts
+- **Wheeler's XmR Charts** - Individuals (X), Moving Range (mR), and Distribution charts
 - **Natural Process Limits** - 2.66 sigma control limits
 - **Automatic Phase Detection** - Detects process shifts using:
   - Rule #1: Points beyond control limits
-  - Rule #4: 8 consecutive points on one side of centerline
+  - Rule #4: 7 consecutive points on one side of centerline
+- **Distribution Analysis** - Histogram with normal curve overlay to assess data normality
+- **Chart Grouping** - All three charts (X, mR, Distribution) for each measure appear together
 
 ### Export
 - **Save as PNG** - Click the download button on any chart
@@ -126,5 +128,5 @@ For technical details about the SPC methodology used, see:
 
 **Built with:** Python, HTML5 Canvas, Statistical Process Control
 **License:** Internal use only
-**Version:** 1.0 (October 2025)
+**Version:** 1.5 (October 2025)
 

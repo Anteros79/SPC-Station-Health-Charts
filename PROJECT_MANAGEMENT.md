@@ -1,10 +1,11 @@
 # Project Management Documentation
 ## SPC Station Health Charts
 
-**Version:** 1.0  
-**Date:** October 6, 2025  
-**Project Duration:** September 28 - October 6, 2025 (9 days)  
-**Total Effort:** ~80 hours
+**Version:** 1.4  
+**Date:** October 7, 2025  
+**Project Duration:** September 28 - October 7, 2025 (10 days)  
+**Total Effort:** ~90 hours  
+**Enhancement:** Debug Tools & CSV Troubleshooting
 
 ---
 
@@ -321,14 +322,14 @@ Development of a Statistical Process Control dashboard for airline maintenance m
 
 **User Story 2.2.3: Detect Wheeler's Rule #4**
 - **As a** phase detector
-- **I want to** identify 8 consecutive points on one side of CL
+- **I want to** identify 7 consecutive points on one side of CL
 - **So that** process shifts detected
 
 **Acceptance Criteria:**
 - Track consecutive above CL
 - Track consecutive below CL
 - Points ON centerline don't reset counter
-- Signal after 8 consecutive
+- Signal after 7 consecutive
 - Phase ends at point BEFORE run started
 
 **Estimation:** 4 hours  

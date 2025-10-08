@@ -1,10 +1,11 @@
 # Product Requirements Document (PRD)
 ## SPC Station Health Charts
 
-**Version:** 1.0  
-**Date:** October 6, 2025  
+**Version:** 1.4  
+**Date:** October 7, 2025  
 **Owner:** Technical Operations Analytics Team  
-**Status:** Delivered
+**Status:** Delivered with Debug Tools  
+**Enhancement:** CSV Troubleshooting & Enhanced Error Reporting
 
 ---
 
@@ -182,7 +183,7 @@ A lightweight, desktop-based Statistical Process Control (SPC) dashboard that:
 - **FR-03.1:** Establish baseline with minimum 20 points
 - **FR-03.2:** Calculate limits from baseline data only
 - **FR-03.3:** Monitor for Rule #1: Point beyond control limits
-- **FR-03.4:** Monitor for Rule #4: 8 consecutive points on one side of centerline
+- **FR-03.4:** Monitor for Rule #4: 7 consecutive points on one side of centerline
 - **FR-03.5:** Start new phase when signal detected
 - **FR-03.6:** Recalculate limits for new phase
 

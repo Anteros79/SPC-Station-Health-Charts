@@ -1,9 +1,10 @@
 # Technical Specification
 ## SPC Station Health Charts
 
-**Version:** 1.0  
-**Date:** October 6, 2025  
-**Status:** Implemented
+**Version:** 1.4  
+**Date:** October 7, 2025  
+**Status:** Implemented with Debug Tools  
+**Enhancement:** CSV Troubleshooting & Enhanced Error Reporting
 
 ---
 
@@ -216,12 +217,12 @@ def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float) -> in
     
     Wheeler's Rules for detecting special causes:
       Rule #1: Point beyond control limits (outside UCL/LCL)
-      Rule #4: 8 consecutive points on one side of centerline
+      Rule #4: 7 consecutive points on one side of centerline
     
     Returns:
         Index where current phase should end (signal detected)
     """
-    RUN_LENGTH = 8
+    RUN_LENGTH = 7
     consecutive_above = 0
     consecutive_below = 0
     
@@ -231,7 +232,7 @@ def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float) -> in
             # Signal! Phase ends at the point BEFORE this outlier
             return max(0, i - 1)
         
-        # RULE #4: Track 8-point runs
+        # RULE #4: Track 7-point runs
         if value > cl:
             consecutive_above += 1
             consecutive_below = 0
@@ -240,7 +241,7 @@ def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float) -> in
             consecutive_above = 0
         # Point exactly on centerline doesn't reset counter
         
-        # Signal detected: 8 consecutive on one side
+        # Signal detected: 7 consecutive on one side
         if consecutive_above >= RUN_LENGTH or consecutive_below >= RUN_LENGTH:
             # Phase ends at the point BEFORE the run started
             return max(0, i - RUN_LENGTH)
@@ -994,4 +995,5 @@ SPC-Station-Health-Charts.zip
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-10-06 | Development Team | Initial technical specification |
+| 1.4 | 2025-10-07 | Development Team | Debug logging, CSV troubleshooting tools, enhanced error reporting |
 

@@ -156,10 +156,10 @@
     </div>
 
     <div class="doc-info">
-        <p><strong>Version:</strong> 1.3</p>
+        <p><strong>Version:</strong> 1.5</p>
         <p><strong>Date:</strong> October 7, 2025</p>
-        <p><strong>Status:</strong> Implemented with Graphics Enhancement</p>
-        <p><strong>Technical Updates:</strong> Logo integration, CSS optimization, test utilities</p>
+        <p><strong>Status:</strong> Implemented with Debug Tools</p>
+        <p><strong>Enhancement:</strong> CSV Troubleshooting & Enhanced Error Reporting</p>
     </div>
 
     <h2>1. Technical Overview</h2>
@@ -366,7 +366,7 @@ lcl = max(0, cl - 2.66 * mR_bar)  # Non-negative</div>
         <p><strong>Wheeler's Rules for Detecting Special Causes:</strong></p>
         <ul>
             <li><strong>Rule #1:</strong> Point beyond control limits (outside UCL/LCL)</li>
-            <li><strong>Rule #4:</strong> 8 consecutive points on one side of centerline</li>
+            <li><strong>Rule #4:</strong> 7 consecutive points on one side of centerline</li>
         </ul>
     </div>
 
@@ -378,7 +378,7 @@ lcl = max(0, cl - 2.66 * mR_bar)  # Non-negative</div>
     Returns:
         Index where current phase should end (signal detected)
     """
-    RUN_LENGTH = 8
+    RUN_LENGTH = 7
     consecutive_above = 0
     consecutive_below = 0
     
@@ -388,7 +388,7 @@ lcl = max(0, cl - 2.66 * mR_bar)  # Non-negative</div>
             # Signal! Phase ends at the point BEFORE this outlier
             return max(0, i - 1)
         
-        # RULE #4: Track 8-point runs
+        # RULE #4: Track 7-point runs
         if value > cl:
             consecutive_above += 1
             consecutive_below = 0
@@ -396,7 +396,7 @@ lcl = max(0, cl - 2.66 * mR_bar)  # Non-negative</div>
             consecutive_below += 1
             consecutive_above = 0
         
-        # Signal detected: 8 consecutive on one side
+        # Signal detected: 7 consecutive on one side
         if consecutive_above >= RUN_LENGTH or consecutive_below >= RUN_LENGTH:
             # Phase ends at the point BEFORE the run started
             return max(0, i - RUN_LENGTH)
@@ -886,6 +886,12 @@ let selectedStation = 'all';    // Station filter</div>
                 <td>2025-10-07</td>
                 <td>Development Team</td>
                 <td>Graphics update: Southwest Tech Badge logo integration, CSS optimization, logo test utilities</td>
+            </tr>
+            <tr>
+                <td>1.4</td>
+                <td>2025-10-07</td>
+                <td>Development Team</td>
+                <td>Debug logging, CSV troubleshooting tools, enhanced error reporting</td>
             </tr>
         </table>
         <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>

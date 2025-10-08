@@ -150,6 +150,8 @@ def auto_convert_csv_format(csv_text, filename=''):
             timestamp = row.get('timestamp', '').strip()
             metric_value = row.get('metric_value', '').strip()
             
+            print(f"Debug - Row: station='{station}', timestamp='{timestamp}', metric_value='{metric_value}'")
+            
             if station and timestamp and metric_value:
                 # Map station names if needed
                 from load_actual_data import STATION_MAP
@@ -168,19 +170,19 @@ def run_server(port=8000):
     httpd = HTTPServer(server_address, SPCHandler)
     
     print(f"""
-╔════════════════════════════════════════════════════════════╗
-║  Airline Tech Ops SPC Dashboard Server                    ║
-╚════════════════════════════════════════════════════════════╝
+============================================================
+  Airline Tech Ops SPC Dashboard Server                    
+============================================================
 
-✓ Server running on: http://localhost:{port}
+Server running on: http://localhost:{port}
 
-📋 Instructions:
+Instructions:
    1. Open your web browser
    2. Navigate to: http://localhost:{port}
    3. Click 'Load Demo' or upload your CSV file
    4. Press Ctrl+C to stop the server
 
-⚠️  Keep this window open while using the dashboard!
+WARNING: Keep this window open while using the dashboard!
 """)
     
     try:
