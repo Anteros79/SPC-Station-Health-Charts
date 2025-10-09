@@ -58,13 +58,13 @@ class SPCHandler(SimpleHTTPRequestHandler):
                 if not csv_text or not csv_text.strip():
                     raise ValueError("Uploaded file is empty")
                 
-                # Validate CSV format
+                # Auto-detect and convert CSV format first
+                csv_text = auto_convert_csv_format(csv_text, filename)
+                
+                # Then validate the converted format
                 is_valid, error_msg = validate_csv_format(csv_text)
                 if not is_valid:
                     raise ValueError(error_msg)
-                
-                # Auto-detect CSV format
-                csv_text = auto_convert_csv_format(csv_text, filename)
                 
                 # Process the data
                 result = process_data(csv_text)
