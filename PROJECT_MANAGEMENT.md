@@ -1,8 +1,8 @@
 # Project Management Documentation
 ## SPC Station Health Charts
 
-**Version:** 1.4  
-**Date:** October 7, 2025  
+**Version:** 1.6  
+**Date:** October 9, 2025  
 **Project Duration:** September 28 - October 7, 2025 (10 days)  
 **Total Effort:** ~90 hours  
 **Enhancement:** Debug Tools & CSV Troubleshooting

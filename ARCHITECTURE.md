@@ -1,8 +1,8 @@
 # Architecture Documentation
 ## SPC Station Health Charts
 
-**Version:** 1.4  
-**Last Updated:** October 7, 2025  
+**Version:** 1.6  
+**Last Updated:** October 9, 2025  
 **Architecture Style:** Client-Server (Local)  
 **Enhancement:** Debug Tools & CSV Troubleshooting
 

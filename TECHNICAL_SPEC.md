@@ -1,8 +1,8 @@
 # Technical Specification
 ## SPC Station Health Charts
 
-**Version:** 1.4  
-**Date:** October 7, 2025  
+**Version:** 1.6  
+**Date:** October 9, 2025  
 **Status:** Implemented with Debug Tools  
 **Enhancement:** CSV Troubleshooting & Enhanced Error Reporting
 

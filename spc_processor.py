@@ -90,7 +90,9 @@ def calculate_standard_deviation_odds(value: float, center_line: float, standard
     if probability_extreme <= 0.0001:
         return 10000.0  # Cap at 1 in 10,000
     
-    odds = 1 / probability_extreme
+    # Use odds ratio per spreadsheet/workflow: (1 - P) / P
+    # This yields odds like "1 in X" where X = (1-P)/P
+    odds = (1 - probability_extreme) / probability_extreme
     return round(odds, 0)
 
 
