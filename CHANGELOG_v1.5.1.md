@@ -90,3 +90,4 @@ ctx.strokeStyle = '#10B981';  // Green
 **Built with:** Python, HTML5 Canvas, Statistical Process Control  
 **Methodology:** Donald J. Wheeler's XmR Charts  
 **License:** Internal use only - Airline Technical Operations
+

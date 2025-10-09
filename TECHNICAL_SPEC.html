@@ -3,21 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Technical Specification - SPC Station Health Charts</title>
+    <title>Technical Specification · Southwest Airlines Technical Operations</title>
     <style>
         @page { margin: 1in; }
+        :root {
+            --swa-blue: #304CB2;
+            --swa-yellow: #FFBF27;
+            --swa-red: #E1251B;
+            --ink: #0b0f1a;
+            --muted: #4b5563;
+        }
         body {
-            font-family: 'Calibri', 'Arial', sans-serif;
+            font-family: 'Segoe UI', Inter, system-ui, Arial, sans-serif;
             line-height: 1.6;
-            color: #304CB2;
+            color: var(--ink);
             max-width: 8.5in;
             margin: 0 auto;
             padding: 0.5in;
-            background: white;
+            background: #ffffff;
         }
         .header {
             text-align: center;
-            border-bottom: 4px solid #304CB2;
+            border-bottom: 4px solid var(--swa-blue);
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
@@ -35,34 +42,34 @@
             font-weight: bold;
         }
         h1 {
-            color: #304CB2;
+            color: var(--swa-blue);
             font-size: 28pt;
             margin: 10px 0;
             font-weight: bold;
         }
         h2 {
-            color: #304CB2;
+            color: var(--swa-blue);
             font-size: 18pt;
             margin-top: 30px;
             margin-bottom: 15px;
-            border-bottom: 2px solid #FFBF27;
+            border-bottom: 2px solid var(--swa-yellow);
             padding-bottom: 5px;
         }
         h3 {
-            color: #304CB2;
+            color: var(--swa-blue);
             font-size: 14pt;
             margin-top: 20px;
             margin-bottom: 10px;
         }
         h4 {
-            color: #304CB2;
+            color: var(--swa-blue);
             font-size: 12pt;
             margin-top: 15px;
             margin-bottom: 8px;
         }
         .doc-info {
             background: #F7F7F7;
-            border-left: 4px solid #304CB2;
+            border-left: 4px solid var(--swa-blue);
             padding: 15px;
             margin: 20px 0;
         }
@@ -76,7 +83,7 @@
             margin: 20px 0;
         }
         th {
-            background: #304CB2;
+            background: var(--swa-blue);
             color: white;
             padding: 12px;
             text-align: left;
@@ -99,7 +106,7 @@
             color: #333;
         }
         .checkmark {
-            color: #2ECC71;
+            color: #10B981;
             font-weight: bold;
         }
         .code-block {
@@ -115,7 +122,7 @@
         }
         .highlight-box {
             background: #FFF9E6;
-            border: 2px solid #FFBF27;
+            border: 2px solid var(--swa-yellow);
             border-radius: 5px;
             padding: 15px;
             margin: 15px 0;
@@ -125,7 +132,7 @@
             text-align: justify;
         }
         strong {
-            color: #304CB2;
+            color: var(--swa-blue);
         }
         .footer {
             text-align: center;
@@ -162,10 +169,10 @@
     </div>
 
     <div class="doc-info">
-        <p><strong>Version:</strong> 1.6</p>
+        <p><strong>Version:</strong> 1.7</p>
         <p><strong>Date:</strong> October 9, 2025</p>
-        <p><strong>Status:</strong> Implemented with Debug Tools</p>
-        <p><strong>Enhancement:</strong> CSV Troubleshooting & Enhanced Error Reporting</p>
+        <p><strong>Status:</strong> Branding Refresh & Histogram Linking</p>
+        <p><strong>Enhancement:</strong> SWA branding, distribution linked to phase slider, footer removed</p>
     </div>
 
     <h2>1. Technical Overview</h2>

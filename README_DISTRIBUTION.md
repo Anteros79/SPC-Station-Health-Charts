@@ -23,7 +23,7 @@ Statistical Process Control (SPC) Dashboard for Airline Maintenance Metrics
 3. Run: `./start_dashboard.sh`
 4. Open your browser to: `http://localhost:8000`
 
-## 📁 What's Included
+## 📁 What's Included (v1.7)
 
 ```
 SPC-Station-Health-Charts/
@@ -61,7 +61,7 @@ Click **"Upload CSV"** in the dashboard to analyze a single file.
 - `timestamp,station,metric_value` (filename becomes measure name)
 - `station,measure,date,value` (standard format)
 
-## 📈 Features
+## 📈 Features (Highlights)
 
 ### Statistical Methods
 - **Wheeler's XmR Charts** - Individuals (X), Moving Range (mR), and Distribution charts
@@ -75,6 +75,7 @@ Click **"Upload CSV"** in the dashboard to analyze a single file.
 ### Export
 - **Save as PNG** - Click the download button on any chart
 - Charts save to the `output/` folder automatically
+- Footer text removed for executive-ready images
 
 ### Data Coverage
 - Sample data spans **January 2023 to present**
@@ -128,5 +129,5 @@ For technical details about the SPC methodology used, see:
 
 **Built with:** Python, HTML5 Canvas, Statistical Process Control
 **License:** Internal use only - Southwest Airlines Technical Operations
-**Version:** 1.6 (October 9, 2025)
+**Version:** 1.7 (October 9, 2025)
 

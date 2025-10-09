@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SPC Rules, Odds, and Phase Logic · Southwest Airlines Technical Operations</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --bg:#ffffff;
+      --panel:#f8fafc;
+      --ink:#0b0f1a;
+      --muted:#4b5563;
+      --brand:#304CB2; /* SWA blue */
+      --accent:#FFBF27; /* SWA yellow */
+      --ok:#10B981;
+      --warn:#F59E0B;
+      --bad:#EF4444;
+      --shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, system-ui, -apple-system, sans-serif;}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1100px;margin:32px auto;padding:0 20px}
+    /* Metallic rivet frame */
+    .frame{position:relative;padding:28px;border-radius:18px;background:var(--panel);border:1px solid #e5e7eb;box-shadow:var(--shadow);overflow:hidden}
+    .frame::before{
+      content:"";
+      position:absolute;inset:-60px;
+      background:
+        radial-gradient(circle at 80px 80px, rgba(255,255,255,.25), transparent 60px),
+        radial-gradient(circle at calc(100% - 80px) 80px, rgba(255,255,255,.2), transparent 60px),
+        radial-gradient(circle at 80px calc(100% - 80px), rgba(255,255,255,.2), transparent 60px),
+        radial-gradient(circle at calc(100% - 80px) calc(100% - 80px), rgba(255,255,255,.25), transparent 60px);
+      pointer-events:none;
+      filter:blur(22px);
+      opacity:.25;
+    }
+    .rivet{
+      position:absolute;width:20px;height:20px;border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #ffffff 0%, #dfe6ef 20%, #aab3c1 45%, #8b95a5 60%, #6f7a8b 100%);
+      box-shadow:inset 0 2px 1px rgba(255,255,255,.5), 0 4px 8px rgba(0,0,0,.5);
+    }
+    .rivet.tl{top:-10px;left:-10px}
+    .rivet.tr{top:-10px;right:-10px}
+    .rivet.bl{bottom:-10px;left:-10px}
+    .rivet.br{bottom:-10px;right:-10px}
+
+    header.hero{display:flex;gap:22px;align-items:center;padding:16px 18px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:var(--shadow)}
+    header.hero img{height:64px;width:auto;flex:0 0 auto;border-radius:8px}
+    header.hero h1{margin:0;font-size:28px;letter-spacing:.2px;color:var(--brand)}
+    header.hero p{margin:2px 0 0;color:var(--muted)}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:12px;color:#c9d6ea}
+
+    nav.toc{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 8px}
+    nav.toc a{padding:8px 12px;border-radius:10px;background:#ffffff;border:1px solid #e5e7eb;color:var(--brand)}
+    section{margin:30px 0 26px}
+    h2{margin:0 0 12px;font-size:22px}
+    h3{margin:18px 0 8px;font-size:18px;color:#dfe7f4}
+    .grid{display:grid;gap:14px}
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width:980px){.grid.cols-2{grid-template-columns:1fr}}
+
+    .card{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+    .status{display:inline-flex;align-items:center;gap:8px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+
+    .kpi{font-weight:600;color:#fff}
+    table{width:100%;border-collapse:separate;border-spacing:0 6px}
+    th,td{padding:10px 12px;text-align:left}
+    thead th{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#1f2937}
+    tbody tr{background:#ffffff;border:1px solid #e5e7eb}
+    tbody td{border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb}
+    tbody tr:hover{background:#f8fafc}
+    code,kbd,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    pre{background:#0b1220;color:#e6edf6;border:1px solid #111827;padding:14px;border-radius:10px;overflow:auto}
+    .filename{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#374151;font-size:13px}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#ffffff;border:1px solid #e5e7eb;font-size:12px;color:#374151}
+    details{border-radius:10px;overflow:hidden;background:#ffffff;border:1px solid #e5e7eb}
+    details>summary{cursor:pointer;padding:12px 14px;font-weight:600;list-style:none}
+    details[open]>summary{border-bottom:1px solid #e5e7eb;background:#f8fafc}
+    .callout{padding:12px 14px;border-left:4px solid var(--accent);background:#fff8db;border-radius:6px;margin:10px 0;color:#92400e}
+    .muted{color:var(--muted)}
+    footer{margin:30px 0 10px;color:#6b7280;font-size:12px;text-align:center}
+  </style>
+  <meta name="robots" content="noindex">
+</head>
+<body>
+  <div class="wrap">
+    <div class="frame">
+      <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+
+      <header class="hero">
+        <div>
+          <h1>SPC Rules, Signal Hierarchy, Odds, and Phase Logic</h1>
+          <p>Wheeler XmR methodology with code popouts and statistical proofs. <span class="pill">Internal • Southwest Airlines Technical Operations</span></p>
+        </div>
+      </header>
+
+      <nav class="toc">
+        <a href="#stability">Process Stability Levels</a>
+        <a href="#hierarchy">Signal Hierarchy & Odds</a>
+        <a href="#rules">Implemented Rules (with code)</a>
+        <a href="#phases">Phase Handling Scenarios</a>
+        <a href="#odds">Odds Logic & Examples</a>
+        <a href="#extensions">Additional Rule Extensions</a>
+      </nav>
+
+      <section id="stability" class="grid cols-2">
+        <div class="card">
+          <h2>1) Process Stability Levels</h2>
+          <p class="muted">Three tiers guiding realistic and achievable goal ranges.</p>
+          <ul>
+            <li><span class="status"><span class="dot bad"></span><b>N/S — Not Stable</b></span>: currently signaling</li>
+            <li><span class="status"><span class="dot warn"></span><b>T — Trial</b></span>: ≥ 5 stable (non‑signaling) time periods</li>
+            <li><span class="status"><span class="dot ok"></span><b>S — Set</b></span>: ≥ 30 (or ≥ 53) stable (non‑signaling) time periods</li>
+            <li><b>→ 30</b> stable periods for nominal; <b>→ 53</b> for annual/cycle/seasonal; adjust width by use‑case</li>
+            <li><span class="status"><span class="dot ok"></span><b>L — Lock</b></span>: &lt; 100 stable (non‑signaling) time periods</li>
+          </ul>
+          <div class="callout">Goals are set only after the process is stable and assignable cause is understood.</div>
+          <ul class="muted">
+            <li>Research actions</li>
+            <li>Build action plan with leaders</li>
+            <li>Build bar measure</li>
+            <li>Set goal range</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Natural Process Limits (NPL)</h3>
+          <p>For Individuals (X) chart: CL = mean, UCL/LCL = CL ± 2.66 × mR̄ (LCL floored at 0). For Moving Range (mR): CL = mR̄, UCL = 3.268 × mR̄, LCL = 0.</p>
+          <p class="muted">σ is estimated as mR̄/1.128, so ±2.66×mR̄ ≈ ±3σ.</p>
+        </div>
+      </section>
+
+      <section id="hierarchy" class="card">
+        <h2>2) Signal Hierarchy & Odds</h2>
+        <p class="muted">Priority by rarity under normal, independent conditions.</p>
+        <table aria-label="Signal hierarchy odds">
+          <thead><tr><th>Signal</th><th>Derivation</th><th>Probability</th><th>Odds (≈)</th></tr></thead>
+          <tbody>
+            <tr><td><b>Trend (7)</b></td><td>2 monotone orders / 7!</td><td>0.0003968</td><td class="kpi">1 : 2,519</td></tr>
+            <tr><td><b>Outlier ≥ 3σ</b></td><td>2(1 − Φ(3))</td><td>0.002699</td><td class="kpi">1 : 370</td></tr>
+            <tr><td><b>2 of 3 ≥ 2σ (same side)</b></td><td>2[ C(3,2)p²(1−p) + p³ ], p=0.02275</td><td>0.00306</td><td class="kpi">1 : 326</td></tr>
+            <tr><td><b>4 of 5 ≥ 1σ (same side)</b></td><td>2[ C(5,4)q⁴(1−q) + q⁵ ], q=0.158655</td><td>0.00555</td><td class="kpi">1 : 180</td></tr>
+            <tr><td><b>Step (7 on one side)</b></td><td>2 × (1/2)⁷</td><td>0.015625</td><td class="kpi">1 : 63</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">Now implemented: Outlier (≥3σ), 2‑of‑3 ≥ 2σ (same side), and Step (7 on a side). Trend and 4‑of‑5 are shown here with proofs and can be added.</p>
+      </section>
+
+      <section id="rules" class="grid cols-2">
+        <div class="card">
+          <h2>3) Implemented Rules (with code popouts)</h2>
+          <details open>
+            <summary>Rule #1 — Point outside control limits (UCL/LCL)</summary>
+            <div class="filename"><span>spc_processor.py · find_phase_end</span><span class="tag">Lines 116–123</span></div>
+            <pre><code># RULE #1: Point outside control limits
+if value &gt; ucl or value &lt; lcl:
+    # Signal! Phase ends at the point BEFORE this outlier
+    # The outlier starts the new phase
+    return max(0, i - 1)</code></pre>
+          </details>
+
+          <details open>
+            <summary>Rule #4 — 7 consecutive points on one side of CL</summary>
+            <div class="filename"><span>spc_processor.py · find_phase_end</span><span class="tag">Lines 123–137</span></div>
+            <pre><code># RULE #4: Track 7-point runs
+if value &gt; cl:
+    consecutive_above += 1; consecutive_below = 0
+elif value &lt; cl:
+    consecutive_below += 1; consecutive_above = 0
+# Signal detected: 7 consecutive on one side
+if consecutive_above &gt;= 7 or consecutive_below &gt;= 7:
+    # Phase ends at the point BEFORE the run started
+    return max(0, i - 7)</code></pre>
+          </details>
+
+          <details>
+            <summary>Baseline → Limits → Phase append</summary>
+            <div class="filename"><span>spc_processor.py · detect_phases</span><span class="tag">Lines 186–236</span></div>
+            <pre><code>MIN_BASELINE = 20
+baseline_end = min(current_start + MIN_BASELINE, len(values))
+cl, mR_bar = calculate_initial_limits(baseline_values)
+ucl = cl + 2.66 * mR_bar
+lcl = max(0, cl - 2.66 * mR_bar)
+signal_offset = find_phase_end(values[baseline_end:], cl, ucl, lcl)
+phase_end = baseline_end + signal_offset
+# Recompute limits using actual phase data
+cl, mR_bar = calculate_initial_limits(values[current_start:phase_end + 1])</code></pre>
+          </details>
+        </div>
+
+        <div class="card">
+          <h3>mR phases share X boundaries</h3>
+          <div class="filename"><span>spc_processor.py · apply_phases_to_mr</span><span class="tag">Lines 308–333</span></div>
+          <pre><code>mR_bar = sum(phase_values) / len(phase_values)
+ucl_mr = mR_bar * 3.268
+lcl_mr = 0
+augmented_points[i]['cl'] = round(mR_bar, 2)
+augmented_points[i]['ucl'] = round(ucl_mr, 2)
+augmented_points[i]['lcl'] = 0</code></pre>
+
+          <h3 class="muted" style="margin-top:14px">X–mR signal categories</h3>
+          <pre><code>signal_info = {
+  'both_signaling': x_signals &gt; 0 and mr_signals &gt; 0,
+  'x_only': x_signals &gt; 0 and mr_signals == 0,
+  'mr_only': mr_signals &gt; 0 and x_signals == 0,
+  'stable': x_signals == 0 and mr_signals == 0
+}</code></pre>
+        </div>
+      </section>
+
+      <section id="phases" class="card">
+        <h2>4) Phase Handling Scenarios</h2>
+        <div class="grid cols-2">
+          <div>
+            <h3>Scenario A — Outlier (Rule #1)</h3>
+            <ul>
+              <li>Phase ends at point immediately <i>before</i> the outlier.</li>
+              <li>Outlier becomes first point of new phase.</li>
+              <li>Limits recomputed from the new phase’s data.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Scenario B — 7‑run (Rule #4)</h3>
+            <ul>
+              <li>Phase ends at point before the run started.</li>
+              <li>First point of the 7‑run starts new phase.</li>
+              <li>Limits recomputed from the new phase’s data.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Scenario C — No signal</h3>
+            <ul>
+              <li>All points remain one phase; limits finalized from entire phase.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="odds" class="grid cols-2">
+        <div class="card">
+          <h2>5) Odds Logic & Examples</h2>
+          <p><b>Estimation:</b> σ ≈ mR̄ / 1.128, so z = |x − CL| / σ.</p>
+          <p><b>Two-tailed probability:</b> p = 2(1 − Φ(z)). <b>Displayed odds:</b> (1 − p) / p → “1 in X”.</p>
+          <div class="filename"><span>spc_processor.py · calculate_standard_deviation_odds</span><span class="tag">Lines 74–96</span></div>
+          <pre><code>z = abs(value - center_line) / standard_deviation
+p = 2 * (1 - normal_cdf(z))
+X = (1 - p) / p  # "1 in X" (capped at 10,000)</code></pre>
+
+          <h3>Worked examples</h3>
+          <ul>
+            <li>At UCL (≈ 3σ): p ≈ 0.002699 → odds ≈ <b>1 : 370</b></li>
+            <li>z = 2.66: p ≈ 0.00782 → odds ≈ <b>1 : 128</b></li>
+            <li>z = 2.00: p ≈ 0.0455 → odds ≈ <b>1 : 21</b></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Compact proofs for hierarchy</h3>
+          <ul>
+            <li><b>Trend (7):</b> 2 / 7! = 0.0003968 → 1 : 2,519</li>
+            <li><b>Outlier ≥ 3σ:</b> 2(1 − Φ(3)) = 0.002699 → 1 : 370</li>
+            <li><b>2 of 3 ≥ 2σ:</b> 2[ C(3,2)p²(1−p) + p³ ], p=0.02275 → 0.00306 → 1 : 326</li>
+            <li><b>4 of 5 ≥ 1σ:</b> 2[ C(5,4)q⁴(1−q) + q⁵ ], q=0.158655 → 0.00555 → 1 : 180</li>
+            <li><b>Step (7 on one side):</b> 2 × (1/2)⁷ = 0.015625 → 1 : 63</li>
+          </ul>
+          <p class="muted">Assumes normal, independent data (no autocorrelation). Values guide priority; field judgment still required.</p>
+        </div>
+      </section>
+
+      <section id="extensions" class="card">
+        <h2>6) Additional Rule Extensions (optional to implement)</h2>
+        <p>The dashboard already applies Rule #1 and Rule #4. The following can be added with identical phase sharing for X and mR:</p>
+        <ul>
+          <li><b>Trend (7)</b> — strictly increasing or strictly decreasing sequence of 7.</li>
+          <li><b>2 of 3 ≥ 2σ</b> (same side)</li>
+          <li><b>4 of 5 ≥ 1σ</b> (same side)</li>
+        </ul>
+        <p class="muted">These do not change phase boundaries unless configured; they can be used to prioritize investigation and goal‑setting confidence.</p>
+      </section>
+
+      <footer>
+        © Southwest Airlines Technical Operations • Wheeler XmR methodology • Internal Use
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
+
+

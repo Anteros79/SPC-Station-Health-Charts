@@ -14,7 +14,7 @@ Lightweight desktop tool for monitoring maintenance performance across multiple 
 - ✅ **PNG export** - Save charts for reports and presentations
 - ✅ **Offline capable** - All processing happens locally on your machine
 - ✅ **CSV troubleshooting tools** - Built-in format checker and debug logging
-- ✅ **Southwest Tech Badge branding** - Professional metallic logo integration
+- ✅ **Southwest Airlines branding** - Unified SWA blue/yellow theme across docs and UI
 
 ## 📋 Requirements
 
@@ -109,13 +109,14 @@ The dashboard automatically detects which format you're using.
 - Click the **"Save PNG"** button on any chart
 - Charts save to your Downloads folder
 - High resolution, suitable for presentations
+- Footer stamp removed for executive-ready images
 
 ## 📈 Statistical Methodology
 
 ### Wheeler's XmR Charts
 - **X Chart (Individuals):** Monitors process location (average)
 - **mR Chart (Moving Range):** Monitors process variation (consistency)
-- **Distribution Chart:** Histogram with normal curve overlay to assess data normality
+- **Distribution Chart:** Histogram with normal curve overlay; linked to phase slider, auto-bins filtered X values
 
 ### Natural Process Limits (NPL)
 - **Sigma:** 2.66 (natural process limits)
@@ -187,6 +188,6 @@ Internal use only - Airline Technical Operations
 
 ---
 
-**Version:** 1.6  
+**Version:** 1.7  
 **Last Updated:** October 9, 2025  
 **Maintained by:** Southwest Airlines Technical Operations Analytics Team

@@ -180,3 +180,4 @@ None reported for this release.
 **Previous Version:** 1.4 (CSV Troubleshooting & Debug Tools)  
 **Current Version:** 1.5 (Chart Grouping & Signal Refinement)  
 **Next Planned:** 1.6 (Additional Wheeler's Rules)
+

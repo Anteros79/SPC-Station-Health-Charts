@@ -48,6 +48,20 @@
             flex-wrap: wrap;
             align-items: center;
         }
+        .link-docs {
+            background: #FFFFFF;
+            color: #111B40;
+            border: 1.5px solid #9CA3AF;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+        .link-docs:hover {
+            background: #F3F4F6;
+            border-color: #6B7280;
+        }
         button {
             padding: 0.5rem 1rem;
             border: none;
@@ -373,6 +387,7 @@
             <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV</button>
             <input type="text" id="newStation" placeholder="Add Station (e.g., SFO)" style="width: 160px">
             <button class="btn-secondary" onclick="addStation()">Add</button>
+            <a class="link-docs" href="SPC_Rules_and_Odds.html" target="_blank" rel="noopener">📘 SPC Rules & Odds</a>
             <select id="stationSelect" onchange="filterStation()">
                 <option value="all">All Stations</option>
                 <option value="ABQ">ABQ - Albuquerque</option>
@@ -840,8 +855,12 @@
                     const tooltip = document.getElementById(`tooltip-${canvasId}`);
                     
                     if (canvas && tooltip) {
-                        if (filteredData.type === 'distribution' && filteredData.histogram) {
-                            drawHistogram(canvas, filteredData.histogram);
+                        if (measure.includes('(Distribution)')) {
+                            const xData = chartData[station][baseMeasure];
+                            const filteredX = filterToLastNPhases(xData, defaultPhases);
+                            const values = (filteredX.points || []).map(p => p.value);
+                            const hist = buildHistogram(values);
+                            drawHistogram(canvas, hist);
                         } else {
                             drawChart(canvas, filteredData);
                             setupInteractivity(canvas, tooltip, filteredData);
@@ -906,8 +925,12 @@
                 const tooltip = document.getElementById(`tooltip-${canvasId}`);
                 
                 if (canvas && tooltip) {
-                    if (filteredData.type === 'distribution' && filteredData.histogram) {
-                        drawHistogram(canvas, filteredData.histogram);
+                    if (measure.includes('(Distribution)')) {
+                        const xData = chartData[station][baseMeasure];
+                        const filteredX = filterToLastNPhases(xData, numPhases);
+                        const values = (filteredX.points || []).map(p => p.value);
+                        const hist = buildHistogram(values);
+                        drawHistogram(canvas, hist);
                     } else {
                         drawChart(canvas, filteredData);
                         setupInteractivity(canvas, tooltip, filteredData);
@@ -1010,6 +1033,43 @@
                 tooltip.style.display = 'none';
                 drawChart(canvas, data);
             });
+        }
+        
+        function computeStats(values) {
+            const n = values.length || 1;
+            const mean = values.reduce((s, v) => s + v, 0) / n;
+            const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+            return { mean: +mean.toFixed(2), stdDev: +Math.sqrt(variance).toFixed(2) };
+        }
+
+        function buildHistogram(values) {
+            if (!values || values.length === 0) {
+                return { bins: [], frequencies: [], normal_curve: [], mean: 0, std_dev: 0 };
+            }
+            const sorted = [...values].sort((a, b) => a - b);
+            const n = sorted.length;
+            const q1 = sorted[Math.floor(0.25 * (n - 1))];
+            const q3 = sorted[Math.floor(0.75 * (n - 1))];
+            const iqr = Math.max(q3 - q1, 1e-9);
+            const range = Math.max(sorted[n - 1] - sorted[0], 1e-9);
+            const fdWidth = (2 * iqr) / Math.cbrt(n);
+            const binWidth = Math.max(fdWidth, range / 30);
+            const binCount = Math.max(6, Math.min(30, Math.ceil(range / binWidth)));
+            const min = sorted[0], max = sorted[n - 1];
+            const width = (max - min) / binCount || 1;
+            const bins = Array.from({ length: binCount }, (_, i) => min + i * width);
+            const frequencies = new Array(binCount).fill(0);
+            for (const v of values) {
+                const idx = Math.min(Math.floor((v - min) / width), binCount - 1);
+                frequencies[idx] += 1;
+            }
+            const { mean, stdDev } = computeStats(values);
+            const normal_curve = frequencies.map((_, i) => {
+                const c = min + (i + 0.5) * width;
+                const z = (c - mean) / (stdDev || 1);
+                return Math.exp(-0.5 * z * z);
+            });
+            return { bins, frequencies, normal_curve, mean: mean.toFixed(2), std_dev: stdDev.toFixed(2) };
         }
 
         function drawHistogram(canvas, histogramData) {
@@ -1374,14 +1434,7 @@
                 legendX += 100;
             });
             
-            // Add footer with timestamp and metadata
-            ctx.fillStyle = '#374151';
-            ctx.fillRect(0, rect.height - 30, rect.width, 30);
-            
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '11px sans-serif';
-            const timestamp = new Date().toLocaleString();
-            ctx.fillText(`Generated: ${timestamp} | Wheeler's XmR Charts | NPL: 2.66σ`, 16, rect.height - 12);
+            // Footer removed per stakeholder request
             
             // Download
             const link = document.createElement('a');

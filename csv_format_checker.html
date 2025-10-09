@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Format Checker - SPC Dashboard</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #F7F8FA;
+            color: #111B40;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            background: #111B40;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .checker {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        .format-example {
+            background: #F0F4FF;
+            border: 1px solid #304CB2;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Consolas', monospace;
+            font-size: 0.875rem;
+        }
+        .error {
+            background: #FEF2F2;
+            border: 2px solid #FCA5A5;
+            border-radius: 0.5rem;
+            color: #991B1B;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .success {
+            background: #F0FDF4;
+            border: 2px solid #86EFAC;
+            border-radius: 0.5rem;
+            color: #166534;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        button {
+            background: #304CB2;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #2844A8;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.375rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.875rem;
+        }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 CSV Format Checker</h1>
+        <p>Diagnose your CSV file format for the SPC Dashboard</p>
+    </div>
+
+    <div class="checker">
+        <h2>Expected Formats</h2>
+        
+        <h3>Format A: timestamp,station,metric_value</h3>
+        <div class="format-example">timestamp,station,metric_value
+2023-01-02,Austin,2.5
+2023-01-09,Dallas,3.1
+2023-01-16,Houston,2.8</div>
+        <p><strong>Note:</strong> The measure name will be taken from your filename (e.g., "maintenance_cancels.csv" → "Maintenance Cancels")</p>
+
+        <h3>Format B: station,measure,date,value</h3>
+        <div class="format-example">station,measure,date,value
+AUS,Maintenance Cancels,2023-01-02,2.5
+DAL,Maintenance Delays,2023-01-02,3.1
+HOU,Scheduled Maintenance,2023-01-09,2.8</div>
+
+        <h2>Check Your CSV</h2>
+        <p>Paste your CSV content below to check the format:</p>
+        <textarea id="csvInput" placeholder="Paste your CSV content here..."></textarea>
+        <br>
+        <button onclick="checkFormat()">🔍 Check Format</button>
+        <button onclick="clearInput()">🗑️ Clear</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <div class="checker">
+        <h2>Common Issues & Solutions</h2>
+        
+        <h3>❌ Decimal Format Issues</h3>
+        <p><strong>Problem:</strong> Using commas for decimals (European format)</p>
+        <div class="format-example">❌ Wrong: 3,5
+✅ Correct: 3.5</div>
+
+        <h3>❌ Column Name Issues</h3>
+        <p><strong>Problem:</strong> Column names don't match exactly</p>
+        <div class="format-example">❌ Wrong: Station,Value,Date
+✅ Correct: station,value,date (lowercase)</div>
+
+        <h3>❌ Missing Required Columns</h3>
+        <p><strong>Problem:</strong> Missing one of the required columns</p>
+        <div class="format-example">Format A needs: timestamp, station, metric_value
+Format B needs: station, measure, date, value</div>
+
+        <h3>❌ Empty Rows</h3>
+        <p><strong>Problem:</strong> Empty rows or missing data</p>
+        <div class="format-example">❌ Wrong: Austin,,2.5
+✅ Correct: Austin,Maintenance Cancels,2023-01-02,2.5</div>
+    </div>
+
+    <script>
+        function checkFormat() {
+            const csvText = document.getElementById('csvInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!csvText) {
+                resultDiv.innerHTML = '<div class="error">Please paste your CSV content first.</div>';
+                return;
+            }
+            
+            const lines = csvText.split('\n');
+            if (lines.length < 2) {
+                resultDiv.innerHTML = '<div class="error">CSV must have at least a header row and one data row.</div>';
+                return;
+            }
+            
+            const header = lines[0].toLowerCase().trim();
+            const headerColumns = header.split(',').map(col => col.trim());
+            
+            let analysis = `📊 CSV Analysis Results:\n\n`;
+            analysis += `Header: "${header}"\n`;
+            analysis += `Columns: [${headerColumns.join(', ')}]\n`;
+            analysis += `Total rows: ${lines.length}\n\n`;
+            
+            // Check Format A
+            const formatA = ['timestamp', 'station', 'metric_value'];
+            const hasFormatA = formatA.every(col => headerColumns.includes(col));
+            
+            // Check Format B
+            const formatB = ['station', 'measure', 'date', 'value'];
+            const hasFormatB = formatB.every(col => headerColumns.includes(col));
+            
+            if (hasFormatA) {
+                analysis += `✅ FORMAT A DETECTED: timestamp,station,metric_value\n`;
+                analysis += `   This format will use your filename as the measure name.\n\n`;
+                
+                // Check sample data
+                if (lines.length > 1) {
+                    const sampleRow = lines[1].split(',');
+                    analysis += `Sample data row:\n`;
+                    analysis += `  timestamp: "${sampleRow[0] || 'MISSING'}"\n`;
+                    analysis += `  station: "${sampleRow[1] || 'MISSING'}"\n`;
+                    analysis += `  metric_value: "${sampleRow[2] || 'MISSING'}"\n\n`;
+                    
+                    // Check if metric_value is numeric
+                    const value = sampleRow[2]?.trim();
+                    if (value && !isNaN(parseFloat(value))) {
+                        analysis += `✅ Numeric value detected: ${parseFloat(value)}\n`;
+                    } else {
+                        analysis += `❌ Value is not numeric: "${value}"\n`;
+                        analysis += `   Make sure decimal values use periods (.) not commas (,)\n`;
+                    }
+                }
+                
+            } else if (hasFormatB) {
+                analysis += `✅ FORMAT B DETECTED: station,measure,date,value\n`;
+                analysis += `   This format includes the measure name in the data.\n\n`;
+                
+                // Check sample data
+                if (lines.length > 1) {
+                    const sampleRow = lines[1].split(',');
+                    analysis += `Sample data row:\n`;
+                    analysis += `  station: "${sampleRow[0] || 'MISSING'}"\n`;
+                    analysis += `  measure: "${sampleRow[1] || 'MISSING'}"\n`;
+                    analysis += `  date: "${sampleRow[2] || 'MISSING'}"\n`;
+                    analysis += `  value: "${sampleRow[3] || 'MISSING'}"\n\n`;
+                    
+                    // Check if value is numeric
+                    const value = sampleRow[3]?.trim();
+                    if (value && !isNaN(parseFloat(value))) {
+                        analysis += `✅ Numeric value detected: ${parseFloat(value)}\n`;
+                    } else {
+                        analysis += `❌ Value is not numeric: "${value}"\n`;
+                        analysis += `   Make sure decimal values use periods (.) not commas (,)\n`;
+                    }
+                }
+                
+            } else {
+                analysis += `❌ UNKNOWN FORMAT\n`;
+                analysis += `   Your CSV doesn't match either expected format.\n\n`;
+                analysis += `Expected Format A columns: [${formatA.join(', ')}]\n`;
+                analysis += `Expected Format B columns: [${formatB.join(', ')}]\n`;
+                analysis += `Your columns: [${headerColumns.join(', ')}]\n\n`;
+                
+                // Suggest fixes
+                analysis += `💡 Suggestions:\n`;
+                if (!headerColumns.includes('station')) {
+                    analysis += `   - Add a "station" column\n`;
+                }
+                if (!headerColumns.includes('value') && !headerColumns.includes('metric_value')) {
+                    analysis += `   - Add a "value" or "metric_value" column\n`;
+                }
+                if (!headerColumns.includes('date') && !headerColumns.includes('timestamp')) {
+                    analysis += `   - Add a "date" or "timestamp" column\n`;
+                }
+                if (!headerColumns.includes('measure') && !headerColumns.includes('metric_value')) {
+                    analysis += `   - Add a "measure" column (or use Format A with filename)\n`;
+                }
+            }
+            
+            resultDiv.innerHTML = `<div class="result">${analysis}</div>`;
+        }
+        
+        function clearInput() {
+            document.getElementById('csvInput').value = '';
+            document.getElementById('result').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
+

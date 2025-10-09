@@ -96,14 +96,16 @@ def calculate_standard_deviation_odds(value: float, center_line: float, standard
     return round(odds, 0)
 
 
-def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float) -> int:
-    """Find where phase ends using Wheeler's Rules
+def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float, std_dev: float) -> int:
+    """Find where phase ends using Wheeler's Rules (+ 2-of-3 rule)
     
-    Wheeler's Rules for detecting special causes:
-    Rule #1: Point beyond control limits (outside UCL/LCL)
-    Rule #4: 7 consecutive points on one side of centerline
+    Implemented special-cause signals:
+    - Rule #1: Point beyond control limits (outside UCL/LCL)
+    - Rule #2 (modified): 2 of 3 consecutive points beyond 2σ on the same side of CL
+    - Rule #4: 7 consecutive points on one side of centerline
     
-    Returns index where current phase should end (signal detected)
+    Returns index (offset into `values`) where the current phase should end
+    (i.e., at the point BEFORE the first point of the signaling pattern)
     """
     RUN_LENGTH = 7
     
@@ -112,6 +114,12 @@ def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float) -> in
     
     consecutive_above = 0
     consecutive_below = 0
+    
+    # Precompute 2σ thresholds from provided standard deviation
+    two_sigma_upper = cl + 2 * std_dev
+    two_sigma_lower = cl - 2 * std_dev
+
+    recent_values: List[float] = []
     
     for i, value in enumerate(values):
         # RULE #1: Point outside control limits
@@ -135,6 +143,18 @@ def find_phase_end(values: List[float], cl: float, ucl: float, lcl: float) -> in
         if consecutive_above >= RUN_LENGTH or consecutive_below >= RUN_LENGTH:
             # Phase ends at the point BEFORE the run started
             return max(0, i - RUN_LENGTH)
+
+        # RULE #2 (modified): 2 of 3 beyond 2σ on the same side
+        # Maintain a sliding window of the most recent 3 points
+        recent_values.append(value)
+        if len(recent_values) > 3:
+            recent_values.pop(0)
+        if len(recent_values) == 3:
+            count_upper = sum(1 for v in recent_values if v >= two_sigma_upper)
+            count_lower = sum(1 for v in recent_values if v <= two_sigma_lower)
+            if count_upper >= 2 or count_lower >= 2:
+                # Signal! Phase ends at the point BEFORE the 3-point window
+                return max(0, i - 2)
     
     # No signal found - entire dataset is one phase
     return len(values) - 1
@@ -198,7 +218,9 @@ def detect_phases(data_points: List[Dict[str, Any]]) -> Dict[str, Any]:
         
         # Now look for signal in data AFTER baseline using Wheeler's Rules
         remaining_values = values[baseline_end:]
-        signal_offset = find_phase_end(remaining_values, cl, ucl, lcl)
+        # Standard deviation estimate from baseline for 2σ checks
+        baseline_std_dev = (mR_bar / 1.128) if mR_bar > 0 else 0.001
+        signal_offset = find_phase_end(remaining_values, cl, ucl, lcl, baseline_std_dev)
         
         # Phase ends at baseline + signal offset
         phase_end = baseline_end + signal_offset
