@@ -464,11 +464,8 @@
                     updateStationSelect(result.stations);
                     renderCharts();
                 } else {
-                    showError(`Upload Failed: ${result.error || 'Invalid CSV format'}<br><br>
-                        <strong>Supported formats:</strong><br>
-                        1. timestamp,station,metric_value (filename used as measure)<br>
-                        2. station,measure,date,value<br><br>
-                        Your file appears to have a different format.`);
+                    // Show the actual error message from the server
+                    showError(`Upload Failed: ${result.error || 'Unknown error occurred'}`);
                 }
             } catch (err) {
                 showError('Failed to process CSV file: ' + err.message);
