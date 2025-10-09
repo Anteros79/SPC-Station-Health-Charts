@@ -115,6 +115,8 @@
             background: white;
             padding: 0;
             border-radius: 0.5rem;
+            width: 100%;
+            max-width: 100%;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
             border: 1px solid #E5E7EB;
         }
@@ -164,7 +166,10 @@
         }
         .chart-canvas {
             width: 100%;
-            height: 350px;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            min-height: 400px;
+            max-height: 600px;
             background: #FFFFFF;
             border-radius: 0;
             cursor: crosshair;
@@ -197,6 +202,78 @@
             justify-content: space-between;
             margin: 0.375rem 0;
             font-size: 0.8125rem;
+        }
+        .measure-group {
+            background: #FFFFFF;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            border: 1px solid #E5E7EB;
+        }
+        .measure-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        .measure-group-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111B40;
+        }
+        .phase-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .phase-control-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6B7280;
+            white-space: nowrap;
+        }
+        .phase-slider {
+            width: 200px;
+            height: 6px;
+            border-radius: 3px;
+            background: #E5E7EB;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .phase-slider::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #304CB2;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .phase-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #304CB2;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .phase-value-display {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #304CB2;
+            min-width: 60px;
+            text-align: center;
+        }
+        .measure-charts {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
         .tooltip-label {
             color: #6B7280;
@@ -260,6 +337,21 @@
             width: 32px;
             height: 3px;
             border-radius: 2px;
+        }
+        
+        @media print {
+            .measure-group {
+                page-break-inside: avoid;
+                page-break-after: always;
+            }
+            
+            .chart-canvas {
+                max-height: none;
+            }
+            
+            button {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -415,6 +507,54 @@
             }
         }
 
+        function filterToLastNPhases(data, numPhases) {
+            /**
+             * Filter chart data to show only the last N phases
+             * Returns filtered data with adjusted indices
+             */
+            // Skip filtering for distribution charts (no phases)
+            if (data.type === 'distribution') {
+                return data;
+            }
+            
+            if (!data.phases || data.phases.length === 0) {
+                return data;
+            }
+            
+            // If numPhases is 'all' or >= total phases, return all data
+            if (numPhases === 'all' || numPhases >= data.phases.length) {
+                return data;
+            }
+            
+            // Get the last N phases
+            const phasesToShow = data.phases.slice(-numPhases);
+            
+            // Find the start index (beginning of the Nth-to-last phase)
+            const startIndex = phasesToShow[0].startIndex;
+            
+            // Filter points to only include those from startIndex onward
+            const filteredPoints = data.points.slice(startIndex);
+            
+            // For distribution chart, filter histogram data to match date range
+            let filteredHistogram = data.histogram;
+            if (data.histogram && filteredPoints.length > 0) {
+                const startDate = filteredPoints[0].date;
+                const endDate = filteredPoints[filteredPoints.length - 1].date;
+                // Filter histogram bins to match the date range (simplified)
+                filteredHistogram = data.histogram; // Keep for now, can enhance later
+            }
+            
+            // Create new data object with filtered points and phases
+            return {
+                ...data,
+                points: filteredPoints,
+                phases: phasesToShow,
+                histogram: filteredHistogram,
+                originalPhaseCount: data.phases.length,  // Track total phases
+                filteredFrom: startIndex
+            };
+        }
+
         function renderCharts() {
             if (!chartData) return;
             
@@ -429,159 +569,251 @@
                 
                 html += `<div class="station-section">`;
                 html += `<h2 class="station-title">${station}</h2>`;
-                html += `<div class="charts-grid">`;
                 
-                const measures = Object.keys(chartData[station]);
-
-                // Group measures by their base name (without suffixes)
-                // This ensures X, mR, and Distribution charts for the same measure appear together
-                measures.sort((a, b) => {
-                    // Extract base measure name (remove suffixes)
-                    const getBaseMeasure = (name) => {
-                        return name
-                            .replace(' (Moving Range)', '')
-                            .replace(' (Distribution)', '');
-                    };
+                const allMeasures = Object.keys(chartData[station]);
+                
+                // Group measures by base name
+                const measureGroups = {};
+                allMeasures.forEach(measure => {
+                    const baseMeasure = measure
+                        .replace(' (Moving Range)', '')
+                        .replace(' (Distribution)', '');
                     
-                    const getChartType = (name) => {
-                        if (name.includes('(Distribution)')) return 2;  // Distribution last
-                        if (name.includes('(Moving Range)')) return 1;  // mR second
-                        return 0;  // X chart first
-                    };
-                    
-                    const baseA = getBaseMeasure(a);
-                    const baseB = getBaseMeasure(b);
-                    
-                    // First sort by base measure name
-                    if (baseA !== baseB) {
-                        return baseA.localeCompare(baseB);
+                    if (!measureGroups[baseMeasure]) {
+                        measureGroups[baseMeasure] = {
+                            x: null,
+                            mr: null,
+                            dist: null,
+                            maxPhases: 0
+                        };
                     }
                     
-                    // Then sort by chart type (X, mR, Distribution)
-                    return getChartType(a) - getChartType(b);
-                });
-
-                measures.forEach(measure => {
-                    const data = chartData[station][measure];
-                    const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
-                    
-                    // Calculate statistics
-                    const points = data.points || [];
-                    const mean = points.length > 0 ? (points.reduce((sum, p) => sum + p.value, 0) / points.length).toFixed(2) : 'N/A';
-                    const ucl = points.length > 0 && points[0].ucl ? points[0].ucl.toFixed(2) : 'N/A';
-                    const lcl = points.length > 0 && points[0].lcl ? points[0].lcl.toFixed(2) : 'N/A';
-                    const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}` : '';
-                    
-                    // Determine if this is X or mR chart and get signal status
-                    const isXChart = !measure.includes('Moving Range') && !measure.includes('Distribution');
-                    const isMRChart = measure.includes('Moving Range');
-                    const signalInfo = data.signal_info || {};
-
-                    let headerBadge = '';
-                    if (isXChart && signalInfo.x_signal_count > 0) {
-                        headerBadge = '<span style="margin-left: 0.5rem; padding: 0.125rem 0.5rem; background: #DBEAFE; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #1E40AF;">🔔 Signaling</span>';
-                    } else if (isMRChart && signalInfo.mr_signal_count > 0) {
-                        headerBadge = '<span style="margin-left: 0.5rem; padding: 0.125rem 0.5rem; background: #FCE7F3; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #9F1239;">🔔 Signaling</span>';
+                    if (measure.includes('(Distribution)')) {
+                        measureGroups[baseMeasure].dist = measure;
+                    } else if (measure.includes('(Moving Range)')) {
+                        measureGroups[baseMeasure].mr = measure;
+                        const phases = chartData[station][measure].phases || [];
+                        measureGroups[baseMeasure].maxPhases = Math.max(
+                            measureGroups[baseMeasure].maxPhases, 
+                            phases.length
+                        );
+                    } else {
+                        measureGroups[baseMeasure].x = measure;
+                        const phases = chartData[station][measure].phases || [];
+                        measureGroups[baseMeasure].maxPhases = Math.max(
+                            measureGroups[baseMeasure].maxPhases, 
+                            phases.length
+                        );
                     }
-
-                    html += `
-                        <div class="chart-container" id="container-${canvasId}">
-                            <div class="chart-header">
-                                <div>
-                                    <div class="chart-title">${measure}${headerBadge}</div>
-                                    <div class="chart-subtitle">${station} • ${dateRange}</div>
-                                </div>
-                                <div class="chart-stats">
-                                    <div class="chart-stat">
-                                        <span class="chart-stat-label">Mean</span>
-                                        <span class="chart-stat-value">${mean}</span>
-                                    </div>
-                                    <div class="chart-stat">
-                                        <span class="chart-stat-label">UCL</span>
-                                        <span class="chart-stat-value">${ucl}</span>
-                                    </div>
-                                    <div class="chart-stat">
-                                        <span class="chart-stat-label">LCL</span>
-                                        <span class="chart-stat-value">${lcl}</span>
-                                    </div>
-                                    <button onclick="downloadChartWithHeader('container-${canvasId}', '${station}_${measure}')" 
-                                            style="padding: 0.4rem 0.75rem; background: #4f46e5; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
-                                        💾 Save PNG
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="chart-wrapper">
-                                <canvas id="${canvasId}" class="chart-canvas"></canvas>
-                                <div id="tooltip-${canvasId}" class="tooltip"></div>
-                            </div>
-                            <div class="legend">
-                                <div class="legend-item">
-                                    <div class="legend-line" style="background: #304CB2;"></div>
-                                    <span>Value</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-line" style="background: #10B981;"></div>
-                                    <span>CL</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-line" style="background: #F87171;"></div>
-                                    <span>UCL/LCL</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
                 });
                 
-                html += `</div></div>`;
+                // Sort base measures alphabetically
+                const sortedBaseMeasures = Object.keys(measureGroups).sort();
+                
+                // Render each measure group
+                sortedBaseMeasures.forEach(baseMeasure => {
+                    const group = measureGroups[baseMeasure];
+                    const groupId = `${station}-${baseMeasure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                    const maxPhases = group.maxPhases;
+                    const defaultPhases = maxPhases;  // Start with all phases visible
+                    
+                    html += `<div class="measure-group" id="group-${groupId}">`;
+                    html += `<div class="measure-group-header">`;
+                    html += `<div class="measure-group-title">${baseMeasure}</div>`;
+                    
+                    if (maxPhases > 1) {
+                        html += `<div class="phase-control">`;
+                        html += `<label class="phase-control-label">Show Phases:</label>`;
+                        html += `<input type="range" 
+                                   class="phase-slider" 
+                                   id="slider-${groupId}"
+                                   min="1" 
+                                   max="${maxPhases}" 
+                                   value="${defaultPhases}"
+                                   onchange="updatePhaseZoom('${station}', '${baseMeasure}', this.value)">`;
+                        html += `<span class="phase-value-display" id="value-${groupId}">Last ${defaultPhases} of ${maxPhases}</span>`;
+                        html += `</div>`;
+                    }
+                    
+                    html += `</div>`;  // End measure-group-header
+                    html += `<div class="measure-charts">`;
+                    
+                    // Render X, mR, and Distribution charts in order
+                    [group.x, group.mr, group.dist].forEach(measure => {
+                        if (!measure) return;
+                        
+                        const data = chartData[station][measure];
+                        const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                        
+                        // Apply phase filter (defaults to all phases)
+                        const filteredData = filterToLastNPhases(data, defaultPhases);
+                        const points = filteredData.points || [];
+                        
+                        // Calculate statistics
+                        const mean = points.length > 0 ? (points.reduce((sum, p) => sum + p.value, 0) / points.length).toFixed(2) : 'N/A';
+                        const ucl = points.length > 0 && points[0].ucl ? points[0].ucl.toFixed(2) : 'N/A';
+                        const lcl = points.length > 0 && points[0].lcl ? points[0].lcl.toFixed(2) : 'N/A';
+                        const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}` : '';
+                        
+                        // Determine chart type and signal status
+                        const isXChart = !measure.includes('Moving Range') && !measure.includes('Distribution');
+                        const isMRChart = measure.includes('Moving Range');
+                        const signalInfo = filteredData.signal_info || {};
+
+                        let headerBadge = '';
+                        if (isXChart && signalInfo.x_signal_count > 0) {
+                            headerBadge = '<span style="margin-left: 0.5rem; padding: 0.125rem 0.5rem; background: #DBEAFE; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #1E40AF;">🔔 Signaling</span>';
+                        } else if (isMRChart && signalInfo.mr_signal_count > 0) {
+                            headerBadge = '<span style="margin-left: 0.5rem; padding: 0.125rem 0.5rem; background: #FCE7F3; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; color: #9F1239;">🔔 Signaling</span>';
+                        }
+
+                        html += `
+                            <div class="chart-container" id="container-${canvasId}" data-station="${station}" data-base-measure="${baseMeasure}" data-measure="${measure}">
+                                <div class="chart-header">
+                                    <div>
+                                        <div class="chart-title">${measure}${headerBadge}</div>
+                                        <div class="chart-subtitle">${station} • ${dateRange}</div>
+                                    </div>
+                                    <div class="chart-stats">
+                                        <div class="chart-stat">
+                                            <span class="chart-stat-label">Mean</span>
+                                            <span class="chart-stat-value">${mean}</span>
+                                        </div>
+                                        <div class="chart-stat">
+                                            <span class="chart-stat-label">UCL</span>
+                                            <span class="chart-stat-value">${ucl}</span>
+                                        </div>
+                                        <div class="chart-stat">
+                                            <span class="chart-stat-label">LCL</span>
+                                            <span class="chart-stat-value">${lcl}</span>
+                                        </div>
+                                        <button onclick="downloadChartWithHeader('container-${canvasId}', '${station}_${measure}')" 
+                                                style="padding: 0.4rem 0.75rem; background: #4f46e5; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
+                                            💾 Save PNG
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <canvas id="${canvasId}" class="chart-canvas"></canvas>
+                                    <div id="tooltip-${canvasId}" class="tooltip"></div>
+                                </div>
+                                <div class="legend">
+                                    <div class="legend-item">
+                                        <div class="legend-line" style="background: #304CB2;"></div>
+                                        <span>Value</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-line" style="background: #10B981;"></div>
+                                        <span>CL</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-line" style="background: #F87171;"></div>
+                                        <span>UCL/LCL</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div>`;  // End measure-charts
+                    html += `</div>`;  // End measure-group
+                });
+                
+                html += `</div>`;  // End station-section
             });
             
             document.getElementById('content').innerHTML = html;
             
-            // Draw all charts with interactive tooltips
+            // Draw all charts with default filter applied
             stations.forEach(station => {
                 if (!chartData[station]) return;
-                const measures = Object.keys(chartData[station]);
-
-                // Group measures by their base name (without suffixes)
-                measures.sort((a, b) => {
-                    const getBaseMeasure = (name) => {
-                        return name
-                            .replace(' (Moving Range)', '')
-                            .replace(' (Distribution)', '');
-                    };
+                
+                const allMeasures = Object.keys(chartData[station]);
+                allMeasures.forEach(measure => {
+                    const data = chartData[station][measure];
+                    const baseMeasure = measure
+                        .replace(' (Moving Range)', '')
+                        .replace(' (Distribution)', '');
+                    const maxPhases = data.phases ? data.phases.length : 0;
+                    const defaultPhases = maxPhases;  // Start with all phases visible
                     
-                    const getChartType = (name) => {
-                        if (name.includes('(Distribution)')) return 2;
-                        if (name.includes('(Moving Range)')) return 1;
-                        return 0;
-                    };
-                    
-                    const baseA = getBaseMeasure(a);
-                    const baseB = getBaseMeasure(b);
-                    
-                    if (baseA !== baseB) {
-                        return baseA.localeCompare(baseB);
-                    }
-                    
-                    return getChartType(a) - getChartType(b);
-                });
-
-                measures.forEach(measure => {
+                    const filteredData = filterToLastNPhases(data, defaultPhases);
                     const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
                     const canvas = document.getElementById(canvasId);
                     const tooltip = document.getElementById(`tooltip-${canvasId}`);
+                    
                     if (canvas && tooltip) {
-                        const data = chartData[station][measure];
-                        
-                        // Check if this is a distribution chart
-                        if (data.type === 'distribution' && data.histogram) {
-                            drawHistogram(canvas, data.histogram);
+                        if (filteredData.type === 'distribution' && filteredData.histogram) {
+                            drawHistogram(canvas, filteredData.histogram);
                         } else {
-                            drawChart(canvas, data);
-                            setupInteractivity(canvas, tooltip, data);
+                            drawChart(canvas, filteredData);
+                            setupInteractivity(canvas, tooltip, filteredData);
                         }
                     }
                 });
+            });
+        }
+
+        function updatePhaseZoom(station, baseMeasure, numPhases) {
+            /**
+             * Update charts for a specific measure group when slider changes
+             */
+            numPhases = parseInt(numPhases);
+            const groupId = `${station}-${baseMeasure}`.replace(/[^a-zA-Z0-9]/g, '-');
+            
+            // Update display text
+            const valueDisplay = document.getElementById(`value-${groupId}`);
+            const slider = document.getElementById(`slider-${groupId}`);
+            const maxPhases = parseInt(slider.max);
+            
+            if (valueDisplay) {
+                valueDisplay.textContent = `Last ${numPhases} of ${maxPhases}`;
+            }
+            
+            // Get all chart containers for this measure group
+            const containers = document.querySelectorAll(
+                `[data-station="${station}"][data-base-measure="${baseMeasure}"]`
+            );
+            
+            containers.forEach(container => {
+                const measure = container.getAttribute('data-measure');
+                const data = chartData[station][measure];
+                
+                // Apply filter
+                const filteredData = filterToLastNPhases(data, numPhases);
+                
+                // Update chart statistics in header
+                const points = filteredData.points || [];
+                if (points.length > 0) {
+                    const mean = (points.reduce((sum, p) => sum + p.value, 0) / points.length).toFixed(2);
+                    const dateRange = `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}`;
+                    
+                    // Update subtitle with new date range
+                    const subtitle = container.querySelector('.chart-subtitle');
+                    if (subtitle) {
+                        subtitle.textContent = `${station} • ${dateRange}`;
+                    }
+                    
+                    // Update mean stat
+                    const meanValue = container.querySelector('.chart-stat:nth-child(1) .chart-stat-value');
+                    if (meanValue) {
+                        meanValue.textContent = mean;
+                    }
+                }
+                
+                // Redraw chart
+                const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                const canvas = document.getElementById(canvasId);
+                const tooltip = document.getElementById(`tooltip-${canvasId}`);
+                
+                if (canvas && tooltip) {
+                    if (filteredData.type === 'distribution' && filteredData.histogram) {
+                        drawHistogram(canvas, filteredData.histogram);
+                    } else {
+                        drawChart(canvas, filteredData);
+                        setupInteractivity(canvas, tooltip, filteredData);
+                    }
+                }
             });
         }
 
