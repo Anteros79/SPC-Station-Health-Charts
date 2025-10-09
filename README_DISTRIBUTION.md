@@ -127,6 +127,6 @@ For technical details about the SPC methodology used, see:
 ---
 
 **Built with:** Python, HTML5 Canvas, Statistical Process Control
-**License:** Internal use only
-**Version:** 1.5.1 (October 2025)
+**License:** Internal use only - Southwest Airlines Technical Operations
+**Version:** 1.6 (October 9, 2025)
 

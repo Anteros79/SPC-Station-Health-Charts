@@ -1,0 +1,12 @@
+This file should be replaced with the new Southwest Tech Ops metallic logo image.
+
+The new logo should be named: Southwest_Tech_Ops_Metallic_Logo.png
+
+Description of the new logo:
+- Metallic, brushed-texture square plaque with rounded corners
+- Southwest heart logo in upper-left (red, blue, yellow sections)
+- "Southwest" text in light grey/white
+- "Tech Ops" text in golden-yellow
+- Horizontal line below with red and yellow segments
+- Embossed/raised appearance with subtle shadows
+- Professional, modern aesthetic

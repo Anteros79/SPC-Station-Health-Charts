@@ -13,12 +13,12 @@
         }
         .header {
             background: #111B40;
-            padding: 1.5rem 2rem;
+            padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.75rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
         .header h1 {
@@ -28,29 +28,28 @@
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
         }
         .logo {
-            height: 112.5px;
+            height: 80px;
             width: auto;
             object-fit: contain;
         }
         .app-title {
-            font-size: 2.25rem;
+            font-size: 1.75rem;
             font-weight: 700;
             letter-spacing: -0.5px;
             line-height: 1.2;
-            white-space: normal;
-            word-wrap: break-word;
+            white-space: nowrap;
         }
         .controls {
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
             align-items: center;
         }
         button {
-            padding: 0.625rem 1.25rem;
+            padding: 0.5rem 1rem;
             border: none;
             border-radius: 0.375rem;
             font-weight: 600;
@@ -79,12 +78,13 @@
             border-color: #2844A8;
         }
         input[type="text"], select {
-            padding: 0.625rem;
+            padding: 0.5rem;
             border-radius: 0.375rem;
             border: 1.5px solid #D1D5DB;
             background: white;
             color: #111B40;
             font-weight: 500;
+            font-size: 0.875rem;
         }
         input[type="text"]:focus, select:focus {
             outline: none;
@@ -271,8 +271,8 @@
             text-align: center;
         }
         .measure-charts {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
         }
         .tooltip-label {
@@ -339,6 +339,12 @@
             border-radius: 2px;
         }
         
+        @media (max-width: 1200px) {
+            .measure-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         @media print {
             .measure-group {
                 page-break-inside: avoid;
@@ -358,17 +364,98 @@
 <body>
     <div class="header">
         <h1>
-            <img src="images/20251007_0649_Southwest%20Tech%20Badge_simple_compose_01k6z814avfefa6hd9mw6753v1.png" alt="Southwest Tech Ops" class="logo">
+            <img src="SW Tech Ops logo.png" alt="Southwest Tech Ops" class="logo">
             <span class="app-title">Station Health Dashboard</span>
         </h1>
         <div class="controls">
-            <button class="btn-primary" onclick="loadActualData()" style="font-size: 1.1rem; padding: 0.625rem 1.25rem;">📊 Load Test Data</button>
+            <button class="btn-primary" onclick="loadActualData()" style="font-size: 0.95rem;">📊 Load Test Data</button>
             <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
-            <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV (Auto-Detect Format)</button>
+            <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV</button>
             <input type="text" id="newStation" placeholder="Add Station (e.g., SFO)" style="width: 160px">
             <button class="btn-secondary" onclick="addStation()">Add</button>
             <select id="stationSelect" onchange="filterStation()">
                 <option value="all">All Stations</option>
+                <option value="ABQ">ABQ - Albuquerque</option>
+                <option value="ALB">ALB - Albany</option>
+                <option value="AMA">AMA - Amarillo</option>
+                <option value="ATL">ATL - Atlanta</option>
+                <option value="AUS">AUS - Austin</option>
+                <option value="BDL">BDL - Hartford</option>
+                <option value="BHM">BHM - Birmingham</option>
+                <option value="BNA">BNA - Nashville</option>
+                <option value="BOI">BOI - Boise</option>
+                <option value="BOS">BOS - Boston</option>
+                <option value="BUF">BUF - Buffalo</option>
+                <option value="BUR">BUR - Burbank</option>
+                <option value="BWI">BWI - Baltimore</option>
+                <option value="CHS">CHS - Charleston</option>
+                <option value="CLE">CLE - Cleveland</option>
+                <option value="CLT">CLT - Charlotte</option>
+                <option value="CMH">CMH - Columbus</option>
+                <option value="CRP">CRP - Corpus Christi</option>
+                <option value="CUN">CUN - Cancun</option>
+                <option value="DAL">DAL - Dallas Love Field</option>
+                <option value="DCA">DCA - Washington Reagan</option>
+                <option value="DEN">DEN - Denver</option>
+                <option value="DSM">DSM - Des Moines</option>
+                <option value="DTW">DTW - Detroit</option>
+                <option value="ELP">ELP - El Paso</option>
+                <option value="FLL">FLL - Fort Lauderdale</option>
+                <option value="GRR">GRR - Grand Rapids</option>
+                <option value="HOU">HOU - Houston Hobby</option>
+                <option value="IAD">IAD - Washington Dulles</option>
+                <option value="IAH">IAH - Houston Intercontinental</option>
+                <option value="ICT">ICT - Wichita</option>
+                <option value="IND">IND - Indianapolis</option>
+                <option value="JAX">JAX - Jacksonville</option>
+                <option value="LAS">LAS - Las Vegas</option>
+                <option value="LAX">LAX - Los Angeles</option>
+                <option value="LBB">LBB - Lubbock</option>
+                <option value="LGA">LGA - New York LaGuardia</option>
+                <option value="LIT">LIT - Little Rock</option>
+                <option value="MAF">MAF - Midland</option>
+                <option value="MBJ">MBJ - Montego Bay</option>
+                <option value="MCI">MCI - Kansas City</option>
+                <option value="MCO">MCO - Orlando</option>
+                <option value="MDW">MDW - Chicago Midway</option>
+                <option value="MEM">MEM - Memphis</option>
+                <option value="MEX">MEX - Mexico City</option>
+                <option value="MHT">MHT - Manchester</option>
+                <option value="MKE">MKE - Milwaukee</option>
+                <option value="MSP">MSP - Minneapolis</option>
+                <option value="MSY">MSY - New Orleans</option>
+                <option value="OAK">OAK - Oakland</option>
+                <option value="OKC">OKC - Oklahoma City</option>
+                <option value="OMA">OMA - Omaha</option>
+                <option value="ONT">ONT - Ontario</option>
+                <option value="ORF">ORF - Norfolk</option>
+                <option value="PBI">PBI - West Palm Beach</option>
+                <option value="PDX">PDX - Portland</option>
+                <option value="PHL">PHL - Philadelphia</option>
+                <option value="PHX">PHX - Phoenix</option>
+                <option value="PIT">PIT - Pittsburgh</option>
+                <option value="PNS">PNS - Pensacola</option>
+                <option value="PVD">PVD - Providence</option>
+                <option value="PVR">PVR - Puerto Vallarta</option>
+                <option value="PWM">PWM - Portland, ME</option>
+                <option value="RDU">RDU - Raleigh-Durham</option>
+                <option value="RNO">RNO - Reno</option>
+                <option value="RSW">RSW - Fort Myers</option>
+                <option value="SAN">SAN - San Diego</option>
+                <option value="SAT">SAT - San Antonio</option>
+                <option value="SDF">SDF - Louisville</option>
+                <option value="SEA">SEA - Seattle</option>
+                <option value="SFO">SFO - San Francisco</option>
+                <option value="SJC">SJC - San Jose</option>
+                <option value="SJD">SJD - Cabo San Lucas</option>
+                <option value="SJU">SJU - San Juan</option>
+                <option value="SLC">SLC - Salt Lake City</option>
+                <option value="SMF">SMF - Sacramento</option>
+                <option value="SNA">SNA - Orange County</option>
+                <option value="STL">STL - St. Louis</option>
+                <option value="TPA">TPA - Tampa</option>
+                <option value="TUL">TUL - Tulsa</option>
+                <option value="TUS">TUS - Tucson</option>
             </select>
         </div>
     </div>
@@ -393,6 +480,7 @@
         let allData = null;
         let chartData = null;
         let currentFilter = 'all';
+        let phaseSelections = {}; // Track phase selections per measure group
 
         async function loadActualData() {
             document.getElementById('content').innerHTML = '<div class="loading">Loading Test Data...</div>';
@@ -407,6 +495,7 @@
                 
                 if (result.success) {
                     chartData = result.chartData;
+                    phaseSelections = {};  // Reset phase selections
                     updateStationSelect(result.stations);
                     renderCharts();
                 } else {
@@ -430,6 +519,7 @@
                 
                 if (result.success) {
                     chartData = result.chartData;
+                    phaseSelections = {};  // Reset phase selections
                     updateStationSelect(result.stations);
                     renderCharts();
                 } else {
@@ -461,6 +551,7 @@
                 
                 if (result.success) {
                     chartData = result.chartData;
+                    phaseSelections = {};  // Reset phase selections
                     updateStationSelect(result.stations);
                     renderCharts();
                 } else {
@@ -532,6 +623,13 @@
             // Filter points to only include those from startIndex onward
             const filteredPoints = data.points.slice(startIndex);
             
+            // **FIX: Adjust phase indices to be relative to filtered points**
+            const adjustedPhases = phasesToShow.map(phase => ({
+                ...phase,
+                startIndex: phase.startIndex - startIndex,  // Make relative to filtered array
+                endIndex: phase.endIndex - startIndex      // Make relative to filtered array
+            }));
+            
             // For distribution chart, filter histogram data to match date range
             let filteredHistogram = data.histogram;
             if (data.histogram && filteredPoints.length > 0) {
@@ -541,11 +639,11 @@
                 filteredHistogram = data.histogram; // Keep for now, can enhance later
             }
             
-            // Create new data object with filtered points and phases
+            // Create new data object with filtered points and adjusted phases
             return {
                 ...data,
                 points: filteredPoints,
-                phases: phasesToShow,
+                phases: adjustedPhases,
                 histogram: filteredHistogram,
                 originalPhaseCount: data.phases.length,  // Track total phases
                 filteredFrom: startIndex
@@ -612,7 +710,8 @@
                     const group = measureGroups[baseMeasure];
                     const groupId = `${station}-${baseMeasure}`.replace(/[^a-zA-Z0-9]/g, '-');
                     const maxPhases = group.maxPhases;
-                    const defaultPhases = maxPhases;  // Start with all phases visible
+                    const groupKey = `${station}-${baseMeasure}`;
+                    const defaultPhases = phaseSelections[groupKey] || maxPhases;  // Use saved or default to all phases
                     
                     html += `<div class="measure-group" id="group-${groupId}">`;
                     html += `<div class="measure-group-header">`;
@@ -732,7 +831,8 @@
                         .replace(' (Moving Range)', '')
                         .replace(' (Distribution)', '');
                     const maxPhases = data.phases ? data.phases.length : 0;
-                    const defaultPhases = maxPhases;  // Start with all phases visible
+                    const groupKey = `${station}-${baseMeasure}`;
+                    const defaultPhases = phaseSelections[groupKey] || maxPhases;  // Use saved or default to all phases
                     
                     const filteredData = filterToLastNPhases(data, defaultPhases);
                     const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
@@ -757,6 +857,8 @@
              */
             numPhases = parseInt(numPhases);
             const groupId = `${station}-${baseMeasure}`.replace(/[^a-zA-Z0-9]/g, '-');
+            const groupKey = `${station}-${baseMeasure}`;
+            phaseSelections[groupKey] = numPhases;  // Save state
             
             // Update display text
             const valueDisplay = document.getElementById(`value-${groupId}`);

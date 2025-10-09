@@ -187,6 +187,6 @@ Internal use only - Airline Technical Operations
 
 ---
 
-**Version:** 1.5.1  
-**Last Updated:** October 2025  
-**Maintained by:** Technical Operations Analytics Team
+**Version:** 1.6  
+**Last Updated:** October 9, 2025  
+**Maintained by:** Southwest Airlines Technical Operations Analytics Team
