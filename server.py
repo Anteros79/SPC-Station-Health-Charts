@@ -54,21 +54,69 @@ class SPCHandler(SimpleHTTPRequestHandler):
                 csv_text = request_data.get('csvData', '')
                 filename = request_data.get('filename', '')
                 
+                # Validate CSV isn't empty
+                if not csv_text or not csv_text.strip():
+                    raise ValueError("Uploaded file is empty")
+                
+                # Validate CSV format
+                is_valid, error_msg = validate_csv_format(csv_text)
+                if not is_valid:
+                    raise ValueError(error_msg)
+                
                 # Auto-detect CSV format
                 csv_text = auto_convert_csv_format(csv_text, filename)
                 
+                # Process the data
                 result = process_data(csv_text)
+                
+                # Check if processing succeeded
+                if not result.get('success', False):
+                    raise ValueError(result.get('error', 'Unknown processing error'))
                 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps(result).encode('utf-8'))
             
+            except json.JSONDecodeError as e:
+                error_msg = f"Invalid JSON data: {str(e)}"
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {'error': error_msg, 'success': False}
+                self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            
+            except UnicodeDecodeError as e:
+                error_msg = f"File encoding error. Please save as UTF-8: {str(e)}"
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {'error': error_msg, 'success': False}
+                self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            
+            except ValueError as e:
+                error_msg = str(e)
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {'error': error_msg, 'success': False}
+                self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            
+            except OSError as e:
+                # [Errno 22] Invalid argument falls here
+                error_msg = f"File processing error: {str(e)}. Check date formats (use YYYY-MM-DD or M/D/YYYY)"
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {'error': error_msg, 'success': False}
+                self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            
             except Exception as e:
+                error_msg = f"Unexpected error: {str(e)}"
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                error_response = {'error': str(e), 'success': False}
+                error_response = {'error': error_msg, 'success': False}
                 self.wfile.write(json.dumps(error_response).encode('utf-8'))
         
         elif self.path == '/api/demo':
@@ -163,6 +211,31 @@ def auto_convert_csv_format(csv_text, filename=''):
     
     # Format B or already correct - return as-is
     return csv_text
+
+
+def validate_csv_format(csv_text):
+    """
+    Validate CSV format and provide helpful error messages
+    Returns (is_valid, error_message)
+    """
+    lines = [line.strip() for line in csv_text.strip().split('\n') if line.strip()]
+    
+    if len(lines) < 2:
+        return False, "CSV file must have at least a header row and one data row"
+    
+    header = lines[0].lower()
+    required_formats = [
+        (['timestamp', 'station', 'metric_value'], "Format A"),
+        (['station', 'measure', 'date', 'value'], "Format B")
+    ]
+    
+    # Check if header matches either format
+    for required_cols, format_name in required_formats:
+        if all(col in header for col in required_cols):
+            return True, ""
+    
+    # Neither format matched
+    return False, f"CSV header must contain either:\n  - 'timestamp,station,metric_value' OR\n  - 'station,measure,date,value'\nFound: {lines[0]}"
 
 
 def run_server(port=8000):

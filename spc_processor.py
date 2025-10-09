@@ -12,16 +12,33 @@ from io import StringIO
 
 
 def parse_csv(csv_text: str) -> List[Dict[str, Any]]:
-    """Parse CSV text into data points"""
-    reader = csv.DictReader(StringIO(csv_text))
+    """Parse CSV text into data points with validation"""
+    try:
+        reader = csv.DictReader(StringIO(csv_text))
+    except Exception as e:
+        raise ValueError(f"Failed to read CSV: {str(e)}")
+    
+    # Validate required columns exist
+    if reader.fieldnames is None:
+        raise ValueError("CSV file has no header row")
+    
+    required_cols = ['station', 'measure', 'date', 'value']
+    missing_cols = [col for col in required_cols if col not in reader.fieldnames]
+    if missing_cols:
+        raise ValueError(f"Missing required columns: {', '.join(missing_cols)}")
+    
     data_points = []
+    row_num = 1
     
     for row in reader:
+        row_num += 1
         try:
-            print(f"Debug SPC - Row: {row}")
-            print(f"Debug SPC - Value string: '{row['value']}'")
+            # Validate all required fields are present
+            for col in required_cols:
+                if not row.get(col) or not row[col].strip():
+                    raise ValueError(f"Row {row_num}: Missing value for '{col}'")
+            
             value_float = float(row['value'])
-            print(f"Debug SPC - Value float: {value_float}")
             
             data_points.append({
                 'station': row['station'].strip(),
@@ -30,13 +47,12 @@ def parse_csv(csv_text: str) -> List[Dict[str, Any]]:
                 'value': value_float
             })
         except (ValueError, KeyError) as e:
-            print(f"Warning: Skipping invalid row: {e}")
-            print(f"Row data: {row}")
+            print(f"Warning: Skipping row {row_num}: {e}")
             continue
     
-    print(f"Debug SPC - Total data points created: {len(data_points)}")
     if len(data_points) == 0:
-        print("ERROR: No valid data points found!")
+        raise ValueError("No valid data rows found in CSV. Check that all rows have station, measure, date, and numeric value.")
+    
     return data_points
 
 
@@ -139,16 +155,21 @@ def detect_phases(data_points: List[Dict[str, Any]]) -> Dict[str, Any]:
     
     # Sort by date (properly parse dates for correct chronological order)
     def parse_date(date_str):
-        try:
-            # Handle M/D/YYYY format
-            return datetime.strptime(date_str.strip(), '%m/%d/%Y')
-        except ValueError:
+        """Parse date with better error handling"""
+        if not date_str or not isinstance(date_str, str):
+            raise ValueError(f"Invalid date value: {date_str}")
+        
+        date_str = date_str.strip()
+        
+        # Try common formats
+        for fmt in ['%m/%d/%Y', '%Y-%m-%d', '%Y/%m/%d', '%m-%d-%Y']:
             try:
-                # Handle YYYY-MM-DD format
-                return datetime.strptime(date_str.strip(), '%Y-%m-%d')
+                return datetime.strptime(date_str, fmt)
             except ValueError:
-                # Fallback to string comparison if parsing fails
-                return date_str
+                continue
+        
+        # If all formats fail
+        raise ValueError(f"Unable to parse date '{date_str}'. Supported formats: M/D/YYYY, YYYY-MM-DD, YYYY/M/D, M-D-YYYY")
     
     sorted_data = sorted(data_points, key=lambda x: parse_date(x['date']))
     values = [p['value'] for p in sorted_data]
