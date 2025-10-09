@@ -96,6 +96,7 @@ class SPCHandler(SimpleHTTPRequestHandler):
             
             except ValueError as e:
                 error_msg = str(e)
+                print(f"ValueError caught: {error_msg}")
                 self.send_response(400)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -104,7 +105,8 @@ class SPCHandler(SimpleHTTPRequestHandler):
             
             except OSError as e:
                 # [Errno 22] Invalid argument falls here
-                error_msg = f"File processing error: {str(e)}. Check date formats (use YYYY-MM-DD or M/D/YYYY)"
+                error_msg = f"File processing error: {str(e)}\n\nThis is typically caused by invalid date formats. Please ensure:\n- Dates use supported formats: M/D/YYYY, YYYY-MM-DD, YYYY/M/D, or M-D-YYYY\n- All date values are valid (no dates like 13/45/2023)\n- File is saved as UTF-8 encoding"
+                print(f"OSError caught: {error_msg}")
                 self.send_response(400)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
