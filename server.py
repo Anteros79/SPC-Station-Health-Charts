@@ -46,10 +46,31 @@ class SPCHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/api/process':
             # Handle data processing with auto-format detection
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
             try:
+                # Log basic request info (size-limited headers)
+                try:
+                    raw_headers = str(self.headers)
+                    print(f"Incoming /api/process request. Headers (trimmed):\n{raw_headers[:800]}")
+                except Exception:
+                    pass
+
+                # Defensive Content-Length parsing
+                length_header = self.headers.get('Content-Length')
+                if not length_header:
+                    raise ValueError('Missing Content-Length header')
+                try:
+                    content_length = int(length_header)
+                except Exception:
+                    raise ValueError(f'Invalid Content-Length: {length_header}')
+                if content_length <= 0:
+                    raise ValueError('Empty request body (Content-Length <= 0)')
+
+                # Read request body safely
+                post_data = self.rfile.read(content_length)
+                if not post_data:
+                    raise ValueError('No request body received')
+
+                # Decode JSON strictly
                 request_data = json.loads(post_data.decode('utf-8'))
                 csv_text = request_data.get('csvData', '')
                 filename = request_data.get('filename', '')
@@ -105,8 +126,8 @@ class SPCHandler(SimpleHTTPRequestHandler):
             
             except OSError as e:
                 # [Errno 22] Invalid argument falls here
-                error_msg = f"File processing error: {str(e)}\n\nThis is typically caused by invalid date formats. Please ensure:\n- Dates use supported formats: M/D/YYYY, YYYY-MM-DD, YYYY/M/D, or M-D-YYYY\n- All date values are valid (no dates like 13/45/2023)\n- File is saved as UTF-8 encoding"
-                print(f"OSError caught: {error_msg}")
+                error_msg = f"File processing error: {str(e)}<br><br>This is typically caused by invalid date formats. Please ensure:<br>• Dates use supported formats: M/D/YYYY, YYYY-MM-DD, YYYY/M/D, or M-D-YYYY<br>• All date values are valid (no dates like 13/45/2023)<br>• File is saved as UTF-8 encoding"
+                print(f"OSError caught: {str(e)}")
                 self.send_response(400)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -114,12 +135,41 @@ class SPCHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(error_response).encode('utf-8'))
             
             except Exception as e:
+                import traceback
                 error_msg = f"Unexpected error: {str(e)}"
+                print(f"\n{'='*60}")
+                print(f"EXCEPTION CAUGHT: {type(e).__name__}")
+                print(f"Error message: {str(e)}")
+                print(f"Traceback:")
+                traceback.print_exc()
+                print(f"{'='*60}\n")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 error_response = {'error': error_msg, 'success': False}
                 self.wfile.write(json.dumps(error_response).encode('utf-8'))
+        
+        elif self.path == '/api/ping':
+            # Simple echo endpoint to test POST pipeline
+            try:
+                length_header = self.headers.get('Content-Length')
+                content_length = int(length_header) if length_header else 0
+                body = self.rfile.read(content_length) if content_length > 0 else b''
+                payload = None
+                if body:
+                    try:
+                        payload = json.loads(body.decode('utf-8'))
+                    except Exception:
+                        payload = {'raw': body.decode('utf-8', errors='replace')}
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'ok': True, 'received': payload}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'ok': False, 'error': str(e)}).encode('utf-8'))
         
         elif self.path == '/api/demo':
             # Generate demo data
