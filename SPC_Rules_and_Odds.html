@@ -162,8 +162,22 @@ if value &gt; ucl or value &lt; lcl:
           </details>
 
           <details open>
+            <summary>Rule #2 — 2 of 3 consecutive points beyond 2σ (same side)</summary>
+            <div class="filename"><span>spc_processor.py · find_phase_end</span><span class="tag">Lines 147–157</span></div>
+            <pre><code># RULE #2 (modified): 2 of 3 beyond 2σ on the same side
+# Maintain a sliding window of the most recent 3 points
+recent_values.append(value)
+if len(recent_values) == 3:
+    count_upper = sum(1 for v in recent_values if v &gt;= two_sigma_upper)
+    count_lower = sum(1 for v in recent_values if v &lt;= two_sigma_lower)
+    if count_upper &gt;= 2 or count_lower &gt;= 2:
+        # Signal! Phase ends at the point BEFORE the 3-point window
+        return max(0, i - 2)</code></pre>
+          </details>
+
+          <details open>
             <summary>Rule #4 — 7 consecutive points on one side of CL</summary>
-            <div class="filename"><span>spc_processor.py · find_phase_end</span><span class="tag">Lines 123–137</span></div>
+            <div class="filename"><span>spc_processor.py · find_phase_end</span><span class="tag">Lines 131–145</span></div>
             <pre><code># RULE #4: Track 7-point runs
 if value &gt; cl:
     consecutive_above += 1; consecutive_below = 0
@@ -270,10 +284,9 @@ X = (1 - p) / p  # "1 in X" (capped at 10,000)</code></pre>
 
       <section id="extensions" class="card">
         <h2>6) Additional Rule Extensions (optional to implement)</h2>
-        <p>The dashboard already applies Rule #1 and Rule #4. The following can be added with identical phase sharing for X and mR:</p>
+        <p>The dashboard already applies Rule #1 (outlier beyond 3σ), Rule #2 (2 of 3 ≥ 2σ), and Rule #4 (7-point run). The following can be added with identical phase sharing for X and mR:</p>
         <ul>
           <li><b>Trend (7)</b> — strictly increasing or strictly decreasing sequence of 7.</li>
-          <li><b>2 of 3 ≥ 2σ</b> (same side)</li>
           <li><b>4 of 5 ≥ 1σ</b> (same side)</li>
         </ul>
         <p class="muted">These do not change phase boundaries unless configured; they can be used to prioritize investigation and goal‑setting confidence.</p>
