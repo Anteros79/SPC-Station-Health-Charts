@@ -183,8 +183,8 @@ def detect_phases(data_points: List[Dict[str, Any]]) -> Dict[str, Any]:
         
         date_str = date_str.strip()
         
-        # Try common formats
-        for fmt in ['%m/%d/%Y', '%Y-%m-%d', '%Y/%m/%d', '%m-%d-%Y']:
+        # Try common formats - YYYY-MM-DD first for proper sorting
+        for fmt in ['%Y-%m-%d', '%Y/%m/%d', '%m/%d/%Y', '%m-%d-%Y']:
             try:
                 return datetime.strptime(date_str, fmt)
             except ValueError:
@@ -193,11 +193,25 @@ def detect_phases(data_points: List[Dict[str, Any]]) -> Dict[str, Any]:
         # If all formats fail
         raise ValueError(f"Unable to parse date '{date_str}'. Supported formats: M/D/YYYY, YYYY-MM-DD, YYYY/M/D, M-D-YYYY")
     
-    sorted_data = sorted(data_points, key=lambda x: parse_date(x['date']))
+    # Sort by date - for daily data, chronological order (oldest to newest); for weekly data, chronological order
+    has_daily_data = any('(Daily Bar)' in point['measure'] for point in data_points)
+    if has_daily_data:
+        # Daily data: chronological order (ascending order) - oldest on left, newest on right
+        sorted_data = sorted(data_points, key=lambda x: parse_date(x['date']))
+    else:
+        # Weekly data: chronological order (ascending order)
+        sorted_data = sorted(data_points, key=lambda x: parse_date(x['date']))
     values = [p['value'] for p in sorted_data]
     
     phases = []
-    augmented_points = [dict(p) for p in sorted_data]
+    # Convert dates to ISO format strings for proper JavaScript parsing
+    augmented_points = []
+    for p in sorted_data:
+        point = dict(p)
+        # Parse the date string to datetime, then convert to ISO format
+        parsed_date = parse_date(p['date'])
+        point['date'] = parsed_date.isoformat()  # Convert to ISO format (YYYY-MM-DDTHH:MM:SS)
+        augmented_points.append(point)
     
     current_start = 0
     phase_number = 1
@@ -493,41 +507,49 @@ def process_data(csv_text: str) -> Dict[str, Any]:
         grouped[station][measure].append(point)
     
     # Process each station/measure combination
-    # Generate BOTH X chart and mR chart
+    # Generate charts based on data type
     chart_data = {}
     for station, measures in grouped.items():
         chart_data[station] = {}
         for measure, points in measures.items():
-            # Step 1: Detect phases using X chart (Individuals) ONLY
-            x_chart_data = detect_phases(points)
             
-            # Step 2: Generate mR data from same points
-            mr_points = generate_moving_range_data(points)
-            mr_chart_data = None
-            
-            if mr_points:
-                # Step 3: Apply X chart's phase boundaries to mR chart
-                # This ensures both charts have IDENTICAL phase structure
-                mr_chart_data = apply_phases_to_mr(mr_points, x_chart_data['phases'])
+            # Check if this is daily bar chart data
+            if '(Daily Bar)' in measure:
+                # Daily bar chart data - only create the single daily chart
+                daily_chart_data = detect_phases(points)
+                chart_data[station][measure] = daily_chart_data
+            else:
+                # Weekly SPC data - create X, mR, and Distribution charts
+                # Step 1: Detect phases using X chart (Individuals) ONLY
+                x_chart_data = detect_phases(points)
                 
-                # Step 4: Detect signal coordination
-                signal_info = detect_xmr_signal_type(x_chart_data, mr_chart_data)
-                x_chart_data['signal_info'] = signal_info
-                mr_chart_data['signal_info'] = signal_info
-            
-            # Step 5: Store X and mR charts
-            chart_data[station][measure] = x_chart_data
-            if mr_chart_data:
-                mr_measure = measure + ' (Moving Range)'
-                chart_data[station][mr_measure] = mr_chart_data
-            
-            # Step 6: Generate distribution chart LAST
-            histogram_data = generate_histogram_data(points)
-            histogram_measure = measure + ' (Distribution)'
-            chart_data[station][histogram_measure] = {
-                'histogram': histogram_data,
-                'type': 'distribution'
-            }
+                # Step 2: Generate mR data from same points
+                mr_points = generate_moving_range_data(points)
+                mr_chart_data = None
+                
+                if mr_points:
+                    # Step 3: Apply X chart's phase boundaries to mR chart
+                    # This ensures both charts have IDENTICAL phase structure
+                    mr_chart_data = apply_phases_to_mr(mr_points, x_chart_data['phases'])
+                    
+                    # Step 4: Detect signal coordination
+                    signal_info = detect_xmr_signal_type(x_chart_data, mr_chart_data)
+                    x_chart_data['signal_info'] = signal_info
+                    mr_chart_data['signal_info'] = signal_info
+                
+                # Step 5: Store X and mR charts
+                chart_data[station][measure] = x_chart_data
+                if mr_chart_data:
+                    mr_measure = measure + ' (Moving Range)'
+                    chart_data[station][mr_measure] = mr_chart_data
+                
+                # Step 6: Generate distribution chart LAST
+                histogram_data = generate_histogram_data(points)
+                histogram_measure = measure + ' (Distribution)'
+                chart_data[station][histogram_measure] = {
+                    'histogram': histogram_data,
+                    'type': 'distribution'
+                }
     
     return {
         'success': True,

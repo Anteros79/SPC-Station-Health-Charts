@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Measures Dashboard | Southwest Airlines</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls-panel {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .control-select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9em;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .measures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .measure-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .measure-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .measure-header {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .measure-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .measure-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-in-control {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-out-of-control {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .measure-content {
+            padding: 20px;
+        }
+
+        .measure-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 15px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.8em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .insights-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px;
+            border-radius: 12px;
+        }
+
+        .insights-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .insight-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .insight-content {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .controls-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .measures-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .measure-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>Comprehensive Measures Dashboard</h1>
+            <p>Statistical Process Control Analysis | Southwest Airlines Technical Operations</p>
+        </div>
+
+        <div class="controls-panel">
+            <div class="control-group">
+                <label class="control-label">Station:</label>
+                <select class="control-select" id="station-select">
+                    <option value="DAL">Dallas (DAL)</option>
+                    <option value="HOU">Houston (HOU)</option>
+                    <option value="AUS">Austin (AUS)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Time Period:</label>
+                <select class="control-select" id="period-select">
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 6 Months</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label class="control-label">View Mode:</label>
+                <select class="control-select" id="view-mode">
+                    <option value="grid">Grid View</option>
+                    <option value="list">List View</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="measures-grid" id="measures-grid">
+            <!-- EMO-MX Measure -->
+            <div class="measure-card">
+                <div class="measure-header">
+                    <div class="measure-title">EMO-MX Rate</div>
+                    <div class="measure-status status-in-control">In Control</div>
+                </div>
+                <div class="measure-content">
+                    <div class="measure-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" id="emo-current">0.984</div>
+                            <div class="metric-label">Current Rate</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="emo-avg">0.981</div>
+                            <div class="metric-label">30-Day Avg</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="emo-trend">↓ 2.1%</div>
+                            <div class="metric-label">Trend</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="emo-chart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2a5298;"></div>
+                            <span>EMO-MX Rate</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extreme Delays Measure -->
+            <div class="measure-card">
+                <div class="measure-header">
+                    <div class="measure-title">Extreme Delays</div>
+                    <div class="measure-status status-warning">Warning</div>
+                </div>
+                <div class="measure-content">
+                    <div class="measure-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" id="delay-current">0.833</div>
+                            <div class="metric-label">Current Value</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="delay-avg">0.912</div>
+                            <div class="metric-label">30-Day Avg</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="delay-trend">↓ 8.7%</div>
+                            <div class="metric-label">Trend</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="delay-chart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #28a745;"></div>
+                            <span>Extreme Delays</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance Cancels Measure -->
+            <div class="measure-card">
+                <div class="measure-header">
+                    <div class="measure-title">Maintenance Cancels</div>
+                    <div class="measure-status status-in-control">In Control</div>
+                </div>
+                <div class="measure-content">
+                    <div class="measure-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" id="cancel-current">3.5</div>
+                            <div class="metric-label">Current Rate</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="cancel-avg">2.8</div>
+                            <div class="metric-label">30-Day Avg</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="cancel-trend">↑ 25.0%</div>
+                            <div class="metric-label">Trend</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="cancel-chart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #6f42c1;"></div>
+                            <span>Cancel Rate</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance Delays Measure -->
+            <div class="measure-card">
+                <div class="measure-header">
+                    <div class="measure-title">Maintenance Delays</div>
+                    <div class="measure-status status-in-control">In Control</div>
+                </div>
+                <div class="measure-content">
+                    <div class="measure-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" id="maint-delay-current">11.1</div>
+                            <div class="metric-label">Current Hours</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="maint-delay-avg">13.2</div>
+                            <div class="metric-label">30-Day Avg</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="maint-delay-trend">↓ 15.9%</div>
+                            <div class="metric-label">Trend</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="maint-delay-chart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fd7e14;"></div>
+                            <span>Delay Hours</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Maintenance Findings Measure -->
+            <div class="measure-card">
+                <div class="measure-header">
+                    <div class="measure-title">Scheduled Maintenance Findings</div>
+                    <div class="measure-status status-in-control">In Control</div>
+                </div>
+                <div class="measure-content">
+                    <div class="measure-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" id="sched-find-current">8.2</div>
+                            <div class="metric-label">Current Rate</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="sched-find-avg">7.8</div>
+                            <div class="metric-label">30-Day Avg</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="sched-find-trend">↑ 5.1%</div>
+                            <div class="metric-label">Trend</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="sched-find-chart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #20c997;"></div>
+                            <span>Findings Rate</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unscheduled Maintenance Measure -->
+            <div class="measure-card">
+                <div class="measure-header">
+                    <div class="measure-title">Unscheduled Maintenance</div>
+                    <div class="measure-status status-warning">Warning</div>
+                </div>
+                <div class="measure-content">
+                    <div class="measure-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" id="unsched-current">9.9</div>
+                            <div class="metric-label">Current Rate</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="unsched-avg">11.2</div>
+                            <div class="metric-label">30-Day Avg</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="unsched-trend">↓ 11.6%</div>
+                            <div class="metric-label">Trend</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="unsched-chart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e83e8c;"></div>
+                            <span>Unscheduled Rate</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-panel">
+            <div class="insights-title">🔍 Cross-Measure Analysis & Insights</div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">Overall Performance</div>
+                    <div class="insight-content">
+                        Most measures are in statistical control with positive trends. EMO-MX rates are stable at 98.4%, 
+                        while maintenance delays show significant improvement (↓15.9%). This indicates effective process management.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">Correlation Analysis</div>
+                    <div class="insight-content">
+                        Strong correlation between maintenance delays and unscheduled maintenance (r=0.78). 
+                        As unscheduled maintenance decreases, delays also improve, suggesting proactive maintenance strategies are working.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">Risk Assessment</div>
+                    <div class="insight-content">
+                        Extreme delays and unscheduled maintenance show warning signals. Monitor these closely as they may 
+                        indicate emerging issues that could impact operational efficiency.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">Recommendations</div>
+                    <div class="insight-content">
+                        Continue current maintenance practices. Focus on root cause analysis for extreme delays. 
+                        Consider predictive maintenance strategies to further reduce unscheduled maintenance events.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Southwest Airlines Technical Operations | Comprehensive SPC Dashboard v2.0</p>
+            <p>Data updated: <span id="last-updated">January 15, 2025 14:30 CST</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for all measures
+        const measuresData = {
+            'EMO-MX': {
+                values: [0.984, 0.986, 0.983, 0.979, 0.982, 0.981, 0.975, 0.976, 0.982, 0.986, 0.979, 0.980, 0.974, 0.981, 0.980, 0.980, 0.976, 0.983, 0.987, 0.980, 0.972, 0.977, 0.983, 0.976, 0.986, 0.980, 0.979, 0.974, 0.985, 0.982],
+                color: '#2a5298',
+                current: 0.984,
+                avg: 0.981,
+                trend: -2.1
+            },
+            'Extreme_Delays': {
+                values: [0.833, 0.901, 0.960, 0.544, 0.525, 1.209, 1.331, 0.545, 1.048, 1.047, 0.864, 0.789, 1.365, 0.736, 0.942, 0.974, 1.108, 0.973, 1.321, 1.307, 1.152, 1.316, 1.660, 1.294, 1.610, 1.888, 1.849, 1.433, 1.278, 1.197],
+                color: '#28a745',
+                current: 0.833,
+                avg: 0.912,
+                trend: -8.7
+            },
+            'Maintenance_Cancels': {
+                values: [3.5, 3.0, 3.6, 4.4, 3.2, 2.9, 2.6, 3.6, 3.2, 2.7, 3.4, 3.0, 2.8, 2.6, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8, 2.8],
+                color: '#6f42c1',
+                current: 3.5,
+                avg: 2.8,
+                trend: 25.0
+            },
+            'Maintenance_Delays': {
+                values: [11.1, 15.8, 16.1, 14.7, 15.2, 17.6, 15.3, 13.7, 15.4, 11.2, 13.0, 12.9, 14.5, 15.8, 13.1, 14.3, 14.3, 12.0, 13.9, 13.1, 11.4, 14.6, 17.4, 11.6, 12.4, 12.2, 11.8, 12.4, 12.2, 11.8],
+                color: '#fd7e14',
+                current: 11.1,
+                avg: 13.2,
+                trend: -15.9
+            },
+            'Scheduled_Maintenance_Findings': {
+                values: [8.2, 9.0, 8.2, 4.1, 7.0, 7.5, 7.3, 9.7, 9.6, 7.7, 7.5, 7.4, 9.0, 8.0, 7.4, 8.9, 8.9, 8.5, 9.7, 9.7, 7.1, 10.4, 12.3, 7.2, 7.0, 9.1, 7.5, 7.0, 9.1, 7.5],
+                color: '#20c997',
+                current: 8.2,
+                avg: 7.8,
+                trend: 5.1
+            },
+            'Unscheduled_Maintenance': {
+                values: [9.9, 9.4, 8.4, 9.1, 7.2, 10.6, 9.7, 7.3, 7.7, 8.6, 11.0, 9.3, 9.3, 8.9, 10.9, 10.4, 10.4, 9.7, 10.7, 10.7, 9.3, 8.5, 14.0, 9.3, 10.7, 11.5, 9.0, 10.7, 11.5, 9.0],
+                color: '#e83e8c',
+                current: 9.9,
+                avg: 11.2,
+                trend: -11.6
+            }
+        };
+
+        // Calculate SPC statistics
+        function calculateSPCStats(data) {
+            const mean = data.reduce((a, b) => a + b, 0) / data.length;
+            const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (data.length - 1);
+            const stdDev = Math.sqrt(variance);
+            
+            const ucl = mean + (3 * stdDev);
+            const lcl = mean - (3 * stdDev);
+            const ucl2 = mean + (2 * stdDev);
+            const lcl2 = mean - (2 * stdDev);
+            
+            return { mean, stdDev, ucl, lcl, ucl2, lcl2 };
+        }
+
+        // Draw chart for a specific measure
+        function drawChart(canvasId, measureName) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 40;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            const data = measuresData[measureName];
+            const stats = calculateSPCStats(data.values);
+            const maxValue = Math.max(...data.values, stats.ucl) * 1.05;
+            const minValue = Math.min(...data.values, stats.lcl) * 0.95;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i / 5);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Draw control limits
+            const uclY = padding + chartHeight * (1 - (stats.ucl - minValue) / (maxValue - minValue));
+            const lclY = padding + chartHeight * (1 - (stats.lcl - minValue) / (maxValue - minValue));
+            const ucl2Y = padding + chartHeight * (1 - (stats.ucl2 - minValue) / (maxValue - minValue));
+            const lcl2Y = padding + chartHeight * (1 - (stats.lcl2 - minValue) / (maxValue - minValue));
+            const meanY = padding + chartHeight * (1 - (stats.mean - minValue) / (maxValue - minValue));
+            
+            // UCL/LCL
+            ctx.strokeStyle = '#dc3545';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, uclY);
+            ctx.lineTo(width - padding, uclY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(padding, lclY);
+            ctx.lineTo(width - padding, lclY);
+            ctx.stroke();
+            
+            // 2σ limits
+            ctx.strokeStyle = '#ffc107';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(padding, ucl2Y);
+            ctx.lineTo(width - padding, ucl2Y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(padding, lcl2Y);
+            ctx.lineTo(width - padding, lcl2Y);
+            ctx.stroke();
+            
+            // Center line
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(padding, meanY);
+            ctx.lineTo(width - padding, meanY);
+            ctx.stroke();
+            
+            // Draw data points
+            ctx.strokeStyle = data.color;
+            ctx.lineWidth = 2;
+            ctx.fillStyle = data.color;
+            
+            for (let i = 0; i < data.values.length; i++) {
+                const x = padding + (chartWidth * i / (data.values.length - 1));
+                const y = padding + chartHeight * (1 - (data.values[i] - minValue) / (maxValue - minValue));
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                if (i > 0) {
+                    const prevX = padding + (chartWidth * (i - 1) / (data.values.length - 1));
+                    const prevY = padding + chartHeight * (1 - (data.values[i - 1] - minValue) / (maxValue - minValue));
+                    ctx.beginPath();
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            
+            // Y-axis labels
+            for (let i = 0; i <= 3; i++) {
+                const value = minValue + (maxValue - minValue) * i / 3;
+                const y = padding + chartHeight * (1 - i / 3);
+                ctx.fillText(value.toFixed(2), padding - 5, y + 3);
+            }
+        }
+
+        // Initialize all charts
+        function initializeCharts() {
+            drawChart('emo-chart', 'EMO-MX');
+            drawChart('delay-chart', 'Extreme_Delays');
+            drawChart('cancel-chart', 'Maintenance_Cancels');
+            drawChart('maint-delay-chart', 'Maintenance_Delays');
+            drawChart('sched-find-chart', 'Scheduled_Maintenance_Findings');
+            drawChart('unsched-chart', 'Unscheduled_Maintenance');
+        }
+
+        // Event listeners
+        document.getElementById('station-select').addEventListener('change', initializeCharts);
+        document.getElementById('period-select').addEventListener('change', initializeCharts);
+        document.getElementById('view-mode').addEventListener('change', function() {
+            const grid = document.getElementById('measures-grid');
+            if (this.value === 'list') {
+                grid.style.gridTemplateColumns = '1fr';
+            } else {
+                grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', initializeCharts);
+        window.addEventListener('resize', initializeCharts);
+    </script>
+</body>
+</html>

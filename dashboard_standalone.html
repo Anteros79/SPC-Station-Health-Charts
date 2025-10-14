@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Southwest Tech Ops Station Health Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -486,7 +487,15 @@
                     <li>✓ Houston Hobby (HOU)</li>
                 </ul>
                 <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">Simulated test data • January 2023 to present • 4 maintenance metrics</p>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #304CB2;">
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 600; color: #304CB2;">📈 Chart Modes:</p>
+                    <ul style="margin: 0; padding-left: 1rem; font-size: 0.75rem; color: #6b7280;">
+                        <li><strong>Weekly Mode:</strong> X, mR, and Distribution charts with phase zoom control</li>
+                        <li><strong>Daily Mode:</strong> Interactive Plotly.js bar charts with 7-30 day slider</li>
+                    </ul>
+                </div>
                 <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">Upload supports: timestamp,station,metric_value (filename = measure) OR station,measure,date,value</p>
+                <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">📘 <a href="Explainer_File.html" target="_blank" style="color: #304CB2;">View User Guide</a> • <a href="SPC_Rules_and_Odds.html" target="_blank" style="color: #304CB2;">SPC Rules & Odds</a></p>
             </div>
         </div>
     </div>
@@ -682,45 +691,115 @@
                 
                 const allMeasures = Object.keys(chartData[station]);
                 
-                // Group measures by base name
-                const measureGroups = {};
-                allMeasures.forEach(measure => {
-                    const baseMeasure = measure
-                        .replace(' (Moving Range)', '')
-                        .replace(' (Distribution)', '');
-                    
-                    if (!measureGroups[baseMeasure]) {
-                        measureGroups[baseMeasure] = {
-                            x: null,
-                            mr: null,
-                            dist: null,
-                            maxPhases: 0
-                        };
-                    }
-                    
-                    if (measure.includes('(Distribution)')) {
-                        measureGroups[baseMeasure].dist = measure;
-                    } else if (measure.includes('(Moving Range)')) {
-                        measureGroups[baseMeasure].mr = measure;
-                        const phases = chartData[station][measure].phases || [];
-                        measureGroups[baseMeasure].maxPhases = Math.max(
-                            measureGroups[baseMeasure].maxPhases, 
-                            phases.length
-                        );
-                    } else {
-                        measureGroups[baseMeasure].x = measure;
-                        const phases = chartData[station][measure].phases || [];
-                        measureGroups[baseMeasure].maxPhases = Math.max(
-                            measureGroups[baseMeasure].maxPhases, 
-                            phases.length
-                        );
-                    }
-                });
+                // Check if this is daily data mode (has daily bar charts)
+                const hasDailyData = allMeasures.some(measure => measure.includes('(Daily Bar)'));
                 
-                // Sort base measures alphabetically
-                const sortedBaseMeasures = Object.keys(measureGroups).sort();
-                
-                // Render each measure group
+                if (hasDailyData) {
+                    // Daily mode - only show daily bar charts
+                    const dailyMeasures = allMeasures.filter(measure => measure.includes('(Daily Bar)'));
+                    
+                    dailyMeasures.forEach(dailyMeasure => {
+                        const baseMeasure = dailyMeasure.replace(' (Daily Bar)', '');
+                        const dailyData = chartData[station][dailyMeasure];
+                        const dailyCanvasId = `chart-${station}-${dailyMeasure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                        const dailyPoints = dailyData.points || [];
+                        const dailyMean = dailyPoints.length > 0 ? (dailyPoints.reduce((sum, p) => sum + p.value, 0) / dailyPoints.length).toFixed(3) : 'N/A';
+                        const dailyDateRange = dailyPoints.length > 0 ? `${new Date(dailyPoints[0].date).toLocaleDateString('en-US')} - ${new Date(dailyPoints[dailyPoints.length-1].date).toLocaleDateString('en-US')}` : '';
+                        
+                        // Calculate UCL/LCL from daily data
+                        const values = dailyPoints.map(p => p.value);
+                        const mean = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : 0;
+                        const stdDev = values.length > 1 ? Math.sqrt(values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length - 1)) : 0;
+                        const ucl = (mean + 3 * stdDev).toFixed(3);
+                        const lcl = Math.max(0, mean - 3 * stdDev).toFixed(3);
+                        
+                        html += `
+                            <div class="measure-group" id="group-${station}-${baseMeasure}" style="max-width: 1200px; margin: 0 auto;">
+                                <div class="measure-group-header">
+                                    <div class="measure-group-title">${baseMeasure} - Daily View</div>
+                                </div>
+                                <div class="chart-container" id="container-${dailyCanvasId}" data-station="${station}" data-base-measure="${baseMeasure}" data-measure="${dailyMeasure}" style="width: 100%; max-width: 1200px; margin: 0 auto;">
+                                    <div class="chart-header">
+                                        <div>
+                                            <div class="chart-title">${dailyMeasure}</div>
+                                            <div class="chart-subtitle">${station} • ${dailyDateRange}</div>
+                                        </div>
+                                        <div class="chart-stats">
+                                            <div class="chart-stat">
+                                                <span class="chart-stat-label">Mean</span>
+                                                <span class="chart-stat-value">${mean.toFixed(3)}</span>
+                                            </div>
+                                            <div class="chart-stat">
+                                                <span class="chart-stat-label">UCL</span>
+                                                <span class="chart-stat-value">${ucl}</span>
+                                            </div>
+                                            <div class="chart-stat">
+                                                <span class="chart-stat-label">LCL</span>
+                                                <span class="chart-stat-value">${lcl}</span>
+                                            </div>
+                                            <button onclick="downloadChartWithHeader('container-${dailyCanvasId}', '${station}_${dailyMeasure}')" 
+                                                    style="padding: 0.4rem 0.75rem; background: #4f46e5; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
+                                                💾 Save PNG
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="phase-control" style="margin-bottom: 1rem;">
+                                        <label class="phase-control-label">Days to Display:</label>
+                                        <input type="range" 
+                                               class="phase-slider" 
+                                               min="7" 
+                                               max="30" 
+                                               value="7" 
+                                               id="daily-slider-${dailyCanvasId}"
+                                               oninput="updateDailySlider('${dailyCanvasId}', this.value)">
+                                        <span class="phase-value-display" id="daily-value-${dailyCanvasId}">7 days</span>
+                                    </div>
+                                    <div id="${dailyCanvasId}" style="width: 100%; height: 450px;"></div>
+                                    <div id="data-table-${dailyCanvasId}" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    // Weekly mode - show SPC charts only
+                    const measureGroups = {};
+                    allMeasures.forEach(measure => {
+                        const baseMeasure = measure
+                            .replace(' (Moving Range)', '')
+                            .replace(' (Distribution)', '');
+                        
+                        if (!measureGroups[baseMeasure]) {
+                            measureGroups[baseMeasure] = {
+                                x: null,
+                                mr: null,
+                                dist: null,
+                                maxPhases: 0
+                            };
+                        }
+                        
+                        if (measure.includes('(Distribution)')) {
+                            measureGroups[baseMeasure].dist = measure;
+                        } else if (measure.includes('(Moving Range)')) {
+                            measureGroups[baseMeasure].mr = measure;
+                            const phases = chartData[station][measure].phases || [];
+                            measureGroups[baseMeasure].maxPhases = Math.max(
+                                measureGroups[baseMeasure].maxPhases, 
+                                phases.length
+                            );
+                        } else {
+                            measureGroups[baseMeasure].x = measure;
+                            const phases = chartData[station][measure].phases || [];
+                            measureGroups[baseMeasure].maxPhases = Math.max(
+                                measureGroups[baseMeasure].maxPhases, 
+                                phases.length
+                            );
+                        }
+                    });
+                    
+                    // Sort base measures alphabetically
+                    const sortedBaseMeasures = Object.keys(measureGroups).sort();
+                    
+                    // Render each measure group
                 sortedBaseMeasures.forEach(baseMeasure => {
                     const group = measureGroups[baseMeasure];
                     const groupId = `${station}-${baseMeasure}`.replace(/[^a-zA-Z0-9]/g, '-');
@@ -764,7 +843,7 @@
                         const mean = points.length > 0 ? (points.reduce((sum, p) => sum + p.value, 0) / points.length).toFixed(2) : 'N/A';
                         const ucl = points.length > 0 && points[0].ucl ? points[0].ucl.toFixed(2) : 'N/A';
                         const lcl = points.length > 0 && points[0].lcl ? points[0].lcl.toFixed(2) : 'N/A';
-                        const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}` : '';
+                        const dateRange = points.length > 0 ? `${new Date(points[0].date).toLocaleDateString('en-US')} - ${new Date(points[points.length-1].date).toLocaleDateString('en-US')}` : '';
                         
                         // Determine chart type and signal status
                         const isXChart = !measure.includes('Moving Range') && !measure.includes('Distribution');
@@ -829,44 +908,80 @@
                     html += `</div>`;  // End measure-charts
                     html += `</div>`;  // End measure-group
                 });
+                }
                 
                 html += `</div>`;  // End station-section
             });
             
             document.getElementById('content').innerHTML = html;
             
-            // Draw all charts with default filter applied
+            // Draw charts based on mode
             stations.forEach(station => {
                 if (!chartData[station]) return;
                 
                 const allMeasures = Object.keys(chartData[station]);
-                allMeasures.forEach(measure => {
-                    const data = chartData[station][measure];
-                    const baseMeasure = measure
-                        .replace(' (Moving Range)', '')
-                        .replace(' (Distribution)', '');
-                    const maxPhases = data.phases ? data.phases.length : 0;
-                    const groupKey = `${station}-${baseMeasure}`;
-                    const defaultPhases = phaseSelections[groupKey] || maxPhases;  // Use saved or default to all phases
+                const hasDailyData = allMeasures.some(measure => measure.includes('(Daily Bar)'));
+                
+                if (hasDailyData) {
+                    // Daily mode - draw daily bar charts only
+                    const dailyMeasures = allMeasures.filter(measure => measure.includes('(Daily Bar)'));
                     
-                    const filteredData = filterToLastNPhases(data, defaultPhases);
-                    const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
-                    const canvas = document.getElementById(canvasId);
-                    const tooltip = document.getElementById(`tooltip-${canvasId}`);
-                    
-                    if (canvas && tooltip) {
-                        if (measure.includes('(Distribution)')) {
-                            const xData = chartData[station][baseMeasure];
-                            const filteredX = filterToLastNPhases(xData, defaultPhases);
-                            const values = (filteredX.points || []).map(p => p.value);
-                            const hist = buildHistogram(values);
-                            drawHistogram(canvas, hist);
-                        } else {
-                            drawChart(canvas, filteredData);
-                            setupInteractivity(canvas, tooltip, filteredData);
+                    dailyMeasures.forEach(measure => {
+                        const baseMeasure = measure.replace(' (Daily Bar)', '');
+                        const data = chartData[station][measure];
+                        const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                        const canvas = document.getElementById(canvasId);
+                        
+                        if (data && data.points) {
+                            try {
+                                // Render Plotly chart
+                                renderDailyPlotlyChart(canvasId, data, station, baseMeasure);
+                            } catch (error) {
+                                console.error('Error rendering Plotly chart:', error);
+                                const container = document.getElementById(canvasId);
+                                if (container) {
+                                    container.innerHTML = `
+                                        <div style="padding: 2rem; text-align: center; color: #C4122F;">
+                                            <p style="font-weight: 600;">Chart Rendering Error</p>
+                                            <p style="font-size: 0.875rem; color: #6B7280;">
+                                                Unable to display chart. Please try refreshing the page.
+                                            </p>
+                                        </div>
+                                    `;
+                                }
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    // Weekly mode - draw SPC charts only
+                    allMeasures.forEach(measure => {
+                        const data = chartData[station][measure];
+                        const baseMeasure = measure
+                            .replace(' (Moving Range)', '')
+                            .replace(' (Distribution)', '');
+                        const maxPhases = data.phases ? data.phases.length : 0;
+                        const groupKey = `${station}-${baseMeasure}`;
+                        const defaultPhases = phaseSelections[groupKey] || maxPhases;  // Use saved or default to all phases
+                        
+                        const filteredData = filterToLastNPhases(data, defaultPhases);
+                        const canvasId = `chart-${station}-${measure}`.replace(/[^a-zA-Z0-9]/g, '-');
+                        const canvas = document.getElementById(canvasId);
+                        const tooltip = document.getElementById(`tooltip-${canvasId}`);
+                        
+                        if (canvas && tooltip) {
+                            if (measure.includes('(Distribution)')) {
+                                const xData = chartData[station][baseMeasure];
+                                const filteredX = filterToLastNPhases(xData, defaultPhases);
+                                const values = (filteredX.points || []).map(p => p.value);
+                                const hist = buildHistogram(values);
+                                drawHistogram(canvas, hist);
+                            } else {
+                                drawChart(canvas, filteredData);
+                                setupInteractivity(canvas, tooltip, filteredData);
+                            }
+                        }
+                    });
+                }
             });
         }
 
@@ -904,7 +1019,7 @@
                 const points = filteredData.points || [];
                 if (points.length > 0) {
                     const mean = (points.reduce((sum, p) => sum + p.value, 0) / points.length).toFixed(2);
-                    const dateRange = `${new Date(points[0].date).toLocaleDateString()} - ${new Date(points[points.length-1].date).toLocaleDateString()}`;
+                    const dateRange = `${new Date(points[0].date).toLocaleDateString('en-US')} - ${new Date(points[points.length-1].date).toLocaleDateString('en-US')}`;
                     
                     // Update subtitle with new date range
                     const subtitle = container.querySelector('.chart-subtitle');
@@ -1345,6 +1460,297 @@
             return roman;
         }
 
+
+
+        function renderDailyPlotlyChart(containerId, data, station, measure) {
+            const points = data.points || [];
+            if (points.length === 0) {
+                console.error('No data points available for chart');
+                return;
+            }
+            
+            // Extract data
+            const dates = points.map(p => new Date(p.date));
+            const values = points.map(p => parseFloat(p.value));
+            
+            console.log('Chart data:', { dates, values, pointsCount: points.length });
+            
+            // Calculate statistics
+            const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+            const stdDev = Math.sqrt(values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length - 1));
+            const ucl = mean + 3 * stdDev;
+            const lcl = Math.max(0, mean - 3 * stdDev);
+            
+            // Determine bar colors (Southwest branding)
+            const colors = values.map(v => (v > ucl || v < lcl) ? '#C4122F' : '#304CB2');
+            
+            // Add day-of-week coloring to x-axis
+            const xAxisLabels = dates.map(d => {
+                const dayOfWeek = d.getDay();
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const dayAbbr = d.toLocaleDateString('en-US', { weekday: 'short' });
+                const dateStr = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+                // Color weekends in red (using HTML span)
+                const color = isWeekend ? '#C4122F' : '#304CB2';
+                return `<span style="color:${color}">${dayAbbr}</span><br>${dateStr}`;
+            });
+            
+            // Create traces
+            const barTrace = {
+                x: dates,
+                y: values,
+                type: 'bar',
+                name: 'Daily Rate',
+                marker: { 
+                    color: colors,
+                    line: { width: 1, color: '#FFFFFF' } // Bar borders
+                },
+                text: xAxisLabels,
+                hovertemplate: '<b>%{text}</b><br>Rate: %{y:.3f}<extra></extra>'
+            };
+            
+            const uclTrace = {
+                x: dates,
+                y: Array(dates.length).fill(ucl),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'UCL',
+                line: { color: '#F87171', width: 2, dash: 'dash' },
+                hoverinfo: 'skip'
+            };
+            
+            const lclTrace = {
+                x: dates,
+                y: Array(dates.length).fill(lcl),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'LCL',
+                line: { color: '#F87171', width: 2, dash: 'dash' },
+                hoverinfo: 'skip'
+            };
+            
+            const meanTrace = {
+                x: dates,
+                y: Array(dates.length).fill(mean),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Mean',
+                line: { color: '#304CB2', width: 2 },
+                hoverinfo: 'skip'
+            };
+            
+            // Layout configuration
+            const layout = {
+                title: false,
+                showlegend: false,
+                margin: { l: 70, r: 50, t: 20, b: 120 }, // Increased right margin to prevent label cutoff
+                xaxis: {
+                    title: false,
+                    ticktext: xAxisLabels,
+                    tickvals: dates,
+                    tickangle: 0,
+                    tickfont: { size: 11, family: 'Arial, sans-serif' },
+                    tickmode: 'array',
+                    automargin: true, // Automatically adjust margins for labels
+                    range: dates.length >= 7 ? [dates[dates.length - 7], dates[dates.length - 1]] : [dates[0], dates[dates.length - 1]],
+                    rangeslider: { visible: false },
+                    fixedrange: false, // Allow zooming
+                    showgrid: true,
+                    zeroline: false,
+                    showline: true,
+                    linewidth: 1,
+                    linecolor: '#D1D5DB'
+                },
+                yaxis: {
+                    title: { text: 'Daily Values', standoff: 10 },
+                    gridcolor: '#E5E7EB'
+                },
+                plot_bgcolor: '#FFFFFF',
+                paper_bgcolor: '#FFFFFF',
+                hovermode: 'closest'
+            };
+            
+            // Plotly config
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['pan2d', 'zoom2d', 'resetScale2d'],
+                modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: `${station}_${measure}_daily`,
+                    height: 600,
+                    width: 1200,
+                    scale: 2
+                },
+                // Ensure proper margin handling
+                autosizable: true,
+                fillFrame: false
+            };
+            
+            // Render chart
+            const chartDiv = document.getElementById(containerId);
+            console.log('Rendering chart with traces:', [barTrace, meanTrace, uclTrace, lclTrace]);
+            console.log('Layout:', layout);
+            
+            Plotly.newPlot(chartDiv, [barTrace, meanTrace, uclTrace, lclTrace], layout, config)
+                .then(() => {
+                    console.log('Chart rendered successfully');
+                })
+                .catch(error => {
+                    console.error('Error rendering chart:', error);
+                });
+            
+            // Add event listener for zoom/pan to update table
+            let relayoutTimer;
+            chartDiv.on('plotly_relayout', function(eventData) {
+                // Debounce the relayout event to avoid excessive updates
+                clearTimeout(relayoutTimer);
+                relayoutTimer = setTimeout(() => {
+                    if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]']) {
+                        const startDate = new Date(eventData['xaxis.range[0]']);
+                        const endDate = new Date(eventData['xaxis.range[1]']);
+                        
+                        // Filter points within visible range
+                        const visiblePoints = points.filter(p => {
+                            const pDate = new Date(p.date);
+                            return pDate >= startDate && pDate <= endDate;
+                        });
+                        
+                        // Update table
+                        updateDailyDataTable(containerId, visiblePoints);
+                        
+                        // Update header stats with visible data
+                        updateDailyHeaderStats(containerId, visiblePoints);
+                    }
+                }, 150); // Wait 150ms after last relayout event
+            });
+            
+            // Initial table render (show all visible points based on chart range)
+            const initialRange = dates.length >= 7 ? [dates[dates.length - 7], dates[dates.length - 1]] : [dates[0], dates[dates.length - 1]];
+            const initialPoints = points.filter(p => {
+                const pDate = new Date(p.date);
+                return pDate >= initialRange[0] && pDate <= initialRange[1];
+            });
+            updateDailyDataTable(containerId, initialPoints);
+        }
+
+        function updateDailySlider(containerId, numDays) {
+            numDays = parseInt(numDays);
+            
+            // Update display
+            const valueDisplay = document.getElementById(`daily-value-${containerId}`);
+            if (valueDisplay) {
+                valueDisplay.textContent = `${numDays} day${numDays !== 1 ? 's' : ''}`;
+            }
+            
+            // Get the chart div
+            const chartDiv = document.getElementById(containerId);
+            if (!chartDiv || !chartDiv.data) return;
+            
+            // Get all dates from the chart data
+            const allDates = chartDiv.data[0].x; // Bar trace dates
+            if (!allDates || allDates.length === 0) return;
+            
+            // Calculate new range (last N days)
+            const endDate = allDates[allDates.length - 1];
+            const startDate = allDates[Math.max(0, allDates.length - numDays)];
+            
+            // Use Plotly.relayout to update the view
+            Plotly.relayout(containerId, {
+                'xaxis.range': [startDate, endDate]
+            });
+            
+            // Update table to match the new range
+            const container = chartDiv.closest('.chart-container');
+            const station = container.dataset.station;
+            const measure = container.dataset.measure;
+            
+            if (chartData[station] && chartData[station][measure]) {
+                const data = chartData[station][measure];
+                const points = data.points || [];
+                
+                // Filter points within the new range
+                const visiblePoints = points.filter(p => {
+                    const pDate = new Date(p.date);
+                    return pDate >= startDate && pDate <= endDate;
+                });
+                
+                // Update table and stats
+                updateDailyDataTable(containerId, visiblePoints);
+                updateDailyHeaderStats(containerId, visiblePoints);
+            }
+        }
+
+        function updateDailyDataTable(containerId, visiblePoints) {
+            const tableContainer = document.getElementById(`data-table-${containerId}`);
+            if (!tableContainer || visiblePoints.length === 0) return;
+            
+            // Calculate metrics
+            const tableData = visiblePoints.map(point => {
+                const rate = point.value;
+                const ac = 800; // Assume 800 aircraft
+                const mel = Math.round(rate * ac);
+                
+                return {
+                    date: new Date(point.date),
+                    rate: rate.toFixed(3),
+                    mel: mel,
+                    ac: ac
+                };
+            });
+            
+            // Generate HTML table (horizontal layout)
+            let html = '<div style="margin-top: 1rem; background: #F9FAFB; border-radius: 0.5rem; padding: 1rem;">';
+            html += '<h4 style="margin: 0 0 0.75rem 0; color: #374151; font-size: 0.875rem; font-weight: 600;">Daily Data</h4>';
+            html += '<div style="overflow-x: auto;">';
+            html += '<table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; table-layout: fixed;">'; // Added table-layout: fixed
+            
+            // Header row
+            html += '<thead><tr style="background: #E5E7EB;">';
+            html += '<th style="padding: 0.5rem; text-align: center; border: 1px solid #D1D5DB; width: 80px;">Metric</th>';
+            tableData.forEach(row => {
+                const dateStr = row.date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+                html += `<th style="padding: 0.5rem; text-align: center; border: 1px solid #D1D5DB; min-width: 70px;">${dateStr}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Data rows
+            ['Rate', 'MEL', 'AC*'].forEach((metric, idx) => {
+                html += '<tr>';
+                html += `<td style="padding: 0.5rem; text-align: center; border: 1px solid #D1D5DB; font-weight: 600; background: #F3F4F6;">${metric}</td>`;
+                tableData.forEach(row => {
+                    const value = idx === 0 ? row.rate : (idx === 1 ? row.mel : row.ac);
+                    html += `<td style="padding: 0.5rem; text-align: center; border: 1px solid #D1D5DB;">${value}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div></div>';
+            tableContainer.innerHTML = html;
+        }
+
+        function updateDailyHeaderStats(containerId, visiblePoints) {
+            const container = document.getElementById(`container-${containerId}`);
+            if (!container) return;
+            
+            const values = visiblePoints.map(p => p.value);
+            const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+            const stdDev = Math.sqrt(values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length - 1));
+            const ucl = mean + 3 * stdDev;
+            const lcl = Math.max(0, mean - 3 * stdDev);
+            
+            const meanElem = container.querySelector('.chart-stat:nth-child(1) .chart-stat-value');
+            const uclElem = container.querySelector('.chart-stat:nth-child(2) .chart-stat-value');
+            const lclElem = container.querySelector('.chart-stat:nth-child(3) .chart-stat-value');
+            
+            if (meanElem) meanElem.textContent = mean.toFixed(3);
+            if (uclElem) uclElem.textContent = ucl.toFixed(3);
+            if (lclElem) lclElem.textContent = lcl.toFixed(3);
+        }
+
+
+
         async function downloadChartWithHeader(containerId, chartName) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -1411,28 +1817,30 @@
             const canvasY = canvasRect.top - containerRect.top;
             ctx.drawImage(canvas, 0, canvasY, canvasRect.width, canvasRect.height);
             
-            // Draw legend
-            const legendRect = legend.getBoundingClientRect();
-            const legendY = legendRect.top - containerRect.top;
-            
-            ctx.font = '14px sans-serif';
-            const legendItems = Array.from(legend.querySelectorAll('.legend-item'));
-            let legendX = (rect.width - (legendItems.length * 100)) / 2;
-            
-            legendItems.forEach((item) => {
-                const lineColor = item.querySelector('.legend-line').style.background;
-                const text = item.querySelector('span').textContent;
+            // Draw legend (if it exists)
+            if (legend) {
+                const legendRect = legend.getBoundingClientRect();
+                const legendY = legendRect.top - containerRect.top;
                 
-                // Draw colored line
-                ctx.fillStyle = lineColor;
-                ctx.fillRect(legendX, legendY + 8, 30, 3);
+                ctx.font = '14px sans-serif';
+                const legendItems = Array.from(legend.querySelectorAll('.legend-item'));
+                let legendX = (rect.width - (legendItems.length * 100)) / 2;
                 
-                // Draw text
-                ctx.fillStyle = '#e5e7eb';
-                ctx.fillText(text, legendX + 40, legendY + 15);
-                
-                legendX += 100;
-            });
+                legendItems.forEach((item) => {
+                    const lineColor = item.querySelector('.legend-line').style.background;
+                    const text = item.querySelector('span').textContent;
+                    
+                    // Draw colored line
+                    ctx.fillStyle = lineColor;
+                    ctx.fillRect(legendX, legendY + 8, 30, 3);
+                    
+                    // Draw text
+                    ctx.fillStyle = '#e5e7eb';
+                    ctx.fillText(text, legendX + 40, legendY + 15);
+                    
+                    legendX += 100;
+                });
+            }
             
             // Footer removed per stakeholder request
             

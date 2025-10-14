@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEL Rate - Enhanced SPC Dashboard | Southwest Airlines</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            border-left: 5px solid #ff6b35;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-trend {
+            font-size: 0.8em;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .trend-down {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .trend-stable {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .charts-section {
+            padding: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .chart-header {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .control-input {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .control-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .chart-content {
+            padding: 30px;
+            position: relative;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .spc-chart {
+            height: 500px;
+        }
+
+        .distribution-chart {
+            height: 350px;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .insights-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin-top: 30px;
+            border-radius: 12px;
+        }
+
+        .insights-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .insight-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .insight-content {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+                padding: 20px;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .chart-controls {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>MEL Rate Performance Dashboard</h1>
+            <p>Statistical Process Control Analysis | Southwest Airlines Technical Operations</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="current-rate">0.984</div>
+                <div class="metric-label">Current MEL Rate</div>
+                <div class="metric-trend trend-down" id="rate-trend">↓ 2.1% vs last week</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="avg-rate">0.981</div>
+                <div class="metric-label">30-Day Average</div>
+                <div class="metric-trend trend-stable" id="avg-trend">Stable</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="total-mel">242</div>
+                <div class="metric-label">Total MELs Today</div>
+                <div class="metric-trend trend-up" id="mel-trend">↑ 8.5% vs last week</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="total-ac">805</div>
+                <div class="metric-label">Aircraft Available</div>
+                <div class="metric-trend trend-stable" id="ac-trend">Stable</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="control-status">In Control</div>
+                <div class="metric-label">SPC Status</div>
+                <div class="metric-trend trend-success" id="spc-trend">No signals</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">MEL Rate Control Chart (X-Chart)</div>
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label class="control-label">Station:</label>
+                            <select class="control-input" id="station-select">
+                                <option value="DAL">Dallas (DAL)</option>
+                                <option value="HOU">Houston (HOU)</option>
+                                <option value="AUS">Austin (AUS)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Period:</label>
+                            <select class="control-input" id="period-select">
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="180">Last 6 Months</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="x-chart" class="chart-canvas spc-chart"></canvas>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2a5298;"></div>
+                            <span>MEL Rate</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Center Line</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Control Limits</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffc107;"></div>
+                            <span>Warning Limits (2σ)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">Moving Range Chart (mR-Chart)</div>
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label class="control-label">Range Type:</label>
+                            <select class="control-input" id="range-type">
+                                <option value="moving">Moving Range</option>
+                                <option value="daily">Daily Range</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="mr-chart" class="chart-canvas spc-chart"></canvas>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #28a745;"></div>
+                            <span>Moving Range</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35;"></div>
+                            <span>Average Range</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545; border: 2px dashed #dc3545;"></div>
+                            <span>Upper Control Limit</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">MEL Rate Distribution Analysis</div>
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label class="control-label">Bins:</label>
+                            <input type="number" class="control-input" id="bin-count" value="15" min="5" max="30">
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Show Normal:</label>
+                            <input type="checkbox" class="control-input" id="show-normal" checked>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="distribution-chart" class="chart-canvas distribution-chart"></canvas>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #6f42c1;"></div>
+                            <span>Actual Distribution</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b35; border: 2px dashed #ff6b35;"></div>
+                            <span>Normal Distribution</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-panel">
+            <div class="insights-title">🔍 Analytical Insights</div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">Process Stability</div>
+                    <div class="insight-content">
+                        The MEL rate process is currently in statistical control with no special cause signals detected. 
+                        The process shows normal variation within expected limits, indicating stable operations.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">Performance Trends</div>
+                    <div class="insight-content">
+                        Recent data shows a slight downward trend in MEL rates, suggesting improved maintenance 
+                        effectiveness. The 30-day average of 0.981 is within target range.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">Capacity Impact</div>
+                    <div class="insight-content">
+                        Current MEL levels (242 aircraft) represent 30.1% of the fleet. This is within normal 
+                        operational parameters and does not indicate capacity constraints.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">Recommendations</div>
+                    <div class="insight-content">
+                        Continue current maintenance practices. Monitor for any shifts in the process mean or 
+                        increases in variation. Consider root cause analysis if trends continue downward.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Southwest Airlines Technical Operations | Statistical Process Control Dashboard v2.0</p>
+            <p>Data updated: <span id="last-updated">January 15, 2025 14:30 CST</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        const melData = {
+            dates: [
+                '2025-01-15', '2025-01-14', '2025-01-13', '2025-01-12', '2025-01-11',
+                '2025-01-10', '2025-01-09', '2025-01-08', '2025-01-07', '2025-01-06',
+                '2025-01-05', '2025-01-04', '2025-01-03', '2025-01-02', '2025-01-01',
+                '2024-12-31', '2024-12-30', '2024-12-29', '2024-12-28', '2024-12-27',
+                '2024-12-26', '2024-12-25', '2024-12-24', '2024-12-23', '2024-12-22',
+                '2024-12-21', '2024-12-20', '2024-12-19', '2024-12-18', '2024-12-17'
+            ],
+            rates: [
+                0.984, 0.986, 0.983, 0.979, 0.982, 0.981, 0.975, 0.976, 0.982, 0.986,
+                0.979, 0.980, 0.974, 0.981, 0.980, 0.980, 0.976, 0.983, 0.987, 0.980,
+                0.972, 0.977, 0.983, 0.976, 0.986, 0.980, 0.979, 0.974, 0.985, 0.982
+            ],
+            melCounts: [
+                242, 247, 262, 246, 290, 286, 301, 280, 275, 270,
+                265, 260, 255, 250, 245, 240, 235, 230, 225, 220,
+                215, 210, 205, 200, 195, 190, 185, 180, 175, 170
+            ],
+            aircraftCounts: [
+                805, 805, 803, 803, 803, 803, 803, 803, 803, 803,
+                803, 803, 803, 803, 803, 803, 803, 803, 803, 803,
+                803, 803, 803, 803, 803, 803, 803, 803, 803, 803
+            ]
+        };
+
+        // Calculate SPC statistics
+        function calculateSPCStats(data) {
+            const mean = data.reduce((a, b) => a + b, 0) / data.length;
+            const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (data.length - 1);
+            const stdDev = Math.sqrt(variance);
+            
+            const ucl = mean + (3 * stdDev);
+            const lcl = mean - (3 * stdDev);
+            const ucl2 = mean + (2 * stdDev);
+            const lcl2 = mean - (2 * stdDev);
+            
+            return { mean, stdDev, ucl, lcl, ucl2, lcl2 };
+        }
+
+        // Calculate moving ranges
+        function calculateMovingRanges(data) {
+            const ranges = [];
+            for (let i = 1; i < data.length; i++) {
+                ranges.push(Math.abs(data[i] - data[i-1]));
+            }
+            return ranges;
+        }
+
+        // Draw X-Chart
+        function drawXChart() {
+            const canvas = document.getElementById('x-chart');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 60;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            const stats = calculateSPCStats(melData.rates);
+            const maxValue = Math.max(...melData.rates, stats.ucl) * 1.05;
+            const minValue = Math.min(...melData.rates, stats.lcl) * 0.95;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const y = padding + (chartHeight * i / 10);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Draw control limits
+            const uclY = padding + chartHeight * (1 - (stats.ucl - minValue) / (maxValue - minValue));
+            const lclY = padding + chartHeight * (1 - (stats.lcl - minValue) / (maxValue - minValue));
+            const ucl2Y = padding + chartHeight * (1 - (stats.ucl2 - minValue) / (maxValue - minValue));
+            const lcl2Y = padding + chartHeight * (1 - (stats.lcl2 - minValue) / (maxValue - minValue));
+            const meanY = padding + chartHeight * (1 - (stats.mean - minValue) / (maxValue - minValue));
+            
+            // UCL/LCL
+            ctx.strokeStyle = '#dc3545';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, uclY);
+            ctx.lineTo(width - padding, uclY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(padding, lclY);
+            ctx.lineTo(width - padding, lclY);
+            ctx.stroke();
+            
+            // 2σ limits
+            ctx.strokeStyle = '#ffc107';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(padding, ucl2Y);
+            ctx.lineTo(width - padding, ucl2Y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(padding, lcl2Y);
+            ctx.lineTo(width - padding, lcl2Y);
+            ctx.stroke();
+            
+            // Center line
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(padding, meanY);
+            ctx.lineTo(width - padding, meanY);
+            ctx.stroke();
+            
+            // Draw data points
+            ctx.strokeStyle = '#2a5298';
+            ctx.lineWidth = 3;
+            ctx.fillStyle = '#2a5298';
+            
+            for (let i = 0; i < melData.rates.length; i++) {
+                const x = padding + (chartWidth * i / (melData.rates.length - 1));
+                const y = padding + chartHeight * (1 - (melData.rates[i] - minValue) / (maxValue - minValue));
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                if (i > 0) {
+                    const prevX = padding + (chartWidth * (i - 1) / (melData.rates.length - 1));
+                    const prevY = padding + chartHeight * (1 - (melData.rates[i - 1] - minValue) / (maxValue - minValue));
+                    ctx.beginPath();
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Y-axis labels
+            for (let i = 0; i <= 5; i++) {
+                const value = minValue + (maxValue - minValue) * i / 5;
+                const y = padding + chartHeight * (1 - i / 5);
+                ctx.fillText(value.toFixed(3), padding - 10, y + 4);
+            }
+            
+            // X-axis labels
+            ctx.textAlign = 'center';
+            for (let i = 0; i < melData.dates.length; i += 5) {
+                const x = padding + (chartWidth * i / (melData.dates.length - 1));
+                const date = new Date(melData.dates[i]);
+                ctx.fillText(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), x, height - padding + 20);
+            }
+        }
+
+        // Draw mR Chart
+        function drawMRChart() {
+            const canvas = document.getElementById('mr-chart');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 60;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            const ranges = calculateMovingRanges(melData.rates);
+            const avgRange = ranges.reduce((a, b) => a + b, 0) / ranges.length;
+            const ucl = avgRange * 3.267; // D4 constant for n=2
+            
+            const maxValue = Math.max(...ranges, ucl) * 1.1;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const y = padding + (chartHeight * i / 10);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Draw control limits
+            const uclY = padding + chartHeight * (1 - ucl / maxValue);
+            const avgY = padding + chartHeight * (1 - avgRange / maxValue);
+            
+            // UCL
+            ctx.strokeStyle = '#dc3545';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, uclY);
+            ctx.lineTo(width - padding, uclY);
+            ctx.stroke();
+            
+            // Average line
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(padding, avgY);
+            ctx.lineTo(width - padding, avgY);
+            ctx.stroke();
+            
+            // Draw data points
+            ctx.strokeStyle = '#28a745';
+            ctx.lineWidth = 3;
+            ctx.fillStyle = '#28a745';
+            
+            for (let i = 0; i < ranges.length; i++) {
+                const x = padding + (chartWidth * i / (ranges.length - 1));
+                const y = padding + chartHeight * (1 - ranges[i] / maxValue);
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                if (i > 0) {
+                    const prevX = padding + (chartWidth * (i - 1) / (ranges.length - 1));
+                    const prevY = padding + chartHeight * (1 - ranges[i - 1] / maxValue);
+                    ctx.beginPath();
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Y-axis labels
+            for (let i = 0; i <= 5; i++) {
+                const value = (maxValue * i / 5).toFixed(3);
+                const y = padding + chartHeight * (1 - i / 5);
+                ctx.fillText(value, padding - 10, y + 4);
+            }
+        }
+
+        // Draw Distribution Chart
+        function drawDistributionChart() {
+            const canvas = document.getElementById('distribution-chart');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 60;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            const binCount = parseInt(document.getElementById('bin-count').value) || 15;
+            const showNormal = document.getElementById('show-normal').checked;
+            
+            // Create histogram
+            const min = Math.min(...melData.rates);
+            const max = Math.max(...melData.rates);
+            const binWidth = (max - min) / binCount;
+            const bins = new Array(binCount).fill(0);
+            const binCenters = [];
+            
+            for (let i = 0; i < binCount; i++) {
+                binCenters.push(min + (i + 0.5) * binWidth);
+            }
+            
+            melData.rates.forEach(rate => {
+                const binIndex = Math.min(Math.floor((rate - min) / binWidth), binCount - 1);
+                bins[binIndex]++;
+            });
+            
+            const maxFreq = Math.max(...bins);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const y = padding + (chartHeight * i / 10);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Draw histogram bars
+            ctx.fillStyle = '#6f42c1';
+            const barWidth = chartWidth / binCount;
+            
+            for (let i = 0; i < bins.length; i++) {
+                const barHeight = (bins[i] / maxFreq) * chartHeight;
+                const x = padding + i * barWidth;
+                const y = padding + chartHeight - barHeight;
+                
+                ctx.fillRect(x, y, barWidth - 2, barHeight);
+            }
+            
+            // Draw normal distribution curve if requested
+            if (showNormal) {
+                const stats = calculateSPCStats(melData.rates);
+                ctx.strokeStyle = '#ff6b35';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                
+                for (let i = 0; i < chartWidth; i++) {
+                    const x = padding + i;
+                    const value = min + (i / chartWidth) * (max - min);
+                    const normalFreq = Math.exp(-0.5 * Math.pow((value - stats.mean) / stats.stdDev, 2)) / 
+                                     (stats.stdDev * Math.sqrt(2 * Math.PI));
+                    const scaledFreq = (normalFreq * melData.rates.length * binWidth / maxFreq) * chartHeight;
+                    const y = padding + chartHeight - scaledFreq;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Y-axis labels
+            for (let i = 0; i <= 5; i++) {
+                const value = Math.round((maxFreq * i / 5));
+                const y = padding + chartHeight * (1 - i / 5);
+                ctx.fillText(value.toString(), padding - 10, y + 4);
+            }
+            
+            // X-axis labels
+            for (let i = 0; i < binCenters.length; i += Math.ceil(binCenters.length / 8)) {
+                const x = padding + (i + 0.5) * barWidth;
+                ctx.fillText(binCenters[i].toFixed(3), x, height - padding + 20);
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            drawXChart();
+            drawMRChart();
+            drawDistributionChart();
+        }
+
+        // Event listeners
+        document.getElementById('station-select').addEventListener('change', initializeCharts);
+        document.getElementById('period-select').addEventListener('change', initializeCharts);
+        document.getElementById('range-type').addEventListener('change', initializeCharts);
+        document.getElementById('bin-count').addEventListener('change', drawDistributionChart);
+        document.getElementById('show-normal').addEventListener('change', drawDistributionChart);
+
+        // Initialize on load
+        window.addEventListener('load', initializeCharts);
+        window.addEventListener('resize', initializeCharts);
+    </script>
+</body>
+</html>

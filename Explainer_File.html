@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SPC Dashboard User Guide · Southwest Airlines Technical Operations</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --bg:#ffffff;
+      --panel:#f8fafc;
+      --ink:#0b0f1a;
+      --muted:#4b5563;
+      --brand:#304CB2; /* SWA blue */
+      --accent:#FFBF27; /* SWA yellow */
+      --ok:#10B981;
+      --warn:#F59E0B;
+      --bad:#EF4444;
+      --shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, system-ui, -apple-system, sans-serif;}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1100px;margin:32px auto;padding:0 20px}
+    /* Metallic rivet frame */
+    .frame{position:relative;padding:28px;border-radius:18px;background:var(--panel);border:1px solid #e5e7eb;box-shadow:var(--shadow);overflow:hidden}
+    .frame::before{
+      content:"";
+      position:absolute;inset:-60px;
+      background:
+        radial-gradient(circle at 80px 80px, rgba(255,255,255,.25), transparent 60px),
+        radial-gradient(circle at calc(100% - 80px) 80px, rgba(255,255,255,.2), transparent 60px),
+        radial-gradient(circle at 80px calc(100% - 80px), rgba(255,255,255,.2), transparent 60px),
+        radial-gradient(circle at calc(100% - 80px) calc(100% - 80px), rgba(255,255,255,.25), transparent 60px);
+      pointer-events:none;
+      filter:blur(22px);
+      opacity:.25;
+    }
+    .rivet{
+      position:absolute;width:20px;height:20px;border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #ffffff 0%, #dfe6ef 20%, #aab3c1 45%, #8b95a5 60%, #6f7a8b 100%);
+      box-shadow:inset 0 2px 1px rgba(255,255,255,.5), 0 4px 8px rgba(0,0,0,.5);
+    }
+    .rivet.tl{top:-10px;left:-10px}
+    .rivet.tr{top:-10px;right:-10px}
+    .rivet.bl{bottom:-10px;left:-10px}
+    .rivet.br{bottom:-10px;right:-10px}
+
+    header.hero{display:flex;gap:22px;align-items:center;padding:16px 18px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:var(--shadow)}
+    header.hero img{height:64px;width:auto;flex:0 0 auto;border-radius:8px}
+    header.hero h1{margin:0;font-size:28px;letter-spacing:.2px;color:var(--brand)}
+    header.hero p{margin:4px 0 0 0;color:var(--muted);font-size:14px}
+
+    .card{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;box-shadow:var(--shadow)}
+    .grid{display:grid;gap:20px}
+    .grid.cols-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+    
+    h2{margin:0 0 16px 0;font-size:20px;color:var(--brand)}
+    h3{margin:16px 0 8px 0;font-size:16px;color:var(--ink)}
+    h4{margin:12px 0 6px 0;font-size:14px;color:var(--ink)}
+    p{margin:0 0 12px 0}
+    .muted{color:var(--muted);font-size:14px}
+    ul,ol{margin:0 0 12px 0;padding-left:20px}
+    li{margin:4px 0}
+    
+    .status{display:inline-flex;align-items:center;gap:6px;font-size:14px}
+    .dot{width:8px;height:8px;border-radius:50%}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    
+    .callout{background:#f0f9ff;border:1px solid #0ea5e9;border-radius:8px;padding:16px;margin:16px 0}
+    .callout.warning{background:#fef3c7;border-color:#f59e0b}
+    .callout.success{background:#f0fdf4;border-color:#10b981}
+    
+    .filename{display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:8px 12px;margin:12px 0;font-family:monospace;font-size:12px}
+    .tag{background:var(--brand);color:white;padding:2px 6px;border-radius:4px;font-size:10px}
+    
+    pre{background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:12px;overflow-x:auto;font-size:12px;line-height:1.4}
+    code{background:#f1f5f9;padding:2px 4px;border-radius:3px;font-size:12px;font-family:monospace}
+    
+    table{border-collapse:collapse;width:100%;margin:16px 0}
+    th,td{border:1px solid #e5e7eb;padding:8px 12px;text-align:left}
+    th{background:#f8fafc;font-weight:600;color:var(--brand)}
+    .kpi{color:var(--brand);font-weight:600}
+    
+    .toc{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0;padding:16px;background:#f8fafc;border-radius:8px}
+    .toc a{background:white;border:1px solid #e5e7eb;border-radius:6px;padding:8px 12px;font-size:14px;transition:all 0.2s}
+    .toc a:hover{background:var(--brand);color:white;text-decoration:none}
+    
+    footer{text-align:center;padding:32px 0;color:var(--muted);font-size:14px;border-top:1px solid #e5e7eb;margin-top:40px}
+    
+    .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin:20px 0}
+    .feature-card{background:white;border:1px solid #e5e7eb;border-radius:8px;padding:16px;text-align:center}
+    .feature-icon{font-size:24px;margin-bottom:8px}
+    
+    .step{display:flex;gap:12px;margin:16px 0;padding:16px;background:#f8fafc;border-radius:8px;border-left:4px solid var(--brand)}
+    .step-number{background:var(--brand);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;flex-shrink:0}
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="rivet tl"></div>
+    <div class="rivet tr"></div>
+    <div class="rivet bl"></div>
+    <div class="rivet br"></div>
+    
+    <div class="wrap">
+      <header class="hero">
+        <img src="SW Tech Ops logo.png" alt="Southwest Airlines Technical Operations">
+        <div>
+          <h1>SPC Dashboard User Guide</h1>
+          <p>Statistical Process Control for Airline Maintenance Metrics</p>
+        </div>
+      </header>
+
+      <nav class="toc">
+        <a href="#overview">Overview</a>
+        <a href="#getting-started">Getting Started</a>
+        <a href="#weekly-mode">Weekly Mode</a>
+        <a href="#daily-mode">Daily Mode</a>
+        <a href="#data-formats">Data Formats</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#exporting">Exporting Charts</a>
+      </nav>
+
+      <section id="overview" class="card">
+        <h2>🎯 Overview</h2>
+        <p>The SPC Dashboard is a powerful tool for monitoring maintenance performance across multiple airline stations using Statistical Process Control (SPC) methodology. It implements Wheeler's XmR charts and rules for detecting process shifts and calculating Natural Process Limits.</p>
+        
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h4>Weekly SPC Charts</h4>
+            <p>X, mR, and Distribution charts with automatic phase detection</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <h4>Daily Bar Charts</h4>
+            <p>Interactive Plotly.js charts with zoom/pan and slider control</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h4>Southwest Branding</h4>
+            <p>Unified SWA blue/yellow theme across all interfaces</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💾</div>
+            <h4>PNG Export</h4>
+            <p>High-resolution charts for reports and presentations</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="getting-started" class="card">
+        <h2>🚀 Getting Started</h2>
+        
+        <div class="step">
+          <div class="step-number">1</div>
+          <div>
+            <h4>Start the Dashboard</h4>
+            <p><strong>Windows:</strong> Double-click <code>START_DASHBOARD.bat</code></p>
+            <p><strong>Mac/Linux:</strong> Run <code>./start_dashboard.sh</code></p>
+            <p>The dashboard will open automatically in your browser at <code>http://localhost:8000</code></p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div>
+            <h4>Load Sample Data</h4>
+            <p>Click <strong>"Load Test Data"</strong> to view sample maintenance metrics from 3 stations (AUS, DAL, HOU) from January 2023 to present.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div>
+            <h4>Upload Your Data</h4>
+            <p>Use the file upload button to load your own CSV data. The dashboard supports two formats and will automatically detect which one you're using.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="weekly-mode" class="card">
+        <h2>📊 Weekly Mode - SPC Charts</h2>
+        <p>When you load weekly data, the dashboard displays three types of charts grouped together for each measure:</p>
+        
+        <div class="grid cols-3">
+          <div>
+            <h4>X Chart (Individuals)</h4>
+            <p>Monitors process location (average performance)</p>
+            <ul>
+              <li>Center Line (CL) = mean of phase data</li>
+              <li>UCL/LCL = CL ± 2.66 × mR̄</li>
+              <li>Points beyond limits indicate special causes</li>
+            </ul>
+          </div>
+          <div>
+            <h4>mR Chart (Moving Range)</h4>
+            <p>Monitors process variation (consistency)</p>
+            <ul>
+              <li>Center Line = average moving range</li>
+              <li>UCL = 3.268 × mR̄</li>
+              <li>LCL = 0 (minimum)</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Distribution Chart</h4>
+            <p>Histogram with normal curve overlay</p>
+            <ul>
+              <li>Auto-linked to phase slider</li>
+              <li>Bins automatically recomputed</li>
+              <li>Shows data distribution shape</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Phase Zoom Control</h3>
+        <p>Use the <strong>"Phases to Display"</strong> slider to focus on recent performance:</p>
+        <ul>
+          <li><strong>Default:</strong> Shows all phases from January 2023</li>
+          <li><strong>Adjustable:</strong> Move slider to show fewer phases</li>
+          <li><strong>Synchronized:</strong> All three charts update together</li>
+        </ul>
+
+        <h3>Wheeler's Rules Implemented</h3>
+        <ul>
+          <li><strong>Rule #1:</strong> Point beyond control limits (outside UCL/LCL)</li>
+          <li><strong>Rule #2:</strong> 2 of 3 consecutive points beyond 2σ on the same side</li>
+          <li><strong>Rule #4:</strong> 7 consecutive points on one side of centerline</li>
+        </ul>
+      </section>
+
+      <section id="daily-mode" class="card">
+        <h2>📈 Daily Mode - Interactive Bar Charts</h2>
+        <p>When you load daily data, the dashboard switches to interactive Plotly.js bar charts with enhanced features:</p>
+        
+        <div class="grid cols-2">
+          <div>
+            <h4>Interactive Features</h4>
+            <ul>
+              <li><strong>Zoom:</strong> Mouse wheel to zoom in/out</li>
+              <li><strong>Pan:</strong> Click and drag to move around</li>
+              <li><strong>Slider:</strong> 7-30 day range control</li>
+              <li><strong>Reset:</strong> Click home icon to reset view</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Visual Enhancements</h4>
+            <ul>
+              <li><strong>Weekend Highlighting:</strong> Saturday/Sunday in Southwest red</li>
+              <li><strong>Day Labels:</strong> 3-letter day abbreviations</li>
+              <li><strong>Dynamic Limits:</strong> UCL/LCL calculated from visible data</li>
+              <li><strong>Color Coding:</strong> Out-of-control points in red</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Daily Slider Control</h3>
+        <p>The <strong>"Days to Display"</strong> slider provides explicit control over the date range:</p>
+        <ul>
+          <li><strong>Range:</strong> 7 to 30 days</li>
+          <li><strong>Default:</strong> Shows last 7 days</li>
+          <li><strong>Dynamic:</strong> Table updates with slider changes</li>
+          <li><strong>Synchronized:</strong> Chart and table stay in sync</li>
+        </ul>
+
+        <h3>Data Table</h3>
+        <p>Below each daily chart is a synchronized data table showing:</p>
+        <ul>
+          <li><strong>Rate:</strong> Daily metric values</li>
+          <li><strong>MEL:</strong> Minimum Equipment List counts</li>
+          <li><strong>AC*:</strong> Aircraft counts</li>
+        </ul>
+        <p>The table automatically updates when you use the slider or zoom/pan the chart.</p>
+      </section>
+
+      <section id="data-formats" class="card">
+        <h2>📁 Supported Data Formats</h2>
+        
+        <h3>Format 1: Filename as Measure Name</h3>
+        <div class="filename">
+          <span>maintenance_cancels.csv</span>
+          <span class="tag">Format 1</span>
+        </div>
+        <pre><code>timestamp,station,metric_value
+2023-01-02,Austin,2.5
+2023-01-02,Dallas,3.1
+2023-01-09,Austin,2.8</code></pre>
+        <p class="muted">The filename becomes the measure name. Use this format when you have one measure per file.</p>
+
+        <h3>Format 2: Standard Format</h3>
+        <div class="filename">
+          <span>all_measures.csv</span>
+          <span class="tag">Format 2</span>
+        </div>
+        <pre><code>station,measure,date,value
+AUS,Maintenance Cancels,2023-01-02,2.5
+DAL,Maintenance Cancels,2023-01-02,3.1
+AUS,Maintenance Cancels,2023-01-09,2.8</code></pre>
+        <p class="muted">Use this format when you have multiple measures in one file.</p>
+
+        <div class="callout">
+          <strong>Date Formats Supported:</strong> YYYY-MM-DD, M/D/YYYY, YYYY/M/D, M-D-YYYY
+        </div>
+      </section>
+
+      <section id="troubleshooting" class="card">
+        <h2>🔧 Troubleshooting</h2>
+        
+        <h3>CSV Upload Issues</h3>
+        <div class="callout warning">
+          <strong>Built-in CSV Format Checker:</strong> Navigate to <code>http://localhost:8000/csv_format_checker.html</code> to diagnose format issues and get specific fix suggestions.
+        </div>
+        
+        <h4>Common Issues:</h4>
+        <ul>
+          <li><strong>Wrong date format:</strong> Use YYYY-MM-DD format</li>
+          <li><strong>Text in numeric columns:</strong> Ensure all values are valid numbers</li>
+          <li><strong>Missing headers:</strong> Check that column names match exactly</li>
+          <li><strong>Empty rows:</strong> Remove any blank lines in your CSV</li>
+        </ul>
+
+        <h3>Chart Display Issues</h3>
+        <ul>
+          <li><strong>Charts not loading:</strong> Make sure the server is still running</li>
+          <li><strong>Browser cache:</strong> Try a hard refresh (Ctrl+F5)</li>
+          <li><strong>Console errors:</strong> Press F12 to check for JavaScript errors</li>
+        </ul>
+
+        <h3>Server Issues</h3>
+        <ul>
+          <li><strong>Port already in use:</strong> Edit <code>server.py</code> and change the PORT number</li>
+          <li><strong>Python not found:</strong> Ensure Python 3.7+ is installed and in your PATH</li>
+          <li><strong>Permission denied:</strong> Try running as administrator (Windows) or with sudo (Mac/Linux)</li>
+        </ul>
+      </section>
+
+      <section id="exporting" class="card">
+        <h2>💾 Exporting Charts</h2>
+        
+        <h3>PNG Export</h3>
+        <p>Each chart has a <strong>"Save PNG"</strong> button in the top-right corner:</p>
+        <ul>
+          <li><strong>High Resolution:</strong> 1200×600 pixels at 2x scale</li>
+          <li><strong>Executive Ready:</strong> No footer stamps or auto-generated text</li>
+          <li><strong>Downloads Folder:</strong> Charts save to your default downloads location</li>
+          <li><strong>Filename Format:</strong> <code>station_measure_charttype.png</code></li>
+        </ul>
+
+        <h3>Export Features</h3>
+        <div class="grid cols-2">
+          <div>
+            <h4>Weekly Charts</h4>
+            <ul>
+              <li>X Chart with phase boundaries</li>
+              <li>mR Chart with control limits</li>
+              <li>Distribution histogram</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Daily Charts</h4>
+            <ul>
+              <li>Interactive bar chart</li>
+              <li>Weekend day highlighting</li>
+              <li>Dynamic control limits</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout success">
+          <strong>Pro Tip:</strong> Use the phase slider to focus on the most relevant time period before exporting for presentations.
+        </div>
+      </section>
+
+      <footer>
+        © Southwest Airlines Technical Operations • Wheeler XmR methodology • Internal Use<br>
+        <strong>Version 2.0</strong> • Last Updated: October 13, 2025
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

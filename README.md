@@ -10,11 +10,14 @@ Lightweight desktop tool for monitoring maintenance performance across multiple 
 - ✅ **Zero external dependencies** - Python standard library only
 - ✅ **No web server installation required** - Uses Python's built-in http.server
 - ✅ **Wheeler's XmR Charts** - Both Individuals (X) and Moving Range (mR)
-- ✅ **Automatic phase detection** - Rule #1 (points beyond limits) and Rule #4 (7-point runs)
+- ✅ **Daily Bar Charts** - Interactive Plotly.js charts with zoom/pan and slider control
+- ✅ **Automatic phase detection** - Rule #1 (points beyond limits), Rule #2 (2 of 3 beyond 2σ), and Rule #4 (7-point runs)
+- ✅ **Phase zoom control** - Slider to focus on recent phases (default: all phases from Jan 2023)
 - ✅ **PNG export** - Save charts for reports and presentations
 - ✅ **Offline capable** - All processing happens locally on your machine
 - ✅ **CSV troubleshooting tools** - Built-in format checker and debug logging
 - ✅ **Southwest Airlines branding** - Unified SWA blue/yellow theme across docs and UI
+- ✅ **Executive-ready layout** - Widescreen 16:9 format for presentations
 
 ## 📋 Requirements
 
@@ -81,7 +84,8 @@ SPC-Station-Health-Charts/
 ### Load Sample Data
 1. Click **"Load Test Data"** to view sample maintenance metrics
 2. Data includes 3 stations (AUS, DAL, HOU) from Jan 2023 to present
-3. View 4 maintenance measures with X chart, mR chart, and Distribution chart grouped together
+3. **Weekly Mode:** View 4 maintenance measures with X chart, mR chart, and Distribution chart grouped together
+4. **Daily Mode:** View daily bar charts with interactive zoom/pan and 7-30 day slider control
 
 ### Upload Your Own Data
 
@@ -113,10 +117,18 @@ The dashboard automatically detects which format you're using.
 
 ## 📈 Statistical Methodology
 
-### Wheeler's XmR Charts
+### Wheeler's XmR Charts (Weekly Mode)
 - **X Chart (Individuals):** Monitors process location (average)
 - **mR Chart (Moving Range):** Monitors process variation (consistency)
 - **Distribution Chart:** Histogram with normal curve overlay; linked to phase slider, auto-bins filtered X values
+
+### Daily Bar Charts (Daily Mode)
+- **Interactive Plotly.js charts** with smooth zoom and pan capabilities
+- **7-30 day slider control** for explicit date range selection
+- **Weekend day highlighting** with Southwest Airlines red coloring
+- **Dynamic control limits** calculated from visible data only
+- **Synchronized data table** that updates with chart zoom/pan
+- **Southwest Airlines branding** with proper color scheme
 
 ### Natural Process Limits (NPL)
 - **Sigma:** 2.66 (natural process limits)
@@ -126,6 +138,7 @@ The dashboard automatically detects which format you're using.
 ### Phase Detection
 **Wheeler's Rules implemented:**
 - **Rule #1:** Point beyond control limits (outside UCL/LCL)
+- **Rule #2:** 2 of 3 consecutive points beyond 2σ on the same side of centerline
 - **Rule #4:** 7 consecutive points on one side of centerline
 
 When a signal is detected:
@@ -188,6 +201,6 @@ Internal use only - Airline Technical Operations
 
 ---
 
-**Version:** 1.7  
-**Last Updated:** October 9, 2025  
+**Version:** 2.0  
+**Last Updated:** October 13, 2025  
 **Maintained by:** Southwest Airlines Technical Operations Analytics Team
