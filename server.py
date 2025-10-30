@@ -6,6 +6,7 @@ No installation required - uses Python's built-in http.server
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import urllib.parse
+import math
 from spc_processor import process_data, generate_demo_data
 from load_actual_data import convert_to_spc_format, infer_measure_from_filename
 import re
@@ -211,6 +212,22 @@ class SPCHandler(SimpleHTTPRequestHandler):
                 error_response = {'error': str(e), 'success': False}
                 self.wfile.write(json.dumps(error_response).encode('utf-8'))
         
+        elif self.path == '/api/generate-airline-kpis':
+            # Generate realistic airline KPI data
+            try:
+                result = generate_airline_kpi_data()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode('utf-8'))
+            
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {'error': str(e), 'success': False}
+                self.wfile.write(json.dumps(error_response).encode('utf-8'))
+        
         else:
             self.send_response(404)
             self.end_headers()
@@ -315,6 +332,100 @@ WARNING: Keep this window open while using the dashboard!
     except KeyboardInterrupt:
         print("\n\n✓ Server stopped. You can close this window.")
         httpd.shutdown()
+
+
+def generate_airline_kpi_data():
+    """
+    Generate realistic airline technical operations KPI data for testing.
+    Creates both weekly SPC data and daily bar chart data.
+    """
+    import random
+    import datetime
+    from spc_processor import process_data
+    
+    # Airline stations (major Southwest hubs)
+    stations = ['DAL', 'HOU', 'PHX', 'DEN', 'LAS', 'LAX', 'MDW', 'BWI']
+    
+    # Realistic airline tech ops KPIs
+    weekly_measures = {
+        'Aircraft On-Time Performance': {'base': 85, 'variation': 8, 'unit': '%'},
+        'Maintenance Delays per 100 Departures': {'base': 2.5, 'variation': 1.2, 'unit': 'delays'},
+        'Unscheduled Maintenance Events': {'base': 12, 'variation': 4, 'unit': 'events'},
+        'Aircraft Availability Rate': {'base': 92, 'variation': 5, 'unit': '%'},
+        'Ground Support Equipment Reliability': {'base': 96, 'variation': 3, 'unit': '%'},
+        'Baggage Handling Performance': {'base': 99.2, 'variation': 0.5, 'unit': '%'}
+    }
+    
+    daily_measures = {
+        'MEL Rate (Daily)': {'base': 0.35, 'variation': 0.15, 'unit': 'rate'},
+        'Aircraft Turn Time (Daily)': {'base': 45, 'variation': 12, 'unit': 'minutes'},
+        'Gate Departure Delays (Daily)': {'base': 8, 'variation': 6, 'unit': 'minutes'}
+    }
+    
+    # Generate data starting from January 1, 2023
+    start_date = datetime.date(2023, 1, 1)
+    end_date = datetime.date(2025, 10, 13)  # Current date
+    
+    csv_lines = []
+    
+    # Generate weekly data (every Monday)
+    current_date = start_date
+    while current_date <= end_date:
+        if current_date.weekday() == 0:  # Monday
+            for station in stations:
+                for measure_name, params in weekly_measures.items():
+                    # Add some realistic seasonal variation
+                    seasonal_factor = 1 + 0.1 * math.sin(2 * math.pi * current_date.timetuple().tm_yday / 365)
+                    
+                    # Add some station-specific variation
+                    station_factor = 1 + (hash(station) % 20 - 10) / 100  # -10% to +10%
+                    
+                    # Generate value with normal distribution
+                    base_value = params['base'] * seasonal_factor * station_factor
+                    value = max(0, random.normalvariate(base_value, params['variation']))
+                    
+                    # Round appropriately
+                    if params['unit'] == '%':
+                        value = round(value, 1)
+                    elif params['unit'] == 'rate':
+                        value = round(value, 3)
+                    else:
+                        value = round(value, 1)
+                    
+                    csv_lines.append(f"{station},{measure_name},{current_date},{value}")
+        
+        current_date += datetime.timedelta(days=1)
+    
+    # Generate daily data for the last 30 days
+    daily_start = end_date - datetime.timedelta(days=30)
+    current_date = daily_start
+    while current_date <= end_date:
+        for station in stations:
+            for measure_name, params in daily_measures.items():
+                # Weekend effect (slightly different performance)
+                weekend_factor = 0.95 if current_date.weekday() >= 5 else 1.0
+                
+                # Generate value with normal distribution
+                base_value = params['base'] * weekend_factor
+                value = max(0, random.normalvariate(base_value, params['variation']))
+                
+                # Round appropriately
+                if params['unit'] == 'rate':
+                    value = round(value, 3)
+                else:
+                    value = round(value, 1)
+                
+                csv_lines.append(f"{station},{measure_name} (Daily Bar),{current_date},{value}")
+        
+        current_date += datetime.timedelta(days=1)
+    
+    # Convert to CSV format
+    csv_content = "station,measure,date,value\n" + "\n".join(csv_lines)
+    
+    # Process the data
+    result = process_data(csv_content)
+    
+    return result
 
 
 if __name__ == '__main__':

@@ -1,22 +1,26 @@
-# SPC Station Health Charts
+# Southwest Airlines Tech Ops SPC Dashboard
+
+**Version 2.1 - True Offline Capability**
 
 Statistical Process Control (SPC) Dashboard for Airline Maintenance Metrics using Wheeler's XmR methodology.
 
 ## 🎯 Overview
 
-Lightweight desktop tool for monitoring maintenance performance across multiple airline stations. Implements Wheeler's Rules for detecting process shifts and calculating Natural Process Limits.
+Professional desktop tool for monitoring maintenance performance across multiple airline stations. Implements Wheeler's Rules for detecting process shifts and calculating Natural Process Limits with complete offline capability.
 
 **Key Features:**
+- ✅ **True Offline Operation** - Zero internet requirements, works in air-gapped environments
+- ✅ **Local Plotly.js Library** - Professional charting with no CDN dependencies
 - ✅ **Zero external dependencies** - Python standard library only
 - ✅ **No web server installation required** - Uses Python's built-in http.server
 - ✅ **Wheeler's XmR Charts** - Both Individuals (X) and Moving Range (mR)
-- ✅ **Daily Bar Charts** - Interactive Plotly.js charts with zoom/pan and slider control
+- ✅ **Interactive Daily Bar Charts** - Plotly.js charts with zoom/pan and slider control
 - ✅ **Automatic phase detection** - Rule #1 (points beyond limits), Rule #2 (2 of 3 beyond 2σ), and Rule #4 (7-point runs)
 - ✅ **Phase zoom control** - Slider to focus on recent phases (default: all phases from Jan 2023)
 - ✅ **PNG export** - Save charts for reports and presentations
-- ✅ **Offline capable** - All processing happens locally on your machine
+- ✅ **Comprehensive Testing** - Automated offline functionality validation
 - ✅ **CSV troubleshooting tools** - Built-in format checker and debug logging
-- ✅ **Southwest Airlines branding** - Unified SWA blue/yellow theme across docs and UI
+- ✅ **Southwest Airlines branding** - Unified SWA blue/red/yellow theme across docs and UI
 - ✅ **Executive-ready layout** - Widescreen 16:9 format for presentations
 
 ## 📋 Requirements
@@ -25,7 +29,8 @@ Lightweight desktop tool for monitoring maintenance performance across multiple 
 - **Modern web browser** (Chrome, Edge, Firefox, Safari)
 - **No admin rights required**
 - **No API keys required**
-- **No internet connection required** (runs completely offline)
+- **No internet connection required** (runs completely offline with local Plotly.js v2.27.0)
+- **Storage:** Additional 3.4MB for bundled JavaScript libraries
 
 ## 🚀 Quick Start
 

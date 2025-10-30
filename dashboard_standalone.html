@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Southwest Tech Ops Station Health Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="./js/plotly-2.27.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -384,6 +384,7 @@
         </h1>
         <div class="controls">
             <button class="btn-primary" onclick="loadActualData()" style="font-size: 0.95rem;">📊 Load Test Data</button>
+            <button class="btn-primary" onclick="generateAirlineKPIData()" style="font-size: 0.95rem; background: #059669;">✈️ Generate Airline KPIs</button>
             <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
             <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV</button>
             <input type="text" id="newStation" placeholder="Add Station (e.g., SFO)" style="width: 160px">
@@ -480,13 +481,14 @@
         <div id="content">
             <div class="message">
                 <p style="font-size: 1.5rem; margin-bottom: 1rem;">📊 Ready to View SPC Charts</p>
-                <p style="font-size: 1.125rem; color: #9ca3af;">Click <strong style="color: #059669;">"Load Test Data"</strong> above to view:</p>
+                <p style="font-size: 1.125rem; color: #9ca3af;">Click <strong style="color: #059669;">"Load Test Data"</strong> or <strong style="color: #059669;">"Generate Airline KPIs"</strong> above to view:</p>
                 <ul style="list-style: none; padding: 0; margin-top: 1rem; font-size: 1rem; color: #d1d5db;">
                     <li>✓ Austin (AUS)</li>
                     <li>✓ Dallas Love Field (DAL)</li>
                     <li>✓ Houston Hobby (HOU)</li>
                 </ul>
                 <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">Simulated test data • January 2023 to present • 4 maintenance metrics</p>
+                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;"><strong>Generate Airline KPIs:</strong> Realistic airline tech ops data • 8 major stations • 6 weekly + 3 daily measures</p>
                 <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border-left: 4px solid #304CB2;">
                     <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 600; color: #304CB2;">📈 Chart Modes:</p>
                     <ul style="margin: 0; padding-left: 1rem; font-size: 0.75rem; color: #6b7280;">
@@ -494,7 +496,16 @@
                         <li><strong>Daily Mode:</strong> Interactive Plotly.js bar charts with 7-30 day slider</li>
                     </ul>
                 </div>
-                <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">Upload supports: timestamp,station,metric_value (filename = measure) OR station,measure,date,value</p>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 600; color: #0ea5e9;">📋 CSV Import Requirements:</p>
+                    <div style="font-size: 0.75rem; color: #6b7280;">
+                        <p style="margin: 0 0 0.25rem 0;"><strong>Format 1:</strong> timestamp,station,metric_value (filename becomes measure name)</p>
+                        <p style="margin: 0 0 0.25rem 0;"><strong>Format 2:</strong> station,measure,date,value (multiple measures in one file)</p>
+                        <p style="margin: 0 0 0.25rem 0;"><strong>Date Formats:</strong> YYYY-MM-DD, M/D/YYYY, YYYY/M/D, M-D-YYYY</p>
+                        <p style="margin: 0 0 0.25rem 0;"><strong>Daily Charts:</strong> Add "(Daily Bar)" to measure name for interactive charts</p>
+                        <p style="margin: 0;"><strong>Sample Files:</strong> Weekly_Airline_KPIs_Sample.csv, Daily_Airline_KPIs_Sample.csv</p>
+                    </div>
+                </div>
                 <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">📘 <a href="Explainer_File.html" target="_blank" style="color: #304CB2;">View User Guide</a> • <a href="SPC_Rules_and_Odds.html" target="_blank" style="color: #304CB2;">SPC Rules & Odds</a></p>
             </div>
         </div>
@@ -524,6 +535,30 @@
                     renderCharts();
                 } else {
                     showError(result.error || 'Failed to load test data');
+                }
+            } catch (err) {
+                showError('Failed to connect to server. Make sure server.py is running.');
+            }
+        }
+
+        async function generateAirlineKPIData() {
+            document.getElementById('content').innerHTML = '<div class="loading">Generating realistic airline KPI data...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/generate-airline-kpis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    chartData = result.chartData;
+                    phaseSelections = {};  // Reset phase selections
+                    updateStationSelect(result.stations);
+                    renderCharts();
+                } else {
+                    showError(result.error || 'Failed to generate airline KPI data');
                 }
             } catch (err) {
                 showError('Failed to connect to server. Make sure server.py is running.');
@@ -737,9 +772,13 @@
                                                 <span class="chart-stat-label">LCL</span>
                                                 <span class="chart-stat-value">${lcl}</span>
                                             </div>
-                                            <button onclick="downloadChartWithHeader('container-${dailyCanvasId}', '${station}_${dailyMeasure}')" 
+                                            <button onclick="downloadDailyChartWithTable('${dailyCanvasId}', '${station}_${dailyMeasure}')" 
+                                                    style="padding: 0.4rem 0.75rem; background: #059669; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
+                                                📊 Save Chart + Table
+                                            </button>
+                                            <button onclick="downloadDailyChartWithHeader('${dailyCanvasId}', '${station}_${dailyMeasure}')" 
                                                     style="padding: 0.4rem 0.75rem; background: #4f46e5; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem; margin-left: 0.5rem;">
-                                                💾 Save PNG
+                                                💾 Save with Header
                                             </button>
                                         </div>
                                     </div>
@@ -1543,7 +1582,7 @@
             const layout = {
                 title: false,
                 showlegend: false,
-                margin: { l: 70, r: 50, t: 20, b: 120 }, // Increased right margin to prevent label cutoff
+                margin: { l: 80, r: 60, t: 20, b: 120 }, // Increased margins to prevent bar cutoff
                 xaxis: {
                     title: false,
                     ticktext: xAxisLabels,
@@ -1552,7 +1591,15 @@
                     tickfont: { size: 11, family: 'Arial, sans-serif' },
                     tickmode: 'array',
                     automargin: true, // Automatically adjust margins for labels
-                    range: dates.length >= 7 ? [dates[dates.length - 7], dates[dates.length - 1]] : [dates[0], dates[dates.length - 1]],
+                    range: (() => {
+                        const startIdx = Math.max(0, dates.length - 7);
+                        const endIdx = dates.length - 1;
+                        // Add padding: 12 hours before first date, 12 hours after last date
+                        const paddingMs = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+                        const startDate = new Date(dates[startIdx].getTime() - paddingMs);
+                        const endDate = new Date(dates[endIdx].getTime() + paddingMs);
+                        return [startDate, endDate];
+                    })(),
                     rangeslider: { visible: false },
                     fixedrange: false, // Allow zooming
                     showgrid: true,
@@ -1567,7 +1614,9 @@
                 },
                 plot_bgcolor: '#FFFFFF',
                 paper_bgcolor: '#FFFFFF',
-                hovermode: 'closest'
+                hovermode: 'closest',
+                bargap: 0.15, // 15% gap between bars
+                bargroupgap: 0.1 // Gap between bar groups
             };
             
             // Plotly config
@@ -1652,10 +1701,13 @@
             const allDates = chartDiv.data[0].x; // Bar trace dates
             if (!allDates || allDates.length === 0) return;
             
-            // Calculate new range (last N days)
-            const endDate = allDates[allDates.length - 1];
-            const startDate = allDates[Math.max(0, allDates.length - numDays)];
-            
+            // Calculate new range (last N days) with padding
+            const endIdx = allDates.length - 1;
+            const startIdx = Math.max(0, allDates.length - numDays);
+            const paddingMs = 12 * 60 * 60 * 1000; // 12 hours padding
+            const startDate = new Date(allDates[startIdx].getTime() - paddingMs);
+            const endDate = new Date(allDates[endIdx].getTime() + paddingMs);
+
             // Use Plotly.relayout to update the view
             Plotly.relayout(containerId, {
                 'xaxis.range': [startDate, endDate]
@@ -1849,6 +1901,305 @@
             link.download = `${chartName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
             link.href = compositeCanvas.toDataURL('image/png');
             link.click();
+        }
+
+        async function downloadDailyChartWithTable(containerId, chartName) {
+            const chartDiv = document.getElementById(containerId);
+            const container = chartDiv.closest('.chart-container');
+            if (!container) return;
+            
+            try {
+                // Get Plotly chart as image
+                const plotlyImage = await Plotly.toImage(chartDiv, {
+                    format: 'png',
+                    height: 450,
+                    width: 1200,
+                    scale: 2
+                });
+                
+                // Get the data table element
+                const tableContainer = document.getElementById(`data-table-${containerId}`);
+                if (!tableContainer) {
+                    console.error('Data table not found');
+                    return;
+                }
+                
+                // Get header elements
+                const header = container.querySelector('.chart-header');
+                const title = header.querySelector('.chart-title').textContent;
+                const subtitle = header.querySelector('.chart-subtitle').textContent;
+                const stats = Array.from(header.querySelectorAll('.chart-stat'));
+                
+                // Create composite canvas
+                const compositeCanvas = document.createElement('canvas');
+                const ctx = compositeCanvas.getContext('2d');
+                
+                // Calculate dimensions
+                const headerHeight = 80;
+                const chartHeight = 450;
+                const tableHeaderHeight = 40;
+                const tableHeight = 160; // 3 rows + header
+                const gap = 10;
+                const totalHeight = headerHeight + chartHeight + gap + tableHeaderHeight + tableHeight + 20;
+                
+                // Set canvas size
+                compositeCanvas.width = 1200 * 2; // 2x for quality
+                compositeCanvas.height = totalHeight * 2;
+                ctx.scale(2, 2);
+                
+                // Draw white background
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, 1200, totalHeight);
+                
+                // Draw chart header background
+                ctx.fillStyle = '#374151';
+                ctx.fillRect(0, 0, 1200, headerHeight);
+                
+                // Draw title
+                ctx.fillStyle = '#e5e7eb';
+                ctx.font = 'bold 18px Arial, sans-serif';
+                ctx.fillText(title, 16, 30);
+                
+                // Draw subtitle
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '14px Arial, sans-serif';
+                ctx.fillText(subtitle, 16, 55);
+                
+                // Draw stats on right side
+                let statsX = 1200 - 350;
+                ctx.font = '12px Arial, sans-serif';
+                stats.forEach((stat, i) => {
+                    const label = stat.querySelector('.chart-stat-label').textContent;
+                    const value = stat.querySelector('.chart-stat-value').textContent;
+                    
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.fillText(label, statsX + (i * 90), 30);
+                    
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.font = 'bold 16px Arial, sans-serif';
+                    ctx.fillText(value, statsX + (i * 90), 55);
+                    ctx.font = '12px Arial, sans-serif';
+                });
+                
+                // Draw chart border
+                ctx.strokeStyle = '#D1D5DB';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(1, headerHeight + 1, 1198, chartHeight - 2);
+                
+                // Load and draw Plotly chart image
+                const chartImg = new Image();
+                chartImg.onload = function() {
+                    ctx.drawImage(chartImg, 0, headerHeight, 1200, chartHeight);
+                    
+                    // Get table data
+                    const table = tableContainer.querySelector('table');
+                    if (table) {
+                        const rows = table.querySelectorAll('tr');
+                        const headerRow = rows[0];
+                        const headerCells = headerRow.querySelectorAll('th');
+                        const numDays = headerCells.length - 1; // Exclude first "Metric" column
+                        
+                        // Calculate bar positions from Plotly chart
+                        // Plotly chart has margins: l:80, r:60, so plot area is 1200-80-60 = 1060px
+                        const plotAreaLeft = 80;
+                        const plotAreaWidth = 1200 - 80 - 60; // 1060px
+                        const barWidth = plotAreaWidth / numDays;
+                        
+                        // Draw "Daily Data" header
+                        const tableStartY = headerHeight + chartHeight + gap;
+                        ctx.fillStyle = '#374151';
+                        ctx.fillRect(0, tableStartY, 1200, tableHeaderHeight);
+                        
+                        ctx.fillStyle = '#e5e7eb';
+                        ctx.font = 'bold 14px Arial, sans-serif';
+                        ctx.fillText('Daily Data', 16, tableStartY + 25);
+                        
+                        // Draw table border
+                        const tableDataStartY = tableStartY + tableHeaderHeight;
+                        ctx.strokeStyle = '#D1D5DB';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(1, tableDataStartY, 1198, tableHeight - 2);
+                        
+                        // Draw table background
+                        ctx.fillStyle = '#F9FAFB';
+                        ctx.fillRect(2, tableDataStartY + 1, 1196, tableHeight - 4);
+                        
+                        // Draw table header background
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.fillRect(2, tableDataStartY + 1, 1196, 35);
+                        
+                        // Draw header row - align with chart bars
+                        ctx.fillStyle = '#374151';
+                        ctx.font = 'bold 11px Arial, sans-serif';
+                        ctx.textAlign = 'left';
+                        
+                        // First column (Metric)
+                        ctx.fillText('Metric', 10, tableDataStartY + 22);
+                        
+                        // Date columns - align with bars
+                        ctx.textAlign = 'center';
+                        headerCells.forEach((cell, index) => {
+                            if (index > 0) { // Skip first "Metric" column
+                                const barIndex = index - 1;
+                                const barCenterX = plotAreaLeft + (barIndex * barWidth) + (barWidth / 2);
+                                ctx.fillText(cell.textContent.trim(), barCenterX, tableDataStartY + 22);
+                            }
+                        });
+                        
+                        // Draw data rows
+                        const cellHeight = 35;
+                        const rowLabels = ['Rate', 'MEL', 'AC*'];
+                        
+                        for (let i = 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            const cells = row.querySelectorAll('td');
+                            const yPos = tableDataStartY + 35 + (i * cellHeight) - 10;
+                            
+                            // Alternate row background
+                            if (i % 2 === 0) {
+                                ctx.fillStyle = '#F3F4F6';
+                                ctx.fillRect(2, tableDataStartY + 35 + ((i-1) * cellHeight), 1196, cellHeight);
+                            }
+                            
+                            // Draw row label
+                            ctx.fillStyle = '#374151';
+                            ctx.font = 'bold 11px Arial, sans-serif';
+                            ctx.textAlign = 'left';
+                            ctx.fillText(rowLabels[i-1], 10, yPos);
+                            
+                            // Draw data cells - align with bars
+                            ctx.fillStyle = '#6B7280';
+                            ctx.font = '11px Arial, sans-serif';
+                            ctx.textAlign = 'center';
+                            
+                            cells.forEach((cell, index) => {
+                                if (index > 0) { // Skip first column (already drawn as label)
+                                    const barIndex = index - 1;
+                                    const barCenterX = plotAreaLeft + (barIndex * barWidth) + (barWidth / 2);
+                                    ctx.fillText(cell.textContent.trim(), barCenterX, yPos);
+                                }
+                            });
+                        }
+                        
+                        // Draw vertical grid lines - align with bar edges
+                        ctx.strokeStyle = '#E5E7EB';
+                        ctx.lineWidth = 1;
+                        
+                        for (let i = 0; i <= numDays; i++) {
+                            const xLine = plotAreaLeft + (i * barWidth);
+                            ctx.beginPath();
+                            ctx.moveTo(xLine, tableDataStartY + 1);
+                            ctx.lineTo(xLine, tableDataStartY + tableHeight - 2);
+                            ctx.stroke();
+                        }
+                        
+                        // Draw horizontal grid lines
+                        for (let i = 0; i <= rows.length; i++) {
+                            const yLine = tableDataStartY + 35 + (i * cellHeight);
+                            ctx.beginPath();
+                            ctx.moveTo(2, yLine);
+                            ctx.lineTo(1198, yLine);
+                            ctx.stroke();
+                        }
+                    }
+                    
+                    // Reset text alignment
+                    ctx.textAlign = 'left';
+                    
+                    // Download composite image
+                    const link = document.createElement('a');
+                    link.download = `${chartName.replace(/[^a-zA-Z0-9]/g, '_')}_chart_table.png`;
+                    link.href = compositeCanvas.toDataURL('image/png');
+                    link.click();
+                };
+                chartImg.src = plotlyImage;
+                
+            } catch (error) {
+                console.error('Error creating chart + table image:', error);
+                alert('Failed to download chart and table. Please try the Save with Header option.');
+            }
+        }
+
+        async function downloadDailyChartWithHeader(containerId, chartName) {
+            const chartDiv = document.getElementById(containerId);
+            const container = chartDiv.closest('.chart-container');
+            if (!container) return;
+            
+            try {
+                // Get Plotly chart as image
+                const plotlyImage = await Plotly.toImage(chartDiv, {
+                    format: 'png',
+                    height: 450,
+                    width: 1200,
+                    scale: 2
+                });
+                
+                // Create composite canvas
+                const compositeCanvas = document.createElement('canvas');
+                const ctx = compositeCanvas.getContext('2d');
+                
+                // Set canvas size (header ~80px + chart 450px + padding)
+                compositeCanvas.width = 1200 * 2; // 2x for quality
+                compositeCanvas.height = (80 + 450 + 20) * 2;
+                ctx.scale(2, 2);
+                
+                // Draw background
+                ctx.fillStyle = '#1f2937';
+                ctx.fillRect(0, 0, 1200, 550);
+                
+                // Get header elements
+                const header = container.querySelector('.chart-header');
+                const title = header.querySelector('.chart-title').textContent;
+                const subtitle = header.querySelector('.chart-subtitle').textContent;
+                const stats = Array.from(header.querySelectorAll('.chart-stat'));
+                
+                // Draw header background
+                ctx.fillStyle = '#374151';
+                ctx.fillRect(0, 0, 1200, 80);
+                
+                // Draw title
+                ctx.fillStyle = '#e5e7eb';
+                ctx.font = 'bold 18px Arial, sans-serif';
+                ctx.fillText(title, 16, 30);
+                
+                // Draw subtitle
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '14px Arial, sans-serif';
+                ctx.fillText(subtitle, 16, 55);
+                
+                // Draw stats on right side
+                let statsX = 1200 - 350;
+                ctx.font = '12px Arial, sans-serif';
+                stats.forEach((stat, i) => {
+                    const label = stat.querySelector('.chart-stat-label').textContent;
+                    const value = stat.querySelector('.chart-stat-value').textContent;
+                    
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.fillText(label, statsX + (i * 90), 30);
+                    
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.font = 'bold 16px Arial, sans-serif';
+                    ctx.fillText(value, statsX + (i * 90), 55);
+                    ctx.font = '12px Arial, sans-serif';
+                });
+                
+                // Load and draw Plotly chart image
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 90, 1200, 450);
+                    
+                    // Download composite image
+                    const link = document.createElement('a');
+                    link.download = `${chartName.replace(/[^a-zA-Z0-9]/g, '_')}_complete.png`;
+                    link.href = compositeCanvas.toDataURL('image/png');
+                    link.click();
+                };
+                img.src = plotlyImage;
+                
+            } catch (error) {
+                console.error('Error creating composite image:', error);
+                alert('Failed to download chart. Please try the Quick PNG option.');
+            }
         }
 
         function showError(message) {

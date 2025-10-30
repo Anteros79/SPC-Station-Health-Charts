@@ -1,0 +1,136 @@
+station,measure,date,value
+DAL,Aircraft On-Time Performance,2023-01-02,87.2
+DAL,Aircraft On-Time Performance,2023-01-09,85.8
+DAL,Aircraft On-Time Performance,2023-01-16,89.1
+DAL,Aircraft On-Time Performance,2023-01-23,84.5
+DAL,Aircraft On-Time Performance,2023-01-30,86.7
+DAL,Maintenance Delays per 100 Departures,2023-01-02,2.1
+DAL,Maintenance Delays per 100 Departures,2023-01-09,3.2
+DAL,Maintenance Delays per 100 Departures,2023-01-16,1.8
+DAL,Maintenance Delays per 100 Departures,2023-01-23,2.9
+DAL,Maintenance Delays per 100 Departures,2023-01-30,2.4
+DAL,Unscheduled Maintenance Events,2023-01-02,11.2
+DAL,Unscheduled Maintenance Events,2023-01-09,14.8
+DAL,Unscheduled Maintenance Events,2023-01-16,9.3
+DAL,Unscheduled Maintenance Events,2023-01-23,13.7
+DAL,Unscheduled Maintenance Events,2023-01-30,10.6
+DAL,Aircraft Availability Rate,2023-01-02,93.4
+DAL,Aircraft Availability Rate,2023-01-09,90.8
+DAL,Aircraft Availability Rate,2023-01-16,95.1
+DAL,Aircraft Availability Rate,2023-01-23,89.2
+DAL,Aircraft Availability Rate,2023-01-30,92.3
+DAL,Ground Support Equipment Reliability,2023-01-02,97.1
+DAL,Ground Support Equipment Reliability,2023-01-09,95.8
+DAL,Ground Support Equipment Reliability,2023-01-16,98.3
+DAL,Ground Support Equipment Reliability,2023-01-23,94.6
+DAL,Ground Support Equipment Reliability,2023-01-30,96.7
+DAL,Baggage Handling Performance,2023-01-02,99.4
+DAL,Baggage Handling Performance,2023-01-09,98.8
+DAL,Baggage Handling Performance,2023-01-16,99.6
+DAL,Baggage Handling Performance,2023-01-23,98.2
+DAL,Baggage Handling Performance,2023-01-30,99.1
+HOU,Aircraft On-Time Performance,2023-01-02,86.8
+HOU,Aircraft On-Time Performance,2023-01-09,88.1
+HOU,Aircraft On-Time Performance,2023-01-16,85.4
+HOU,Aircraft On-Time Performance,2023-01-23,87.9
+HOU,Aircraft On-Time Performance,2023-01-30,86.2
+HOU,Maintenance Delays per 100 Departures,2023-01-02,2.3
+HOU,Maintenance Delays per 100 Departures,2023-01-09,2.8
+HOU,Maintenance Delays per 100 Departures,2023-01-16,1.9
+HOU,Maintenance Delays per 100 Departures,2023-01-23,3.1
+HOU,Maintenance Delays per 100 Departures,2023-01-30,2.2
+HOU,Unscheduled Maintenance Events,2023-01-02,12.1
+HOU,Unscheduled Maintenance Events,2023-01-09,13.7
+HOU,Unscheduled Maintenance Events,2023-01-16,10.2
+HOU,Unscheduled Maintenance Events,2023-01-23,14.3
+HOU,Unscheduled Maintenance Events,2023-01-30,11.4
+HOU,Aircraft Availability Rate,2023-01-02,92.8
+HOU,Aircraft Availability Rate,2023-01-09,94.2
+HOU,Aircraft Availability Rate,2023-01-16,91.5
+HOU,Aircraft Availability Rate,2023-01-23,93.7
+HOU,Aircraft Availability Rate,2023-01-30,92.1
+HOU,Ground Support Equipment Reliability,2023-01-02,96.8
+HOU,Ground Support Equipment Reliability,2023-01-09,97.3
+HOU,Ground Support Equipment Reliability,2023-01-16,95.9
+HOU,Ground Support Equipment Reliability,2023-01-23,96.4
+HOU,Ground Support Equipment Reliability,2023-01-30,96.1
+HOU,Baggage Handling Performance,2023-01-02,99.2
+HOU,Baggage Handling Performance,2023-01-09,99.5
+HOU,Baggage Handling Performance,2023-01-16,98.9
+HOU,Baggage Handling Performance,2023-01-23,99.3
+HOU,Baggage Handling Performance,2023-01-30,99.0
+PHX,Aircraft On-Time Performance,2023-01-02,88.5
+PHX,Aircraft On-Time Performance,2023-01-09,85.2
+PHX,Aircraft On-Time Performance,2023-01-16,87.8
+PHX,Aircraft On-Time Performance,2023-01-23,86.4
+PHX,Aircraft On-Time Performance,2023-01-30,89.1
+PHX,Maintenance Delays per 100 Departures,2023-01-02,1.9
+PHX,Maintenance Delays per 100 Departures,2023-01-09,3.4
+PHX,Maintenance Delays per 100 Departures,2023-01-16,2.1
+PHX,Maintenance Delays per 100 Departures,2023-01-23,2.7
+PHX,Maintenance Delays per 100 Departures,2023-01-30,1.8
+PHX,Unscheduled Maintenance Events,2023-01-02,10.8
+PHX,Unscheduled Maintenance Events,2023-01-09,15.2
+PHX,Unscheduled Maintenance Events,2023-01-16,11.7
+PHX,Unscheduled Maintenance Events,2023-01-23,13.1
+PHX,Unscheduled Maintenance Events,2023-01-30,9.9
+PHX,Aircraft Availability Rate,2023-01-02,94.1
+PHX,Aircraft Availability Rate,2023-01-09,91.3
+PHX,Aircraft Availability Rate,2023-01-16,93.8
+PHX,Aircraft Availability Rate,2023-01-23,92.6
+PHX,Aircraft Availability Rate,2023-01-30,95.2
+PHX,Ground Support Equipment Reliability,2023-01-02,97.5
+PHX,Ground Support Equipment Reliability,2023-01-09,95.1
+PHX,Ground Support Equipment Reliability,2023-01-16,96.8
+PHX,Ground Support Equipment Reliability,2023-01-23,95.9
+PHX,Ground Support Equipment Reliability,2023-01-30,97.2
+PHX,Baggage Handling Performance,2023-01-02,99.5
+PHX,Baggage Handling Performance,2023-01-09,98.6
+PHX,Baggage Handling Performance,2023-01-16,99.2
+PHX,Baggage Handling Performance,2023-01-23,98.9
+PHX,Baggage Handling Performance,2023-01-30,99.4
+DAL,MEL Rate (Daily Bar),2025-09-15,0.342
+DAL,MEL Rate (Daily Bar),2025-09-16,0.298
+DAL,MEL Rate (Daily Bar),2025-09-17,0.387
+DAL,MEL Rate (Daily Bar),2025-09-18,0.315
+DAL,MEL Rate (Daily Bar),2025-09-19,0.276
+DAL,Aircraft Turn Time (Daily Bar),2025-09-15,42.3
+DAL,Aircraft Turn Time (Daily Bar),2025-09-16,38.7
+DAL,Aircraft Turn Time (Daily Bar),2025-09-17,51.2
+DAL,Aircraft Turn Time (Daily Bar),2025-09-18,44.8
+DAL,Aircraft Turn Time (Daily Bar),2025-09-19,36.9
+DAL,Gate Departure Delays (Daily Bar),2025-09-15,6.2
+DAL,Gate Departure Delays (Daily Bar),2025-09-16,4.8
+DAL,Gate Departure Delays (Daily Bar),2025-09-17,11.3
+DAL,Gate Departure Delays (Daily Bar),2025-09-18,8.7
+DAL,Gate Departure Delays (Daily Bar),2025-09-19,3.9
+HOU,MEL Rate (Daily Bar),2025-09-15,0.328
+HOU,MEL Rate (Daily Bar),2025-09-16,0.312
+HOU,MEL Rate (Daily Bar),2025-09-17,0.375
+HOU,MEL Rate (Daily Bar),2025-09-18,0.291
+HOU,MEL Rate (Daily Bar),2025-09-19,0.334
+HOU,Aircraft Turn Time (Daily Bar),2025-09-15,41.8
+HOU,Aircraft Turn Time (Daily Bar),2025-09-16,39.2
+HOU,Aircraft Turn Time (Daily Bar),2025-09-17,50.6
+HOU,Aircraft Turn Time (Daily Bar),2025-09-18,43.5
+HOU,Aircraft Turn Time (Daily Bar),2025-09-19,37.4
+HOU,Gate Departure Delays (Daily Bar),2025-09-15,5.9
+HOU,Gate Departure Delays (Daily Bar),2025-09-16,5.1
+HOU,Gate Departure Delays (Daily Bar),2025-09-17,10.8
+HOU,Gate Departure Delays (Daily Bar),2025-09-18,8.2
+HOU,Gate Departure Delays (Daily Bar),2025-09-19,4.3
+PHX,MEL Rate (Daily Bar),2025-09-15,0.335
+PHX,MEL Rate (Daily Bar),2025-09-16,0.304
+PHX,MEL Rate (Daily Bar),2025-09-17,0.378
+PHX,MEL Rate (Daily Bar),2025-09-18,0.288
+PHX,MEL Rate (Daily Bar),2025-09-19,0.341
+PHX,Aircraft Turn Time (Daily Bar),2025-09-15,42.1
+PHX,Aircraft Turn Time (Daily Bar),2025-09-16,38.9
+PHX,Aircraft Turn Time (Daily Bar),2025-09-17,50.8
+PHX,Aircraft Turn Time (Daily Bar),2025-09-18,44.2
+PHX,Aircraft Turn Time (Daily Bar),2025-09-19,37.1
+PHX,Gate Departure Delays (Daily Bar),2025-09-15,6.1
+PHX,Gate Departure Delays (Daily Bar),2025-09-16,4.9
+PHX,Gate Departure Delays (Daily Bar),2025-09-17,11.0
+PHX,Gate Departure Delays (Daily Bar),2025-09-18,8.4
+PHX,Gate Departure Delays (Daily Bar),2025-09-19,4.1

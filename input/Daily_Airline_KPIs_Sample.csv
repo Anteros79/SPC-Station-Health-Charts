@@ -1,0 +1,271 @@
+station,measure,date,value
+DAL,MEL Rate (Daily Bar),2025-09-15,0.342
+DAL,MEL Rate (Daily Bar),2025-09-16,0.298
+DAL,MEL Rate (Daily Bar),2025-09-17,0.387
+DAL,MEL Rate (Daily Bar),2025-09-18,0.315
+DAL,MEL Rate (Daily Bar),2025-09-19,0.276
+DAL,MEL Rate (Daily Bar),2025-09-20,0.401
+DAL,MEL Rate (Daily Bar),2025-09-21,0.289
+DAL,MEL Rate (Daily Bar),2025-09-22,0.334
+DAL,MEL Rate (Daily Bar),2025-09-23,0.312
+DAL,MEL Rate (Daily Bar),2025-09-24,0.365
+DAL,MEL Rate (Daily Bar),2025-09-25,0.283
+DAL,MEL Rate (Daily Bar),2025-09-26,0.398
+DAL,MEL Rate (Daily Bar),2025-09-27,0.321
+DAL,MEL Rate (Daily Bar),2025-09-28,0.356
+DAL,MEL Rate (Daily Bar),2025-09-29,0.294
+DAL,MEL Rate (Daily Bar),2025-09-30,0.372
+DAL,MEL Rate (Daily Bar),2025-10-01,0.308
+DAL,MEL Rate (Daily Bar),2025-10-02,0.339
+DAL,MEL Rate (Daily Bar),2025-10-03,0.285
+DAL,MEL Rate (Daily Bar),2025-10-04,0.391
+DAL,MEL Rate (Daily Bar),2025-10-05,0.317
+DAL,MEL Rate (Daily Bar),2025-10-06,0.348
+DAL,MEL Rate (Daily Bar),2025-10-07,0.296
+DAL,MEL Rate (Daily Bar),2025-10-08,0.374
+DAL,MEL Rate (Daily Bar),2025-10-09,0.302
+DAL,MEL Rate (Daily Bar),2025-10-10,0.331
+DAL,MEL Rate (Daily Bar),2025-10-11,0.278
+DAL,MEL Rate (Daily Bar),2025-10-12,0.385
+DAL,MEL Rate (Daily Bar),2025-10-13,0.314
+DAL,MEL Rate (Daily Bar),2025-10-14,0.345
+HOU,MEL Rate (Daily Bar),2025-09-15,0.328
+HOU,MEL Rate (Daily Bar),2025-09-16,0.312
+HOU,MEL Rate (Daily Bar),2025-09-17,0.375
+HOU,MEL Rate (Daily Bar),2025-09-18,0.291
+HOU,MEL Rate (Daily Bar),2025-09-19,0.334
+HOU,MEL Rate (Daily Bar),2025-09-20,0.368
+HOU,MEL Rate (Daily Bar),2025-09-21,0.305
+HOU,MEL Rate (Daily Bar),2025-09-22,0.352
+HOU,MEL Rate (Daily Bar),2025-09-23,0.318
+HOU,MEL Rate (Daily Bar),2025-09-24,0.341
+HOU,MEL Rate (Daily Bar),2025-09-25,0.286
+HOU,MEL Rate (Daily Bar),2025-09-26,0.379
+HOU,MEL Rate (Daily Bar),2025-09-27,0.323
+HOU,MEL Rate (Daily Bar),2025-09-28,0.356
+HOU,MEL Rate (Daily Bar),2025-09-29,0.299
+HOU,MEL Rate (Daily Bar),2025-09-30,0.364
+HOU,MEL Rate (Daily Bar),2025-10-01,0.311
+HOU,MEL Rate (Daily Bar),2025-10-02,0.337
+HOU,MEL Rate (Daily Bar),2025-10-03,0.282
+HOU,MEL Rate (Daily Bar),2025-10-04,0.388
+HOU,MEL Rate (Daily Bar),2025-10-05,0.315
+HOU,MEL Rate (Daily Bar),2025-10-06,0.346
+HOU,MEL Rate (Daily Bar),2025-10-07,0.293
+HOU,MEL Rate (Daily Bar),2025-10-08,0.371
+HOU,MEL Rate (Daily Bar),2025-10-09,0.308
+HOU,MEL Rate (Daily Bar),2025-10-10,0.329
+HOU,MEL Rate (Daily Bar),2025-10-11,0.275
+HOU,MEL Rate (Daily Bar),2025-10-12,0.382
+HOU,MEL Rate (Daily Bar),2025-10-13,0.312
+HOU,MEL Rate (Daily Bar),2025-10-14,0.343
+PHX,MEL Rate (Daily Bar),2025-09-15,0.335
+PHX,MEL Rate (Daily Bar),2025-09-16,0.304
+PHX,MEL Rate (Daily Bar),2025-09-17,0.378
+PHX,MEL Rate (Daily Bar),2025-09-18,0.288
+PHX,MEL Rate (Daily Bar),2025-09-19,0.341
+PHX,MEL Rate (Daily Bar),2025-09-20,0.365
+PHX,MEL Rate (Daily Bar),2025-09-21,0.302
+PHX,MEL Rate (Daily Bar),2025-09-22,0.349
+PHX,MEL Rate (Daily Bar),2025-09-23,0.315
+PHX,MEL Rate (Daily Bar),2025-09-24,0.338
+PHX,MEL Rate (Daily Bar),2025-09-25,0.283
+PHX,MEL Rate (Daily Bar),2025-09-26,0.376
+PHX,MEL Rate (Daily Bar),2025-09-27,0.320
+PHX,MEL Rate (Daily Bar),2025-09-28,0.353
+PHX,MEL Rate (Daily Bar),2025-09-29,0.297
+PHX,MEL Rate (Daily Bar),2025-09-30,0.362
+PHX,MEL Rate (Daily Bar),2025-10-01,0.309
+PHX,MEL Rate (Daily Bar),2025-10-02,0.334
+PHX,MEL Rate (Daily Bar),2025-10-03,0.279
+PHX,MEL Rate (Daily Bar),2025-10-04,0.386
+PHX,MEL Rate (Daily Bar),2025-10-05,0.313
+PHX,MEL Rate (Daily Bar),2025-10-06,0.344
+PHX,MEL Rate (Daily Bar),2025-10-07,0.291
+PHX,MEL Rate (Daily Bar),2025-10-08,0.369
+PHX,MEL Rate (Daily Bar),2025-10-09,0.306
+PHX,MEL Rate (Daily Bar),2025-10-10,0.327
+PHX,MEL Rate (Daily Bar),2025-10-11,0.273
+PHX,MEL Rate (Daily Bar),2025-10-12,0.380
+PHX,MEL Rate (Daily Bar),2025-10-13,0.310
+PHX,MEL Rate (Daily Bar),2025-10-14,0.341
+DAL,Aircraft Turn Time (Daily Bar),2025-09-15,42.3
+DAL,Aircraft Turn Time (Daily Bar),2025-09-16,38.7
+DAL,Aircraft Turn Time (Daily Bar),2025-09-17,51.2
+DAL,Aircraft Turn Time (Daily Bar),2025-09-18,44.8
+DAL,Aircraft Turn Time (Daily Bar),2025-09-19,36.9
+DAL,Aircraft Turn Time (Daily Bar),2025-09-20,53.4
+DAL,Aircraft Turn Time (Daily Bar),2025-09-21,40.1
+DAL,Aircraft Turn Time (Daily Bar),2025-09-22,46.7
+DAL,Aircraft Turn Time (Daily Bar),2025-09-23,43.2
+DAL,Aircraft Turn Time (Daily Bar),2025-09-24,49.8
+DAL,Aircraft Turn Time (Daily Bar),2025-09-25,39.5
+DAL,Aircraft Turn Time (Daily Bar),2025-09-26,52.1
+DAL,Aircraft Turn Time (Daily Bar),2025-09-27,41.6
+DAL,Aircraft Turn Time (Daily Bar),2025-09-28,47.3
+DAL,Aircraft Turn Time (Daily Bar),2025-09-29,37.8
+DAL,Aircraft Turn Time (Daily Bar),2025-09-30,50.4
+DAL,Aircraft Turn Time (Daily Bar),2025-10-01,42.9
+DAL,Aircraft Turn Time (Daily Bar),2025-10-02,45.6
+DAL,Aircraft Turn Time (Daily Bar),2025-10-03,38.2
+DAL,Aircraft Turn Time (Daily Bar),2025-10-04,54.7
+DAL,Aircraft Turn Time (Daily Bar),2025-10-05,43.8
+DAL,Aircraft Turn Time (Daily Bar),2025-10-06,48.1
+DAL,Aircraft Turn Time (Daily Bar),2025-10-07,39.7
+DAL,Aircraft Turn Time (Daily Bar),2025-10-08,51.3
+DAL,Aircraft Turn Time (Daily Bar),2025-10-09,41.4
+DAL,Aircraft Turn Time (Daily Bar),2025-10-10,46.9
+DAL,Aircraft Turn Time (Daily Bar),2025-10-11,37.3
+DAL,Aircraft Turn Time (Daily Bar),2025-10-12,53.8
+DAL,Aircraft Turn Time (Daily Bar),2025-10-13,44.2
+DAL,Aircraft Turn Time (Daily Bar),2025-10-14,47.5
+HOU,Aircraft Turn Time (Daily Bar),2025-09-15,41.8
+HOU,Aircraft Turn Time (Daily Bar),2025-09-16,39.2
+HOU,Aircraft Turn Time (Daily Bar),2025-09-17,50.6
+HOU,Aircraft Turn Time (Daily Bar),2025-09-18,43.5
+HOU,Aircraft Turn Time (Daily Bar),2025-09-19,37.4
+HOU,Aircraft Turn Time (Daily Bar),2025-09-20,52.8
+HOU,Aircraft Turn Time (Daily Bar),2025-09-21,39.8
+HOU,Aircraft Turn Time (Daily Bar),2025-09-22,45.9
+HOU,Aircraft Turn Time (Daily Bar),2025-09-23,42.7
+HOU,Aircraft Turn Time (Daily Bar),2025-09-24,48.3
+HOU,Aircraft Turn Time (Daily Bar),2025-09-25,38.9
+HOU,Aircraft Turn Time (Daily Bar),2025-09-26,51.7
+HOU,Aircraft Turn Time (Daily Bar),2025-09-27,40.8
+HOU,Aircraft Turn Time (Daily Bar),2025-09-28,46.4
+HOU,Aircraft Turn Time (Daily Bar),2025-09-29,37.1
+HOU,Aircraft Turn Time (Daily Bar),2025-09-30,49.6
+HOU,Aircraft Turn Time (Daily Bar),2025-10-01,42.3
+HOU,Aircraft Turn Time (Daily Bar),2025-10-02,44.7
+HOU,Aircraft Turn Time (Daily Bar),2025-10-03,37.6
+HOU,Aircraft Turn Time (Daily Bar),2025-10-04,53.2
+HOU,Aircraft Turn Time (Daily Bar),2025-10-05,43.1
+HOU,Aircraft Turn Time (Daily Bar),2025-10-06,47.8
+HOU,Aircraft Turn Time (Daily Bar),2025-10-07,39.2
+HOU,Aircraft Turn Time (Daily Bar),2025-10-08,50.9
+HOU,Aircraft Turn Time (Daily Bar),2025-10-09,40.7
+HOU,Aircraft Turn Time (Daily Bar),2025-10-10,46.2
+HOU,Aircraft Turn Time (Daily Bar),2025-10-11,36.8
+HOU,Aircraft Turn Time (Daily Bar),2025-10-12,52.5
+HOU,Aircraft Turn Time (Daily Bar),2025-10-13,43.6
+HOU,Aircraft Turn Time (Daily Bar),2025-10-14,47.1
+PHX,Aircraft Turn Time (Daily Bar),2025-09-15,42.1
+PHX,Aircraft Turn Time (Daily Bar),2025-09-16,38.9
+PHX,Aircraft Turn Time (Daily Bar),2025-09-17,50.8
+PHX,Aircraft Turn Time (Daily Bar),2025-09-18,44.2
+PHX,Aircraft Turn Time (Daily Bar),2025-09-19,37.1
+PHX,Aircraft Turn Time (Daily Bar),2025-09-20,53.1
+PHX,Aircraft Turn Time (Daily Bar),2025-09-21,39.9
+PHX,Aircraft Turn Time (Daily Bar),2025-09-22,46.3
+PHX,Aircraft Turn Time (Daily Bar),2025-09-23,43.5
+PHX,Aircraft Turn Time (Daily Bar),2025-09-24,49.2
+PHX,Aircraft Turn Time (Daily Bar),2025-09-25,39.1
+PHX,Aircraft Turn Time (Daily Bar),2025-09-26,51.9
+PHX,Aircraft Turn Time (Daily Bar),2025-09-27,41.2
+PHX,Aircraft Turn Time (Daily Bar),2025-09-28,47.6
+PHX,Aircraft Turn Time (Daily Bar),2025-09-29,37.5
+PHX,Aircraft Turn Time (Daily Bar),2025-09-30,50.7
+PHX,Aircraft Turn Time (Daily Bar),2025-10-01,42.6
+PHX,Aircraft Turn Time (Daily Bar),2025-10-02,45.3
+PHX,Aircraft Turn Time (Daily Bar),2025-10-03,38.4
+PHX,Aircraft Turn Time (Daily Bar),2025-10-04,54.1
+PHX,Aircraft Turn Time (Daily Bar),2025-10-05,43.4
+PHX,Aircraft Turn Time (Daily Bar),2025-10-06,48.6
+PHX,Aircraft Turn Time (Daily Bar),2025-10-07,39.3
+PHX,Aircraft Turn Time (Daily Bar),2025-10-08,51.7
+PHX,Aircraft Turn Time (Daily Bar),2025-10-09,41.1
+PHX,Aircraft Turn Time (Daily Bar),2025-10-10,46.8
+PHX,Aircraft Turn Time (Daily Bar),2025-10-11,37.7
+PHX,Aircraft Turn Time (Daily Bar),2025-10-12,53.4
+PHX,Aircraft Turn Time (Daily Bar),2025-10-13,43.9
+PHX,Aircraft Turn Time (Daily Bar),2025-10-14,47.2
+DAL,Gate Departure Delays (Daily Bar),2025-09-15,6.2
+DAL,Gate Departure Delays (Daily Bar),2025-09-16,4.8
+DAL,Gate Departure Delays (Daily Bar),2025-09-17,11.3
+DAL,Gate Departure Delays (Daily Bar),2025-09-18,8.7
+DAL,Gate Departure Delays (Daily Bar),2025-09-19,3.9
+DAL,Gate Departure Delays (Daily Bar),2025-09-20,13.6
+DAL,Gate Departure Delays (Daily Bar),2025-09-21,7.4
+DAL,Gate Departure Delays (Daily Bar),2025-09-22,9.8
+DAL,Gate Departure Delays (Daily Bar),2025-09-23,6.5
+DAL,Gate Departure Delays (Daily Bar),2025-09-24,12.1
+DAL,Gate Departure Delays (Daily Bar),2025-09-25,5.2
+DAL,Gate Departure Delays (Daily Bar),2025-09-26,14.3
+DAL,Gate Departure Delays (Daily Bar),2025-09-27,8.1
+DAL,Gate Departure Delays (Daily Bar),2025-09-28,10.6
+DAL,Gate Departure Delays (Daily Bar),2025-09-29,4.7
+DAL,Gate Departure Delays (Daily Bar),2025-09-30,11.8
+DAL,Gate Departure Delays (Daily Bar),2025-10-01,7.3
+DAL,Gate Departure Delays (Daily Bar),2025-10-02,9.2
+DAL,Gate Departure Delays (Daily Bar),2025-10-03,5.6
+DAL,Gate Departure Delays (Daily Bar),2025-10-04,15.7
+DAL,Gate Departure Delays (Daily Bar),2025-10-05,8.9
+DAL,Gate Departure Delays (Daily Bar),2025-10-06,11.4
+DAL,Gate Departure Delays (Daily Bar),2025-10-07,6.1
+DAL,Gate Departure Delays (Daily Bar),2025-10-08,12.9
+DAL,Gate Departure Delays (Daily Bar),2025-10-09,7.8
+DAL,Gate Departure Delays (Daily Bar),2025-10-10,10.3
+DAL,Gate Departure Delays (Daily Bar),2025-10-11,4.4
+DAL,Gate Departure Delays (Daily Bar),2025-10-12,16.2
+DAL,Gate Departure Delays (Daily Bar),2025-10-13,9.5
+DAL,Gate Departure Delays (Daily Bar),2025-10-14,11.7
+HOU,Gate Departure Delays (Daily Bar),2025-09-15,5.9
+HOU,Gate Departure Delays (Daily Bar),2025-09-16,5.1
+HOU,Gate Departure Delays (Daily Bar),2025-09-17,10.8
+HOU,Gate Departure Delays (Daily Bar),2025-09-18,8.2
+HOU,Gate Departure Delays (Daily Bar),2025-09-19,4.3
+HOU,Gate Departure Delays (Daily Bar),2025-09-20,13.1
+HOU,Gate Departure Delays (Daily Bar),2025-09-21,7.1
+HOU,Gate Departure Delays (Daily Bar),2025-09-22,9.4
+HOU,Gate Departure Delays (Daily Bar),2025-09-23,6.8
+HOU,Gate Departure Delays (Daily Bar),2025-09-24,11.6
+HOU,Gate Departure Delays (Daily Bar),2025-09-25,5.5
+HOU,Gate Departure Delays (Daily Bar),2025-09-26,13.8
+HOU,Gate Departure Delays (Daily Bar),2025-09-27,7.9
+HOU,Gate Departure Delays (Daily Bar),2025-09-28,10.2
+HOU,Gate Departure Delays (Daily Bar),2025-09-29,4.9
+HOU,Gate Departure Delays (Daily Bar),2025-09-30,11.3
+HOU,Gate Departure Delays (Daily Bar),2025-10-01,7.6
+HOU,Gate Departure Delays (Daily Bar),2025-10-02,8.8
+HOU,Gate Departure Delays (Daily Bar),2025-10-03,5.8
+HOU,Gate Departure Delays (Daily Bar),2025-10-04,15.2
+HOU,Gate Departure Delays (Daily Bar),2025-10-05,8.6
+HOU,Gate Departure Delays (Daily Bar),2025-10-06,11.1
+HOU,Gate Departure Delays (Daily Bar),2025-10-07,6.4
+HOU,Gate Departure Delays (Daily Bar),2025-10-08,12.4
+HOU,Gate Departure Delays (Daily Bar),2025-10-09,7.5
+HOU,Gate Departure Delays (Daily Bar),2025-10-10,9.9
+HOU,Gate Departure Delays (Daily Bar),2025-10-11,4.7
+HOU,Gate Departure Delays (Daily Bar),2025-10-12,15.8
+HOU,Gate Departure Delays (Daily Bar),2025-10-13,9.2
+HOU,Gate Departure Delays (Daily Bar),2025-10-14,11.4
+PHX,Gate Departure Delays (Daily Bar),2025-09-15,6.1
+PHX,Gate Departure Delays (Daily Bar),2025-09-16,4.9
+PHX,Gate Departure Delays (Daily Bar),2025-09-17,11.0
+PHX,Gate Departure Delays (Daily Bar),2025-09-18,8.4
+PHX,Gate Departure Delays (Daily Bar),2025-09-19,4.1
+PHX,Gate Departure Delays (Daily Bar),2025-09-20,13.4
+PHX,Gate Departure Delays (Daily Bar),2025-09-21,7.2
+PHX,Gate Departure Delays (Daily Bar),2025-09-22,9.6
+PHX,Gate Departure Delays (Daily Bar),2025-09-23,6.6
+PHX,Gate Departure Delays (Daily Bar),2025-09-24,11.8
+PHX,Gate Departure Delays (Daily Bar),2025-09-25,5.3
+PHX,Gate Departure Delays (Daily Bar),2025-09-26,14.0
+PHX,Gate Departure Delays (Daily Bar),2025-09-27,8.0
+PHX,Gate Departure Delays (Daily Bar),2025-09-28,10.4
+PHX,Gate Departure Delays (Daily Bar),2025-09-29,4.8
+PHX,Gate Departure Delays (Daily Bar),2025-09-30,11.5
+PHX,Gate Departure Delays (Daily Bar),2025-10-01,7.4
+PHX,Gate Departure Delays (Daily Bar),2025-10-02,9.0
+PHX,Gate Departure Delays (Daily Bar),2025-10-03,5.7
+PHX,Gate Departure Delays (Daily Bar),2025-10-04,15.5
+PHX,Gate Departure Delays (Daily Bar),2025-10-05,8.7
+PHX,Gate Departure Delays (Daily Bar),2025-10-06,11.2
+PHX,Gate Departure Delays (Daily Bar),2025-10-07,6.2
+PHX,Gate Departure Delays (Daily Bar),2025-10-08,12.6
+PHX,Gate Departure Delays (Daily Bar),2025-10-09,7.7
+PHX,Gate Departure Delays (Daily Bar),2025-10-10,10.1
+PHX,Gate Departure Delays (Daily Bar),2025-10-11,4.5
+PHX,Gate Departure Delays (Daily Bar),2025-10-12,16.0
+PHX,Gate Departure Delays (Daily Bar),2025-10-13,9.3
+PHX,Gate Departure Delays (Daily Bar),2025-10-14,11.6

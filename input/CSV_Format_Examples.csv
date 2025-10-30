@@ -1,0 +1,41 @@
+# CSV Format Examples for SPC Dashboard
+# Copy and modify these examples for your data
+
+# FORMAT 1: Single measure per file (filename becomes measure name)
+# File: maintenance_delays.csv
+timestamp,station,metric_value
+2023-01-02,DAL,2.1
+2023-01-02,HOU,2.3
+2023-01-02,PHX,1.9
+2023-01-09,DAL,3.2
+2023-01-09,HOU,2.8
+2023-01-09,PHX,3.4
+
+# FORMAT 2: Multiple measures in one file
+# File: all_measures.csv
+station,measure,date,value
+DAL,Aircraft On-Time Performance,2023-01-02,87.2
+DAL,Maintenance Delays per 100 Departures,2023-01-02,2.1
+DAL,Unscheduled Maintenance Events,2023-01-02,11.2
+HOU,Aircraft On-Time Performance,2023-01-02,86.8
+HOU,Maintenance Delays per 100 Departures,2023-01-02,2.3
+HOU,Unscheduled Maintenance Events,2023-01-02,12.1
+
+# DAILY CHARTS: Add "(Daily Bar)" to measure name
+station,measure,date,value
+DAL,MEL Rate (Daily Bar),2025-09-15,0.342
+DAL,Aircraft Turn Time (Daily Bar),2025-09-15,42.3
+DAL,Gate Departure Delays (Daily Bar),2025-09-15,6.2
+
+# SUPPORTED DATE FORMATS:
+# YYYY-MM-DD: 2023-01-02
+# M/D/YYYY: 1/2/2023
+# YYYY/M/D: 2023/1/2
+# M-D-YYYY: 1-2-2023
+
+# REQUIREMENTS:
+# - First row must be headers
+# - No empty rows
+# - Numeric values only (no text in value column)
+# - Station codes: 3-letter airport codes (DAL, HOU, PHX, etc.)
+# - Measure names: Descriptive names for your KPIs
