@@ -170,7 +170,7 @@
 
     <div class="doc-info">
         <p><strong>Version:</strong> 2.1</p>
-        <p><strong>Date:</strong> October 17, 2025</p>
+        <p><strong>Date:</strong> October 13, 2025</p>
         <p><strong>Status:</strong> True Offline Capability</p>
         <p><strong>Enhancement:</strong> Local Plotly.js library, zero CDN dependencies, comprehensive offline testing</p>
     </div>
@@ -263,6 +263,7 @@
       - GET /               → Serve dashboard_standalone.html
       - POST /api/process   → Process uploaded CSV
       - POST /api/load-actual → Load sample data from input/
+      - POST /api/test-rules → Generate curated Sample Data for rule demos
       - OPTIONS *           → CORS preflight
     """</div>
 
@@ -299,6 +300,16 @@
             <td>JSON response</td>
         </tr>
     </table>
+
+    <div class="highlight-box">
+        <p><strong>New endpoint: POST /api/test-rules</strong></p>
+        <ul>
+            <li>Calls <code>generate_rule_test_data()</code> to build Sample Data for Rule #1, Rule #2, and Rule #4.</li>
+            <li>Each measure contains ≥3 phases, enabling the UI’s phase slider to demonstrate zooming.</li>
+            <li>Returns both <code>chartData</code> and a <code>ruleShowcase</code> block containing descriptions + code snippets for display in the browser card.</li>
+            <li>Used exclusively by the <em>“🧪 Test Rules &amp; Limits”</em> button; works fully offline.</li>
+        </ul>
+    </div>
 
     <h3>2.2 spc_processor.py - Statistical Engine</h3>
     <p><strong>File:</strong> spc_processor.py<br>

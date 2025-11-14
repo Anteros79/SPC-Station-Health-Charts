@@ -17,6 +17,7 @@ Professional desktop tool for monitoring maintenance performance across multiple
 - ✅ **Interactive Daily Bar Charts** - Plotly.js charts with zoom/pan and slider control
 - ✅ **Automatic phase detection** - Rule #1 (points beyond limits), Rule #2 (2 of 3 beyond 2σ), and Rule #4 (7-point runs)
 - ✅ **Phase zoom control** - Slider to focus on recent phases (default: all phases from Jan 2023)
+- ✅ **Rule Verification Sandbox** - “Test Rules & Limits” button loads curated Sample Data that fires each Wheeler rule across multiple phases so the slider can be demonstrated live
 - ✅ **PNG export** - Save charts for reports and presentations
 - ✅ **Comprehensive Testing** - Automated offline functionality validation
 - ✅ **CSV troubleshooting tools** - Built-in format checker and debug logging
@@ -91,6 +92,7 @@ SPC-Station-Health-Charts/
 2. Data includes 3 stations (AUS, DAL, HOU) from Jan 2023 to present
 3. **Weekly Mode:** View 4 maintenance measures with X chart, mR chart, and Distribution chart grouped together
 4. **Daily Mode:** View daily bar charts with interactive zoom/pan and 7-30 day slider control
+5. Click **"🧪 Test Rules & Limits"** to load **Sample Data**—a curated SWA station that triggers each Wheeler rule (Rule #1, #2, and #4) multiple times. Every chart includes at least three phases so you can drag the phase slider during demos and prove that limits recalc as expected. Each rule card also calls out the code snippet in `spc_processor.py` that enforces the signal.
 
 ### Upload Your Own Data
 

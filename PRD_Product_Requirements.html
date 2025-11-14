@@ -181,7 +181,7 @@
 
     <div class="doc-info">
         <p><strong>Version:</strong> 2.1</p>
-        <p><strong>Date:</strong> October 17, 2025</p>
+        <p><strong>Date:</strong> October 13, 2025</p>
         <p><strong>Owner:</strong> Technical Operations Analytics Team</p>
         <p><strong>Status:</strong> True Offline Capability Implementation</p>
         <p><strong>Enhancement:</strong> SWA branding, distribution linked to phase slider, export footer removed</p>
@@ -305,6 +305,24 @@
         <li>High resolution suitable for printing</li>
         <li>Filename matches chart name</li>
         <li>One-click download per chart</li>
+    </ul>
+
+    <h3>BR-06: Demonstrable Rule Verification</h3>
+    <p><strong>Priority:</strong> P1 (High)<br>
+    <strong>Rationale:</strong> Leaders and new managers want to prove—live—that Wheeler rules are implemented correctly and that the phase slider responds.</p>
+    <p><strong>Requirements:</strong></p>
+    <ul>
+        <li>Provide a single control (“🧪 Test Rules &amp; Limits”) that loads curated Sample Data.</li>
+        <li>Sample Data must include multiple phases per rule so the “Show Phases” slider can be demonstrated.</li>
+        <li>Return metadata describing each rule and the underlying code snippet.</li>
+        <li>Runs offline and does not modify user data.</li>
+    </ul>
+    <p><strong>Acceptance Criteria:</strong></p>
+    <ul>
+        <li>Button instantly loads Sample Data labeled as such.</li>
+        <li>All SPC charts expose ≥3 phases, ensuring the slider can zoom from “Last 1” to “All.”</li>
+        <li>Rule showcase card appears with descriptions + <code>spc_processor.py</code> snippets.</li>
+        <li>No internet connectivity or CSV upload required.</li>
     </ul>
 
     <p><strong>Acceptance Criteria:</strong></p>

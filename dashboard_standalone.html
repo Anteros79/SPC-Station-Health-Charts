@@ -331,6 +331,120 @@
             border: 1px solid #E5E7EB;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
+        .rule-showcase-card {
+            background: linear-gradient(135deg, rgba(48,76,178,0.08), rgba(15,118,110,0.08));
+            border: 1px solid #D1D5DB;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(17,27,64,0.08);
+        }
+        .rule-showcase-header {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            border-bottom: 1px solid rgba(17,27,64,0.1);
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .rule-showcase-header img {
+            height: 72px;
+            width: auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .rule-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #F0F9FF;
+            color: #075985;
+            padding: 0.2rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .rule-showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+        .rule-item {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #E5E7EB;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-height: 100%;
+        }
+        .rule-item h3 {
+            margin: 0.35rem 0 0.25rem 0;
+            color: #111B40;
+        }
+        .rule-dataset {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6B7280;
+            font-weight: 600;
+        }
+        .rule-outcome {
+            background: #F8FAFC;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border-left: 4px solid #059669;
+        }
+        .rule-outcome-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: #0F172A;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .code-snippet {
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: 'Consolas', 'SFMono-Regular', Menlo, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            position: relative;
+        }
+        .code-snippet-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #38bdf8;
+            margin-bottom: 0.35rem;
+        }
+        .code-snippet pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .rule-showcase-footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px dashed rgba(17,27,64,0.2);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rule-notes {
+            margin: 0;
+            padding-left: 1rem;
+            color: #4B5563;
+            font-size: 0.9rem;
+        }
+        .rule-notes li {
+            margin-bottom: 0.35rem;
+        }
         .legend {
             display: flex;
             justify-content: center;
@@ -385,6 +499,7 @@
         <div class="controls">
             <button class="btn-primary" onclick="loadActualData()" style="font-size: 0.95rem;">📊 Load Test Data</button>
             <button class="btn-primary" onclick="generateAirlineKPIData()" style="font-size: 0.95rem; background: #059669;">✈️ Generate Airline KPIs</button>
+            <button class="btn-primary" onclick="runRuleVerificationDemo()" style="font-size: 0.95rem; background: #0EA5E9;">🧪 Test Rules &amp; Limits</button>
             <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
             <button class="btn-secondary" onclick="document.getElementById('csvFile').click()">📤 Upload CSV</button>
             <input type="text" id="newStation" placeholder="Add Station (e.g., SFO)" style="width: 160px">
@@ -516,8 +631,14 @@
         let chartData = null;
         let currentFilter = 'all';
         let phaseSelections = {}; // Track phase selections per measure group
+        let ruleShowcaseMeta = null;
+
+        function clearRuleShowcase() {
+            ruleShowcaseMeta = null;
+        }
 
         async function loadActualData() {
+            clearRuleShowcase();
             document.getElementById('content').innerHTML = '<div class="loading">Loading Test Data...</div>';
             
             try {
@@ -542,6 +663,7 @@
         }
 
         async function generateAirlineKPIData() {
+            clearRuleShowcase();
             document.getElementById('content').innerHTML = '<div class="loading">Generating realistic airline KPI data...</div>';
             
             try {
@@ -565,7 +687,35 @@
             }
         }
 
+        async function runRuleVerificationDemo() {
+            document.getElementById('content').innerHTML = '<div class="loading">Running Sample Rules &amp; Limits Test...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/test-rules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    chartData = result.chartData;
+                    phaseSelections = {};
+                    ruleShowcaseMeta = result.ruleShowcase || null;
+                    updateStationSelect(result.stations);
+                    renderCharts();
+                } else {
+                    ruleShowcaseMeta = null;
+                    showError(result.error || 'Failed to run rule verification demo');
+                }
+            } catch (err) {
+                ruleShowcaseMeta = null;
+                showError('Failed to connect to server. Make sure server.py is running.');
+            }
+        }
+
         async function loadDemoData() {
+            clearRuleShowcase();
             document.getElementById('content').innerHTML = '<div class="loading">Processing Data...</div>';
             
             try {
@@ -593,6 +743,7 @@
             const file = event.target.files[0];
             if (!file) return;
             
+            clearRuleShowcase();
             document.getElementById('content').innerHTML = '<div class="loading">Processing ' + file.name + '...</div>';
             
             try {
@@ -709,6 +860,57 @@
             };
         }
 
+        function escapeHtml(str = '') {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function renderRuleShowcasePanel(meta) {
+            const rules = (meta.rules || []).map(rule => `
+                <div class="rule-item">
+                    <div class="rule-item-header">
+                        <span class="rule-chip">${rule.ruleId || 'Rule'}</span>
+                        <h3>${rule.title || ''}</h3>
+                        <p style="margin:0; color:#4B5563;">${rule.description || ''}</p>
+                        <p class="rule-dataset">${rule.datasetLabel || ''}</p>
+                    </div>
+                    <div class="rule-outcome">
+                        <span class="rule-outcome-label">Chart Reaction</span>
+                        <p style="margin:0; color:#1f2937;">${rule.chartBehavior || ''}</p>
+                    </div>
+                    <div class="code-snippet">
+                        <div class="code-snippet-label">${rule.codeLocation || ''}</div>
+                        <pre><code>${escapeHtml(rule.codeSnippet || '')}</code></pre>
+                    </div>
+                </div>
+            `).join('');
+            
+            const notes = (meta.notes || []).map(note => `<li>${note}</li>`).join('');
+            const notesHtml = notes ? `<ul class="rule-notes">${notes}</ul>` : '';
+            
+            return `
+                <section class="rule-showcase-card">
+                    <div class="rule-showcase-header">
+                        <img src="images/20251007_0649_Southwest Tech Badge_simple_compose_01k6z814avfefa6hd9mw6753v1.png" alt="Southwest Tech Ops">
+                        <div>
+                            <span class="rule-chip">Sample Data</span>
+                            <h2 style="margin:0.35rem 0 0.25rem 0;">${meta.title || 'Sample Data · Wheeler Rule Verification'}</h2>
+                            <p style="margin:0; color:#4B5563;">${meta.subtitle || ''}</p>
+                        </div>
+                    </div>
+                    <div class="rule-showcase-grid">
+                        ${rules}
+                    </div>
+                    <div class="rule-showcase-footer">
+                        ${notesHtml}
+                        <span class="rule-chip" style="background:#ecfccb;color:#365314;">${meta.datasetLabel || 'Sample Data · Demo Only'}</span>
+                    </div>
+                </section>
+            `;
+        }
+
         function renderCharts() {
             if (!chartData) return;
             
@@ -717,6 +919,10 @@
                 : [currentFilter];
             
             let html = '';
+            
+            if (ruleShowcaseMeta) {
+                html += renderRuleShowcasePanel(ruleShowcaseMeta);
+            }
             
             stations.forEach(station => {
                 if (!chartData[station]) return;
@@ -2203,6 +2409,7 @@
         }
 
         function showError(message) {
+            ruleShowcaseMeta = null;
             document.getElementById('content').innerHTML = `
                 <div class="error">
                     <h2 style="margin-bottom: 1rem;">Error</h2>

@@ -228,6 +228,22 @@ class SPCHandler(SimpleHTTPRequestHandler):
                 error_response = {'error': str(e), 'success': False}
                 self.wfile.write(json.dumps(error_response).encode('utf-8'))
         
+        elif self.path == '/api/test-rules':
+            # Generate curated sample data that fires Wheeler's rules
+            try:
+                result = generate_rule_test_data()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode('utf-8'))
+            
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {'error': str(e), 'success': False}
+                self.wfile.write(json.dumps(error_response).encode('utf-8'))
+        
         else:
             self.send_response(404)
             self.end_headers()
@@ -425,6 +441,112 @@ def generate_airline_kpi_data():
     # Process the data
     result = process_data(csv_content)
     
+    return result
+
+
+def generate_rule_test_data():
+    """
+    Generate curated datasets that intentionally trigger each Wheeler rule.
+    Returns processed SPC output plus showcase metadata.
+    """
+    from datetime import date, timedelta
+    
+    station = 'SWA'
+    start_date = date(2023, 1, 2)
+    baseline_length = 24
+    
+    def stable_block(mean: float, count: int) -> list:
+        """Generate a stable sequence with light natural variation."""
+        offsets = [0.0, 0.05, -0.04, 0.03, -0.02, 0.01, -0.03]
+        return [round(mean + offsets[i % len(offsets)], 2) for i in range(count)]
+    
+    def create_series(measure_name, values):
+        current_date = start_date
+        lines = []
+        for value in values:
+            lines.append(f"{station},{measure_name},{current_date},{round(value, 2)}")
+            current_date += timedelta(days=7)
+        return lines
+    
+    baseline = stable_block(10.0, baseline_length)
+    
+    # Rule #1: multiple beyond-limit spikes separated by new stable phases
+    rule_one_values = []
+    rule_one_values += baseline
+    rule_one_values += [12.8]
+    rule_one_values += stable_block(11.1, 24)
+    rule_one_values += [13.05]
+    rule_one_values += stable_block(9.6, 24)
+    rule_one_values += [7.9]
+    rule_one_values += stable_block(10.45, 24)
+    
+    # Rule #2: repeating two-of-three beyond ±2σ sequences
+    rule_two_values = []
+    rule_two_values += baseline
+    rule_two_values += [10.33, 10.31, 10.04, 10.32, 10.03, 10.30, 10.05]
+    rule_two_values += stable_block(9.9, 24)
+    rule_two_values += [9.64, 9.66, 9.88, 9.63, 9.9, 9.6, 9.89]
+    rule_two_values += stable_block(10.18, 24)
+    rule_two_values += [10.39, 10.36, 10.11, 10.35, 10.12, 10.34, 10.13]
+    
+    # Rule #4: alternating seven-point runs above and below CL
+    rule_four_values = []
+    rule_four_values += baseline
+    rule_four_values += [10.25, 10.27, 10.28, 10.3, 10.31, 10.33, 10.34, 10.35]
+    rule_four_values += stable_block(9.96, 24)
+    rule_four_values += [9.75, 9.73, 9.72, 9.71, 9.7, 9.69, 9.68, 9.67]
+    rule_four_values += stable_block(10.12, 24)
+    rule_four_values += [10.26, 10.28, 10.3, 10.31, 10.33, 10.34, 10.36, 10.37]
+    
+    csv_lines = ['station,measure,date,value']
+    csv_lines += create_series('Sample Data · Rule #1: Beyond the Limits', rule_one_values)
+    csv_lines += create_series('Sample Data · Rule #2: Two-of-Three Beyond 2σ', rule_two_values)
+    csv_lines += create_series('Sample Data · Rule #4: Seven-Point Run', rule_four_values)
+    
+    csv_content = "\n".join(csv_lines)
+    result = process_data(csv_content)
+    
+    rule_showcase = {
+        'title': 'Sample Data · Wheeler Rule Verification',
+        'subtitle': 'Curated station demonstrates every monitored Wheeler rule firing across multiple phase shifts.',
+        'datasetLabel': 'Sample Data · Demo Only',
+        'notes': [
+            'Dataset is synthetic and labeled as Sample Data for leadership demos.',
+            'Each measure focuses on a single Wheeler rule to highlight chart reactions.',
+            'Every chart now contains three or more phases so the zoom slider can be exercised live.'
+        ],
+        'rules': [
+            {
+                'ruleId': 'Rule #1',
+                'title': 'Point Beyond Control Limits',
+                'description': 'Stable baseline followed by a spike beyond calculated UCL.',
+                'datasetLabel': 'Sample Data · Rule #1 · Beyond the Limits',
+                'chartBehavior': 'Week 25 leaps above the UCL, immediately ending the prior phase and recalculating limits.',
+                'codeLocation': 'spc_processor.py · find_phase_end()',
+                'codeSnippet': 'if value > ucl or value < lcl:\n    return max(0, i - 1)'
+            },
+            {
+                'ruleId': 'Rule #2',
+                'title': 'Two of Three Beyond 2σ (Same Side)',
+                'description': 'Moderate drift keeps points inside limits but beyond the 2σ guard band.',
+                'datasetLabel': 'Sample Data · Rule #2 · Two-of-Three Beyond 2σ',
+                'chartBehavior': 'Two out of three consecutive points sit beyond ±2σ, forcing an early warning signal.',
+                'codeLocation': 'spc_processor.py · find_phase_end()',
+                'codeSnippet': 'count_upper = sum(1 for v in recent_values if v >= two_sigma_upper)\ncount_lower = sum(1 for v in recent_values if v <= two_sigma_lower)\nif count_upper >= 2 or count_lower >= 2:\n    return max(0, i - 2)'
+            },
+            {
+                'ruleId': 'Rule #4',
+                'title': 'Seven-Point Run',
+                'description': 'Extended run of points on one side of the centerline without breaching limits.',
+                'datasetLabel': 'Sample Data · Rule #4 · Seven-Point Run',
+                'chartBehavior': 'Seven consecutive points stay above the centerline, concluding the phase despite no limit violation.',
+                'codeLocation': 'spc_processor.py · find_phase_end()',
+                'codeSnippet': 'if consecutive_above >= RUN_LENGTH or consecutive_below >= RUN_LENGTH:\n    return max(0, i - RUN_LENGTH)'
+            }
+        ]
+    }
+    
+    result['ruleShowcase'] = rule_showcase
     return result
 
 

@@ -150,10 +150,10 @@
     </div>
 
     <div class="doc-info">
-        <p><strong>Version:</strong> 1.7</p>
-        <p><strong>Last Updated:</strong> October 9, 2025</p>
-        <p><strong>Architecture Style:</strong> Client-Server (Local)</p>
-        <p><strong>Enhancement:</strong> SWA branding, distribution linked to phase slider, export footer removed</p>
+        <p><strong>Version:</strong> 2.1</p>
+        <p><strong>Last Updated:</strong> October 13, 2025</p>
+        <p><strong>Architecture Style:</strong> Client-Server (Local) - True Offline Capability</p>
+        <p><strong>Enhancement:</strong> Local Plotly.js library (v2.27.0), zero CDN dependencies, comprehensive offline testing, SWA branding, executive-ready layout</p>
     </div>
 
     <h2>1. System Overview</h2>
@@ -198,10 +198,13 @@
         <p><strong>Key Responsibilities:</strong></p>
         <ul>
             <li>User interface rendering</li>
-            <li>Chart visualization via HTML5 Canvas</li>
+            <li>Chart visualization via HTML5 Canvas (Weekly Mode) and Plotly.js (Daily Mode)</li>
             <li>API communication with Python backend</li>
-            <li>PNG export via Canvas toDataURL()</li>
+            <li>PNG export via Canvas toDataURL() and Plotly.js</li>
             <li>Client-side state management</li>
+            <li>Offline operation with local Plotly.js library (v2.27.0)</li>
+            <li>Interactive daily bar charts with zoom/pan and date range slider</li>
+            <li>“🧪 Test Rules &amp; Limits” control that requests the /api/test-rules Sample Data and renders the rule showcase card</li>
         </ul>
     </div>
 
@@ -222,7 +225,7 @@
         <li>Routes requests to appropriate handlers</li>
         <li>Adds CORS headers for local development</li>
         <li>Serves static HTML file</li>
-        <li>Processes API requests</li>
+        <li>Processes API requests including curated <strong>Test Rules &amp; Limits</strong> sample data</li>
     </ul>
 
     <p><strong>spc_processor.py - Statistical Engine</strong></p>
@@ -328,9 +331,14 @@ Back to "More data to process?"      ↓
             <td>Zero dependencies; works offline</td>
         </tr>
         <tr>
-            <td><strong>Charting</strong></td>
+            <td><strong>Charting (Weekly Mode)</strong></td>
             <td>HTML5 Canvas API</td>
             <td>No external libraries; full control; PNG export built-in</td>
+        </tr>
+        <tr>
+            <td><strong>Charting (Daily Mode)</strong></td>
+            <td>Plotly.js</td>
+            <td>Local library (v2.27.0); zero CDN dependencies; interactive charts with zoom/pan</td>
         </tr>
         <tr>
             <td><strong>Backend</strong></td>
@@ -407,6 +415,27 @@ Back to "More data to process?"      ↓
             <td>HTTP/1.1 200 OK<br>Content-Type: application/json<br><br>{"success": true, "chartData": {...}, "stations": [...]}</td>
         </tr>
     </table>
+
+    <h3>5.4 Endpoint: POST /api/test-rules</h3>
+    <p><strong>Purpose:</strong> Serve the “🧪 Test Rules &amp; Limits” Sample Data set that fires each Wheeler rule across multiple phases.</p>
+    <table>
+        <tr>
+            <th>Request</th>
+            <th>Response</th>
+        </tr>
+        <tr>
+            <td>POST /api/test-rules HTTP/1.1<br>Host: localhost:8000<br>Content-Type: application/json<br><br>{}</td>
+            <td>HTTP/1.1 200 OK<br>Content-Type: application/json<br><br>{"success": true, "chartData": {...}, "ruleShowcase": {...}}</td>
+        </tr>
+    </table>
+    <div class="highlight-box">
+        <p><strong>Sample Data characteristics:</strong></p>
+        <ul>
+            <li>One synthetic SWA station with three measures: Rule #1, Rule #2, Rule #4.</li>
+            <li>Each measure contains <strong>multiple phases</strong> (baseline + two additional segments) so the phase slider can be demonstrated live.</li>
+            <li>Response includes metadata (code snippets, descriptions) rendered in the UI’s rule showcase card.</li>
+        </ul>
+    </div>
 
     <h2>6. Security Architecture</h2>
 
@@ -623,13 +652,54 @@ No central server - each user runs independent instance
         <p><strong>Status:</strong> ✅ Accepted</p>
     </div>
 
-    <h2>10. Future Architecture Considerations</h2>
+    <h2>10. Offline Architecture & Dependencies</h2>
 
-    <h3>Potential Enhancements (V2.0)</h3>
+    <h3>10.1 True Offline Capability (Version 2.1)</h3>
+    <div class="highlight-box">
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li><strong>Local Plotly.js Library:</strong> Version 2.27.0 bundled locally (3.4MB)</li>
+            <li><strong>Zero CDN Dependencies:</strong> All JavaScript libraries included in distribution</li>
+            <li><strong>Air-Gapped Environment Support:</strong> Works completely offline, no internet required</li>
+            <li><strong>Comprehensive Testing:</strong> Automated offline functionality validation</li>
+            <li><strong>Python Standard Library Only:</strong> No pip packages required</li>
+        </ul>
+    </div>
+
+    <h3>10.2 File Structure for Offline Operation</h3>
+    <div class="diagram-box">SPC-Station-Health-Charts/
+│
+├── dashboard_standalone.html      # Main UI (self-contained)
+├── server.py                      # HTTP server + routing
+├── spc_processor.py              # Statistical calculations
+├── load_actual_data.py           # CSV data loader
+├── csv_format_checker.html       # CSV diagnostic tool
+│
+├── js/                           # Local JavaScript libraries
+│   └── plotly-2.27.0.min.js     # Plotly.js (3.4MB, local copy)
+│
+├── START_DASHBOARD.bat           # Windows launcher
+├── start_dashboard.sh            # Mac/Linux launcher
+│
+├── input/                        # Sample CSV data
+└── output/                       # Exported PNG charts</div>
+
+    <h3>10.3 Offline Testing & Validation</h3>
+    <p>The system includes comprehensive offline testing to ensure:</p>
+    <ul>
+        <li>All JavaScript libraries load from local files</li>
+        <li>No network requests are made during operation</li>
+        <li>Charts render correctly without internet connectivity</li>
+        <li>CSV processing works in air-gapped environments</li>
+    </ul>
+
+    <h2>11. Future Architecture Considerations</h2>
+
+    <h3>Potential Enhancements (V3.0+)</h3>
     <div class="highlight-box">
         <p><strong>Architectural Evolution:</strong></p>
         <ol>
-            <li><strong>Phase 1 (Current):</strong> Desktop tool, zero dependencies ✅</li>
+            <li><strong>Phase 1 (Completed v2.1):</strong> Desktop tool, zero dependencies, true offline capability ✅</li>
             <li><strong>Phase 2 (Future):</strong> Optional web deployment for teams
                 <ul>
                     <li>Web Server: Flask/FastAPI</li>
@@ -673,6 +743,24 @@ No central server - each user runs independent instance
                 <td>2025-10-07</td>
                 <td>Development Team</td>
                 <td>Debug tools, CSV troubleshooting, enhanced error reporting</td>
+            </tr>
+            <tr>
+                <td>1.7</td>
+                <td>2025-10-09</td>
+                <td>Development Team</td>
+                <td>SWA branding, distribution linked to phase slider, export footer removed</td>
+            </tr>
+            <tr>
+                <td>2.0</td>
+                <td>2025-10-13</td>
+                <td>Development Team</td>
+                <td>Interactive daily bar charts with Plotly.js, date range slider, synchronized data table</td>
+            </tr>
+            <tr>
+                <td>2.1</td>
+                <td>2025-10-13</td>
+                <td>Development Team</td>
+                <td>True offline capability: Local Plotly.js library (v2.27.0), zero CDN dependencies, comprehensive offline testing, executive-ready layout</td>
             </tr>
         </table>
         <p style="margin-top: 30px; font-style: italic;">Southwest Airlines - Technical Operations Analytics Team</p>

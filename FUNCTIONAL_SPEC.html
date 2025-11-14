@@ -157,7 +157,7 @@
 
     <div class="doc-info">
         <p><strong>Version:</strong> 2.1</p>
-        <p><strong>Date:</strong> October 17, 2025</p>
+        <p><strong>Date:</strong> October 13, 2025</p>
         <p><strong>Status:</strong> True Offline Capability</p>
         <p><strong>Enhancement:</strong> Local Plotly.js library, zero CDN dependencies, comprehensive testing</p>
     </div>
@@ -241,6 +241,24 @@
         <li>Default browser opens automatically to http://localhost:8000</li>
         <li>Dashboard welcome screen displays</li>
     </ol>
+    <h4>FR-3.4: Test Rules &amp; Limits Sample Data</h4>
+    <p><strong>Trigger:</strong> User clicks the <em>“🧪 Test Rules &amp; Limits”</em> button in the control bar.</p>
+    <p><strong>Process:</strong></p>
+    <ol>
+        <li>Frontend shows a loading state (“Running Sample Rules &amp; Limits Test…”).</li>
+        <li>Client sends <code>POST /api/test-rules</code> (no payload) to the local server.</li>
+        <li>Server generates curated Sample Data for a synthetic SWA station:
+            <ul>
+                <li>Rule #1 measure with three stable phases separated by beyond-limit spikes.</li>
+                <li>Rule #2 measure with multiple two-of-three ±2σ runs that stay inside the control limits.</li>
+                <li>Rule #4 measure with alternating seven-point runs above and below the centerline.</li>
+            </ul>
+        </li>
+        <li>Response also contains <code>ruleShowcase</code> metadata (descriptions + code snippets from <code>spc_processor.py</code>).</li>
+        <li>UI renders the “Sample Data” card, then draws all SPC charts so the phase slider can be demonstrated (each chart exposes ≥3 phases).</li>
+    </ol>
+    <p><strong>Non-Functional:</strong> Works offline, executes instantly (no CSV upload required), and is intended for leadership demos / regression verification.</p>
+
 
     <p><strong>Expected Output:</strong></p>
     <div class="code-block">╔════════════════════════════════════════════════════════════╗
